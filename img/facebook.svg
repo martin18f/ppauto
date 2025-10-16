@@ -1,0 +1,73 @@
+<!-- Facebook Liquid Glass -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>Facebook (Liquid Glass)</title>
+  <defs>
+    <!-- Background gradients -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6EE7F9"/>
+      <stop offset="50%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#F43F5E"/>
+    </linearGradient>
+    <radialGradient id="blobA" cx="0.2" cy="0.2" r="0.8">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="blobB" cx="0.8" cy="0.9" r="0.9">
+      <stop offset="0%" stop-color="#22D3EE" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#22D3EE" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Soft blur for blobs -->
+    <filter id="softBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+
+    <!-- Backdrop-blur simulation: blur a cloned background, clipped to glass -->
+    <filter id="heavyBlur" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+
+    <!-- Icon glow/shadow -->
+    <filter id="iconShadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-opacity="0.28"/>
+    </filter>
+
+    <!-- Glass stroke gradient -->
+    <linearGradient id="glassStroke" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.15"/>
+    </linearGradient>
+
+    <!-- Re-usable background group for cloning -->
+    <g id="bgScene">
+      <rect x="0" y="0" width="256" height="256" rx="48" fill="url(#bgGrad)"/>
+      <g filter="url(#softBlur)">
+        <circle cx="70" cy="70" r="80" fill="url(#blobA)"/>
+        <circle cx="210" cy="210" r="100" fill="url(#blobB)"/>
+      </g>
+    </g>
+
+    <!-- Clip for the glass card -->
+    <clipPath id="glassClip">
+      <rect x="32" y="32" width="192" height="192" rx="36"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <use href="#bgScene"/>
+
+  <!-- Backdrop-blurred background restricted to glass area -->
+  <g clip-path="url(#glassClip)">
+    <g filter="url(#heavyBlur)">
+      <use href="#bgScene"/>
+    </g>
+  </g>
+
+  <!-- Glass card -->
+ 
+
+  <!-- Facebook icon (white), centered, with subtle shadow -->
+  <g filter="url(#iconShadow)" fill="#FFFFFF" opacity="0.95" transform="translate(56,56) scale(6)">
+    <path d="M22.675 0h-21.35C.595 0 0 .595 0 1.325v21.351C0 23.405.595 24 1.325 24h11.495v-9.294H9.692V11.41h3.128V8.797c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.794.143v3.24l-1.918.001c-1.504 0-1.796.715-1.796 1.763v2.313h3.587l-.467 3.296h-3.12V24h6.116C23.405 24 24 23.405 24 22.676V1.325C24 .595 23.405 0 22.675 0z"/>
+  </g>
+</svg>

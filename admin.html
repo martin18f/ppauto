@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin panel – PP AUTO</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    body { padding: 32px; background: var(--bg); color: var(--text); }
+    .wrap { display: grid; grid-template-columns: 420px 1fr; gap: 24px; align-items: start; }
+    form { display: grid; gap: 10px; background: var(--card); border:1px solid var(--line); border-radius: 16px; padding: 16px; }
+    label { font-weight: 600; font-size: 13px; }
+    input, select { padding: 10px; border-radius: 10px; border:1px solid var(--line); background: var(--bg-elev); color: var(--text); }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btnx { padding: 10px 14px; border-radius: 10px; border:1px solid var(--line); background: var(--bg-elev); color: var(--text); font-weight: 600; cursor: pointer; }
+    .btnx.primary { background:#0044d6; border-color: transparent; color: #fff; }
+    .btnx.danger { background:#8b0000; border-color: transparent; color: #fff; }
+    .hint { color: var(--muted); font-size: 12px; margin-top: -6px; }
+    .list { background: var(--card); border:1px solid var(--line); border-radius: 16px; padding: 12px; }
+    .toolbar { display:flex; gap:8px; justify-content: space-between; align-items:center; margin-bottom: 8px; }
+    .search { flex:1; }
+    .search input { width:100%; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); font-size: 14px; }
+    tr:hover { background: rgba(255,255,255,.02); }
+    .cell-actions { display:flex; gap:6px; }
+    .pill-mini { padding: 4px 8px; border:1px solid var(--line); border-radius: 999px; font-size: 12px; color: var(--muted); }
+    .preview { border:1px dashed var(--line); border-radius: 12px; padding: 8px; display:grid; place-items:center; background: #0e141c; }
+    .preview img { max-width: 100%; height: auto; display:block; border-radius: 8px; }
+    @media (max-width: 1024px){ .wrap { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <h2>🛠️ Admin panel – správa áut</h2>
+  <p class="hint">Pridaj auto, uprav alebo vymaž. Následne klikni <b>Exportovať auta.json</b> a nahraj súbor do repozitára (Vercel sa nasadí sám).</p>
+
+  <div class="wrap">
+    <!-- FORM -->
+    <form id="carForm">
+      <label><input type="checkbox" id="zlava"> Toto auto je v zľave</label>
+
+      <div class="row">
+        <div>
+          <label>Značka</label>
+          <input type="text" id="znacka" placeholder="Subaru" required/>
+        </div>
+        <div>
+          <label>Model</label>
+          <input type="text" id="model" placeholder="BRZ" required/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Rok</label>
+          <input type="number" id="rok" placeholder="2024" required/>
+        </div>
+        <div>
+          <label>Palivo</label>
+          <input type="text" id="palivo" placeholder="Benzín"/>
+        </div>
+      </div>
+
+      <div>
+        <label>Prevodovka / Výbava</label>
+        <input type="text" id="prevodovka" placeholder="AT • Premium"/>
+      </div>
+
+      <div id="povodnaCenaWrap">
+        <label>Pôvodná cena (alebo aktuálna, ak zľava NIE JE)</label>
+        <input type="text" id="stara_cena" placeholder="43 840 €"/>
+      </div>
+
+      <div id="novaCenaWrap" style="display:none">
+        <label>Aktuálna cena po zľave</label>
+        <input type="text" id="nova_cena" placeholder="39 900 €"/>
+        <div class="hint">Zobrazí sa zelenou, „Pôvodná cena“ bude prečiarknutá.</div>
+      </div>
+
+      <div>
+        <label>Obrázok (cesta)</label>
+        <input type="text" id="obrazok" placeholder="img/subarubrz2024.avif"/>
+        <div class="preview" id="imgPreview"><small class="hint">Náhľad sa zobrazí po vyplnení poľa.</small></div>
+      </div>
+
+      <div>
+        <label>Tagy (čiarkou oddelené)</label>
+        <input type="text" id="tagy" placeholder="subaru, skladom"/>
+      </div>
+
+      <div class="actions">
+        <button class="btnx primary" id="submitBtn" type="submit">Odoslať</button>
+        <button class="btnx" type="button" id="resetBtn">Vyčistiť formulár</button>
+        <button class="btnx danger" type="button" id="deleteBtn" style="display:none">Vymazať vybrané</button>
+        <span class="pill-mini" id="statusBadge">pridávanie</span>
+      </div>
+
+      <!-- skryté: index upravovaného záznamu -->
+      <input type="hidden" id="editIndex" value="-1"/>
+    </form>
+
+    <!-- LIST -->
+    <div class="list">
+      <div class="toolbar">
+        <div class="search"><input type="text" id="search" placeholder="Hľadať v ponuke…"></div>
+        <div class="actions">
+          <button class="btnx" id="exportBtn" type="button">Exportovať auta.json</button>
+          <button class="btnx" id="reloadBtn" type="button">Načítať zo súboru</button>
+        </div>
+      </div>
+      <table id="carsTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Značka</th>
+            <th>Model</th>
+            <th>Rok</th>
+            <th>Cena</th>
+            <th>Tagy</th>
+            <th>Akcie</th>
+          </tr>
+        </thead>
+        <tbody><!-- render --></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // ====== STATE ======
+    let cars = [];
+    const form = document.getElementById('carForm');
+    const statusBadge = document.getElementById('statusBadge');
+    const editIndexInput = document.getElementById('editIndex');
+    const submitBtn = document.getElementById('submitBtn');
+    const deleteBtn = document.getElementById('deleteBtn');
+    const zlava = document.getElementById('zlava');
+    const povodnaCenaWrap = document.getElementById('povodnaCenaWrap');
+    const novaCenaWrap = document.getElementById('novaCenaWrap');
+    const imgInput = document.getElementById('obrazok');
+    const imgPreview = document.getElementById('imgPreview');
+    const tableBody = document.querySelector('#carsTable tbody');
+    const searchInput = document.getElementById('search');
+
+    // ====== INIT ======
+    document.getElementById('reloadBtn').addEventListener('click', loadFromFile);
+    document.getElementById('exportBtn').addEventListener('click', exportJSON);
+    document.getElementById('resetBtn').addEventListener('click', () => setFormMode('create'));
+    deleteBtn.addEventListener('click', onDeleteSelected);
+    searchInput.addEventListener('input', renderTable);
+    zlava.addEventListener('change', toggleZlavaUI);
+    imgInput.addEventListener('input', renderPreview);
+
+    toggleZlavaUI();
+    loadFromFile();
+
+    // ====== UI HELPERS ======
+    function toggleZlavaUI(){
+      if (zlava.checked) {
+        novaCenaWrap.style.display = 'block';
+      } else {
+        novaCenaWrap.style.display = 'none';
+        form.nova_cena.value = '';
+      }
+    }
+
+    function renderPreview(){
+      const url = imgInput.value.trim();
+      if (!url) {
+        imgPreview.innerHTML = '<small class="hint">Náhľad sa zobrazí po vyplnení poľa.</small>';
+        return;
+      }
+      imgPreview.innerHTML = '<img src="'+url+'" alt="náhľad obrázka">';
+    }
+
+    function setFormMode(mode, index = -1){
+      if (mode === 'create') {
+        form.reset();
+        editIndexInput.value = -1;
+        submitBtn.textContent = 'Odoslať';
+        deleteBtn.style.display = 'none';
+        statusBadge.textContent = 'pridávanie';
+        zlava.checked = false;
+        toggleZlavaUI();
+        renderPreview();
+      } else if (mode === 'edit') {
+        editIndexInput.value = index;
+        submitBtn.textContent = 'Uložiť zmeny';
+        deleteBtn.style.display = 'inline-flex';
+        statusBadge.textContent = 'úprava #' + (index + 1);
+        toggleZlavaUI();
+        renderPreview();
+      }
+    }
+
+    // ====== DATA IO ======
+    async function loadFromFile(){
+      try {
+        const res = await fetch('data/auta.json', { cache: 'no-store' });
+        cars = await res.json();
+        renderTable();
+      } catch (e) {
+        console.error('Nepodarilo sa načítať data/auta.json', e);
+        cars = cars || [];
+        renderTable();
+      }
+    }
+
+    function exportJSON(){
+      const blob = new Blob([JSON.stringify(cars, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'auta.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    // ====== TABLE RENDER ======
+    function renderTable(){
+      const q = searchInput.value.trim().toLowerCase();
+      tableBody.innerHTML = '';
+
+      cars
+        .map((c, i) => ({...c, _i: i}))
+        .filter(c => {
+          const hay = [c.znacka, c.model, c.rok, c.palivo, c.prevodovka, (c.tagy||[]).join(' ')].join(' ').toLowerCase();
+          return !q || hay.includes(q);
+        })
+        .forEach((c, idx) => {
+          const tr = document.createElement('tr');
+
+          const cenaLabel = (c.nova_cena && String(c.nova_cena).trim() !== '')
+            ? `${c.stara_cena || ''} → ${c.nova_cena}`
+            : (c.stara_cena || '—');
+
+          tr.innerHTML = `
+            <td>${c._i + 1}</td>
+            <td>${c.znacka || ''}</td>
+            <td>${c.model || ''}</td>
+            <td>${c.rok || ''}</td>
+            <td>${cenaLabel}</td>
+            <td>${(c.tagy || []).join(', ')}</td>
+            <td class="cell-actions">
+              <button class="btnx" data-edit="${c._i}">Upraviť</button>
+              <button class="btnx danger" data-del="${c._i}">Vymazať</button>
+            </td>
+          `;
+          tableBody.appendChild(tr);
+        });
+
+      // akcie
+      tableBody.querySelectorAll('[data-edit]').forEach(btn => {
+        btn.addEventListener('click', () => onEdit(parseInt(btn.dataset.edit, 10)));
+      });
+      tableBody.querySelectorAll('[data-del]').forEach(btn => {
+        btn.addEventListener('click', () => onDelete(parseInt(btn.dataset.del, 10)));
+      });
+    }
+
+    // ====== CRUD ======
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const maZlavu = zlava.checked;
+      const data = {
+        znacka: form.znacka.value.trim(),
+        model: form.model.value.trim(),
+        rok: Number(form.rok.value),
+        palivo: form.palivo.value.trim(),
+        prevodovka: form.prevodovka.value.trim(),
+        stara_cena: (form.stara_cena.value || '').trim(),
+        nova_cena: maZlavu ? (form.nova_cena.value || '').trim() : '',
+        obrazok: form.obrazok.value.trim(),
+        tagy: form.tagy.value.split(',').map(t => t.trim()).filter(Boolean)
+      };
+
+      const idx = parseInt(editIndexInput.value, 10);
+
+      if (Number.isInteger(idx) && idx >= 0) {
+        // UPDATE
+        cars[idx] = data;
+      } else {
+        // CREATE
+        cars.push(data);
+      }
+
+      renderTable();
+      setFormMode('create');
+    });
+
+    function onEdit(index){
+      const a = cars[index];
+      form.znacka.value = a.znacka || '';
+      form.model.value = a.model || '';
+      form.rok.value = a.rok || '';
+      form.palivo.value = a.palivo || '';
+      form.prevodovka.value = a.prevodovka || '';
+      form.stara_cena.value = a.stara_cena || '';
+      form.nova_cena.value = a.nova_cena || '';
+      form.obrazok.value = a.obrazok || '';
+      form.tagy.value = (a.tagy || []).join(', ');
+      zlava.checked = !!(a.nova_cena && String(a.nova_cena).trim() !== '');
+      toggleZlavaUI();
+      renderPreview();
+      setFormMode('edit', index);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function onDelete(index){
+      if (!confirm('Naozaj vymazať toto auto?')) return;
+      cars.splice(index, 1);
+      renderTable();
+      setFormMode('create');
+    }
+
+    function onDeleteSelected(){
+      const idx = parseInt(editIndexInput.value, 10);
+      if (!(Number.isInteger(idx) && idx >= 0)) return;
+      onDelete(idx);
+    }
+  </script>
+</body>
+</html>

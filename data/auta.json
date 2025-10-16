@@ -1,0 +1,35 @@
+[
+  {
+    "znacka": "Subaru",
+    "model": "BRZ",
+    "rok": 2024,
+    "palivo": "Benzín",
+    "prevodovka": "MT • Final Edition",
+    "stara_cena": "43 840 €",
+    "nova_cena": "39 900 €",
+    "obrazok": "img/subarubrz2024.avif",
+    "tagy": ["subaru", "skladom"]
+  },
+  {
+    "znacka": "Subaru",
+    "model": "OUTBACK",
+    "rok": 2025,
+    "palivo": "Benzín",
+    "prevodovka": "AT • Premium",
+    "stara_cena": "52 640 €",
+    "nova_cena": "",
+    "obrazok": "obr/outback2025-1.jpg",
+    "tagy": ["subaru", "skladom", "novinky"]
+  },
+  {
+    "znacka": "Subaru",
+    "model": "OUTBACK",
+    "rok": 2025,
+    "palivo": "Benzín",
+    "prevodovka": "AT • Premium",
+    "stara_cena": "52 640 €",
+    "nova_cena": "55588€",
+    "obrazok": "obr/outback2025-1.jpg",
+    "tagy": ["subaru", "skladom", "novinky"]
+  }
+]
