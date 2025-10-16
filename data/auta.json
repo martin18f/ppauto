@@ -66,5 +66,18 @@
     "tagy": [
       "jeep"
     ]
+  },
+  {
+    "znacka": "Jeep",
+    "model": "Renegade",
+    "rok": 2023,
+    "palivo": "Benzín + MHEV",
+    "prevodovka": "AT • Limited",
+    "stara_cena": "34 990 €",
+    "nova_cena": "29 990 €",
+    "obrazok": "https://raw.githubusercontent.com/martin18f/ppauto/main/uploads/1760656999635-L9AYy0iWcLbEUcUTb6pBOx3g9jE.avif",
+    "tagy": [
+      "jeep"
+    ]
   }
 ]
