@@ -54,18 +54,20 @@ form input[type="checkbox"]{ width:auto; height:auto; }
 
 
 /* riadok s obrázkom: URL širší ako upload */
+/* riadok s obrázkom je 1 stĺpec */
 .row--image{ grid-template-columns: 1fr; }
 
-/* file + tlačidlo vedľa seba, zarovnané na výšku */
+/* zarovnaj file input doprava */
 .upload-inline{
   display: flex;
-  justify-content: flex-end; /* doprava */
+  justify-content: flex-end;
   align-items: center;
   gap: 8px;
 }
 
-
+/* výška zhodná s ostatnými poľami */
 .upload-inline input[type="file"]{ height:42px; }
+
 .upload-inline .btnx{ height:42px; }
 
 /* mierna rezerva pod náhľad */
@@ -122,20 +124,21 @@ form input[type="checkbox"]{ width:auto; height:auto; }
 
       <div>
   <label>Obrázok</label>
-  <!-- skryté pole, do ktorého sa po uploade uloží URL -->
+  <!-- skryté pole – sem sa po odoslaní uloží URL z uploadu -->
   <input type="hidden" id="obrazok" />
 
   <div class="row row--image">
     <div class="upload-inline">
       <input type="file" id="fileInput" accept="image/*" />
-      <button class="btnx" type="button" id="uploadBtn">Nahrať</button>
+      <!-- tlačidlo Nahrať sme odstránili -->
     </div>
   </div>
 
   <div class="preview" id="imgPreview">
-    <small class="hint">Po nahratí sa zobrazí náhľad.</small>
+    <small class="hint">Vyber súbor. Pri „Odoslať“ sa automaticky nahrá a uloží.</small>
   </div>
 </div>
+
 
 
 
@@ -263,6 +266,18 @@ form input[type="checkbox"]{ width:auto; height:auto; }
   }
 }
 
+// náhľad po výbere súboru (pred odoslaním)
+const fileEl = document.getElementById('fileInput');
+fileEl.addEventListener('change', () => {
+  if (!fileEl.files || !fileEl.files[0]) {
+    imgPreview.innerHTML = '<small class="hint">Vyber súbor. Pri „Odoslať“ sa automaticky nahrá a uloží.</small>';
+    return;
+  }
+  const url = URL.createObjectURL(fileEl.files[0]);
+  imgPreview.innerHTML = `<img src="${url}" alt="náhľad">`;
+});
+
+
     function exportJSON(){
       const blob = new Blob([JSON.stringify(cars, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -321,6 +336,44 @@ form input[type="checkbox"]{ width:auto; height:auto; }
     form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
+  // 1) prípadný upload nového súboru
+  const fileEl = document.getElementById('fileInput');
+  let imageUrl = form.obrazok.value.trim(); // existujúca URL pri editácii
+
+  if (fileEl.files && fileEl.files[0]) {
+    if (fileEl.files[0].size > 10 * 1024 * 1024) {
+      alert('Súbor je príliš veľký (max 10 MB).');
+      return;
+    }
+    const base64 = await fileToBase64(fileEl.files[0]);
+    const up = await fetch('/api/upload-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        filename: fileEl.files[0].name,
+        contentBase64: base64
+      })
+    });
+    if (!up.ok) {
+      const t = await up.text();
+      console.error('Upload failed:', t);
+      alert('Nahratie obrázka zlyhalo.');
+      return;
+    }
+    const upData = await up.json();
+    imageUrl = upData.url || '';
+    form.obrazok.value = imageUrl; // uložíme aj do hidden inputu
+  }
+
+  // (voliteľné) vyžaduj obrázok pri vytváraní nového auta
+  const idx = parseInt(editIndexInput.value, 10);
+  const isEdit = Number.isInteger(idx) && idx >= 0;
+  if (!isEdit && !imageUrl) {
+    alert('Prosím, vyber obrázok.');
+    return;
+  }
+
+  // 2) dáta auta
   const maZlavu = zlava.checked;
   const data = {
     znacka: form.znacka.value.trim(),
@@ -330,21 +383,18 @@ form input[type="checkbox"]{ width:auto; height:auto; }
     prevodovka: form.prevodovka.value.trim(),
     stara_cena: (form.stara_cena.value || '').trim(),
     nova_cena: maZlavu ? (form.nova_cena.value || '').trim() : '',
-    obrazok: form.obrazok.value.trim(),
+    obrazok: imageUrl,
     tagy: form.tagy.value.split(',').map(t => t.trim()).filter(Boolean)
   };
 
-  const idx = parseInt(editIndexInput.value, 10);
-
-  if (Number.isInteger(idx) && idx >= 0) {
-    // UPDATE → PUT /api/cars?index=idx
+  // 3) uloženie auta cez API
+  if (isEdit) {
     await fetch(`/api/cars?index=${idx}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
   } else {
-    // CREATE → POST /api/cars
     await fetch('/api/cars', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -352,9 +402,11 @@ form input[type="checkbox"]{ width:auto; height:auto; }
     });
   }
 
+  // 4) refresh + reset
   await loadFromApi();
   setFormMode('create');
 });
+
 
 
     function onEdit(index){
@@ -404,54 +456,7 @@ form input[type="checkbox"]{ width:auto; height:auto; }
     });
   }
 
-  async function uploadSelectedFile() {
-    const input = document.getElementById('fileInput');
-    if (!input.files || !input.files[0]) {
-      alert('Najprv vyber súbor.');
-      return;
-    }
-    const file = input.files[0];
-
-    // voliteľne: limit veľkosti, napr. 10 MB
-    if (file.size > 10 * 1024 * 1024) {
-      alert('Súbor je príliš veľký (max 10 MB).');
-      return;
-    }
-
-    const base64 = await fileToBase64(file);
-
-    // pošli do /api/upload-image
-    const res = await fetch('/api/upload-image', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        filename: file.name,
-        contentBase64: base64
-      })
-    });
-
-    if (!res.ok) {
-      const t = await res.text();
-      console.error('Upload failed:', t);
-      alert('Nahratie zlyhalo. Pozri konzolu.');
-      return;
-    }
-
-    const data = await res.json();
-    // vyplň URL do poľa, ukáž náhľad
-    form.obrazok.value = data.url;
-    renderPreview();
-  }
-
-  // event handlery:
-  document.getElementById('uploadBtn').addEventListener('click', uploadSelectedFile);
-  document.getElementById('fileInput').addEventListener('change', () => {
-    // po výbere súboru zobraz lokálny náhľad (pred uploadom)
-    const input = document.getElementById('fileInput');
-    if (!input.files || !input.files[0]) return;
-    const url = URL.createObjectURL(input.files[0]);
-    imgPreview.innerHTML = `<img src="${url}" alt="náhľad">`;
-  });
+  
 </script>
 
 </body>
