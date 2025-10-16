@@ -5,7 +5,7 @@
 
 async function nacitajAuta() {
   try {
-    const response = await fetch('data/auta.json', { cache: 'no-store' });
+    const response = await fetch('/api/cars', { cache: 'no-store' });
     const auta = await response.json();
 
     const container = document.getElementById('inventory');

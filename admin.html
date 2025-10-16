@@ -144,7 +144,8 @@
     const searchInput = document.getElementById('search');
 
     // ====== INIT ======
-    document.getElementById('reloadBtn').addEventListener('click', loadFromFile);
+    document.getElementById('reloadBtn').addEventListener('click', loadFromApi);
+
     document.getElementById('exportBtn').addEventListener('click', exportJSON);
     document.getElementById('resetBtn').addEventListener('click', () => setFormMode('create'));
     deleteBtn.addEventListener('click', onDeleteSelected);
@@ -153,7 +154,7 @@
     imgInput.addEventListener('input', renderPreview);
 
     toggleZlavaUI();
-    loadFromFile();
+    loadFromApi();
 
     // ====== UI HELPERS ======
     function toggleZlavaUI(){
@@ -195,17 +196,18 @@
     }
 
     // ====== DATA IO ======
-    async function loadFromFile(){
-      try {
-        const res = await fetch('data/auta.json', { cache: 'no-store' });
-        cars = await res.json();
-        renderTable();
-      } catch (e) {
-        console.error('Nepodarilo sa načítať data/auta.json', e);
-        cars = cars || [];
-        renderTable();
-      }
-    }
+    async function loadFromApi(){
+  try {
+    const res = await fetch('/api/cars', { cache: 'no-store' });
+    if (!res.ok) throw new Error('GET /api/cars failed: ' + res.status);
+    cars = await res.json();
+    renderTable();
+  } catch (e) {
+    console.error('Nepodarilo sa načítať /api/cars', e);
+    cars = [];
+    renderTable();
+  }
+}
 
     function exportJSON(){
       const blob = new Blob([JSON.stringify(cars, null, 2)], { type: 'application/json' });
@@ -262,35 +264,44 @@
     }
 
     // ====== CRUD ======
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
+    form.addEventListener('submit', async (e) => {
+  e.preventDefault();
 
-      const maZlavu = zlava.checked;
-      const data = {
-        znacka: form.znacka.value.trim(),
-        model: form.model.value.trim(),
-        rok: Number(form.rok.value),
-        palivo: form.palivo.value.trim(),
-        prevodovka: form.prevodovka.value.trim(),
-        stara_cena: (form.stara_cena.value || '').trim(),
-        nova_cena: maZlavu ? (form.nova_cena.value || '').trim() : '',
-        obrazok: form.obrazok.value.trim(),
-        tagy: form.tagy.value.split(',').map(t => t.trim()).filter(Boolean)
-      };
+  const maZlavu = zlava.checked;
+  const data = {
+    znacka: form.znacka.value.trim(),
+    model: form.model.value.trim(),
+    rok: Number(form.rok.value),
+    palivo: form.palivo.value.trim(),
+    prevodovka: form.prevodovka.value.trim(),
+    stara_cena: (form.stara_cena.value || '').trim(),
+    nova_cena: maZlavu ? (form.nova_cena.value || '').trim() : '',
+    obrazok: form.obrazok.value.trim(),
+    tagy: form.tagy.value.split(',').map(t => t.trim()).filter(Boolean)
+  };
 
-      const idx = parseInt(editIndexInput.value, 10);
+  const idx = parseInt(editIndexInput.value, 10);
 
-      if (Number.isInteger(idx) && idx >= 0) {
-        // UPDATE
-        cars[idx] = data;
-      } else {
-        // CREATE
-        cars.push(data);
-      }
-
-      renderTable();
-      setFormMode('create');
+  if (Number.isInteger(idx) && idx >= 0) {
+    // UPDATE → PUT /api/cars?index=idx
+    await fetch(`/api/cars?index=${idx}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
     });
+  } else {
+    // CREATE → POST /api/cars
+    await fetch('/api/cars', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  }
+
+  await loadFromApi();
+  setFormMode('create');
+});
+
 
     function onEdit(index){
       const a = cars[index];
@@ -310,12 +321,13 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function onDelete(index){
-      if (!confirm('Naozaj vymazať toto auto?')) return;
-      cars.splice(index, 1);
-      renderTable();
-      setFormMode('create');
-    }
+    async function onDelete(index){
+  if (!confirm('Naozaj vymazať toto auto?')) return;
+  await fetch(`/api/cars?index=${index}`, { method: 'DELETE' });
+  await loadFromApi();
+  setFormMode('create');
+}
+
 
     function onDeleteSelected(){
       const idx = parseInt(editIndexInput.value, 10);
