@@ -29,18 +29,16 @@
     ]
   },
   {
-    "znacka": "Subaru",
-    "model": "OUTBACK",
-    "rok": 2025,
-    "palivo": "Benzín",
-    "prevodovka": "AT • Premium",
-    "stara_cena": "52 640 €",
-    "nova_cena": "",
-    "obrazok": "img/subaruoutback2025magnetitgrey.avif",
+    "znacka": "Jeep",
+    "model": "Grand Cherokee",
+    "rok": 2024,
+    "palivo": "Benzín / Hybrid",
+    "prevodovka": "AT • Summit Reserve",
+    "stara_cena": "98 490€",
+    "nova_cena": "88 490€",
+    "obrazok": "img/grandcherokke2024red.avif",
     "tagy": [
-      "subaru",
-      "skladom",
-      "novinky"
+      "jeep"
     ]
   }
 ]
