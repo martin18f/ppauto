@@ -29,6 +29,45 @@
     .preview { border:1px dashed var(--line); border-radius: 12px; padding: 8px; display:grid; place-items:center; background: #0e141c; }
     .preview img { max-width: 100%; height: auto; display:block; border-radius: 8px; }
     @media (max-width: 1024px){ .wrap { grid-template-columns: 1fr; } }
+    form .row{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: end;               /* spodky polí v jednom riadku */
+}
+
+/* každý field = label nad inputom + rovnaké medzery */
+form .row > div,
+#povodnaCenaWrap,
+#novaCenaWrap,
+form > div:not(.row):not(.actions){
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+form label{ margin-bottom: 0; line-height: 1.2; }
+form input:not([type="checkbox"]):not([type="file"]),
+form select, form textarea{ width:100%; height:42px; }
+
+form input[type="checkbox"]{ width:auto; height:auto; }
+
+
+/* riadok s obrázkom: URL širší ako upload */
+.row--image{ grid-template-columns: 2fr 1fr; }
+
+/* file + tlačidlo vedľa seba, zarovnané na výšku */
+.upload-inline{
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+.upload-inline input[type="file"]{ height:42px; }
+.upload-inline .btnx{ height:42px; }
+
+/* mierna rezerva pod náhľad */
+.preview{ margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -81,9 +120,9 @@
 
       <div>
   <label>Obrázok (URL alebo nahrať)</label>
-  <div class="row">
+  <div class="row row--image">
     <input type="text" id="obrazok" placeholder="URL obrázka (vyplní sa po nahratí)"/>
-    <div>
+    <div class="upload-inline">
       <input type="file" id="fileInput" accept="image/*" />
       <button class="btnx" type="button" id="uploadBtn">Nahrať</button>
     </div>
