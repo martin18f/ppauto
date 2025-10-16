@@ -54,15 +54,17 @@ form input[type="checkbox"]{ width:auto; height:auto; }
 
 
 /* riadok s obrázkom: URL širší ako upload */
-.row--image{ grid-template-columns: 2fr 1fr; }
+.row--image{ grid-template-columns: 1fr; }
 
 /* file + tlačidlo vedľa seba, zarovnané na výšku */
 .upload-inline{
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
+  display: flex;
+  justify-content: flex-end; /* doprava */
   align-items: center;
+  gap: 8px;
 }
+
+
 .upload-inline input[type="file"]{ height:42px; }
 .upload-inline .btnx{ height:42px; }
 
@@ -119,18 +121,22 @@ form input[type="checkbox"]{ width:auto; height:auto; }
       </div>
 
       <div>
-  <label>Obrázok (URL alebo nahrať)</label>
+  <label>Obrázok</label>
+  <!-- skryté pole, do ktorého sa po uploade uloží URL -->
+  <input type="hidden" id="obrazok" />
+
   <div class="row row--image">
-    <input type="text" id="obrazok" placeholder="URL obrázka (vyplní sa po nahratí)"/>
     <div class="upload-inline">
       <input type="file" id="fileInput" accept="image/*" />
       <button class="btnx" type="button" id="uploadBtn">Nahrať</button>
     </div>
   </div>
+
   <div class="preview" id="imgPreview">
-    <small class="hint">Vyber súbor a klikni „Nahrať“, alebo vlož priamy URL.</small>
+    <small class="hint">Po nahratí sa zobrazí náhľad.</small>
   </div>
 </div>
+
 
 
       <div>
@@ -142,7 +148,7 @@ form input[type="checkbox"]{ width:auto; height:auto; }
         <button class="btnx primary" id="submitBtn" type="submit">Odoslať</button>
         <button class="btnx" type="button" id="resetBtn">Vyčistiť formulár</button>
         <button class="btnx danger" type="button" id="deleteBtn" style="display:none">Vymazať vybrané</button>
-        <span class="pill-mini" id="statusBadge">pridávanie</span>
+        
       </div>
 
       <!-- skryté: index upravovaného záznamu -->
@@ -179,7 +185,7 @@ form input[type="checkbox"]{ width:auto; height:auto; }
     // ====== STATE ======
     let cars = [];
     const form = document.getElementById('carForm');
-    const statusBadge = document.getElementById('statusBadge');
+    
     const editIndexInput = document.getElementById('editIndex');
     const submitBtn = document.getElementById('submitBtn');
     const deleteBtn = document.getElementById('deleteBtn');
@@ -199,7 +205,7 @@ form input[type="checkbox"]{ width:auto; height:auto; }
     deleteBtn.addEventListener('click', onDeleteSelected);
     searchInput.addEventListener('input', renderTable);
     zlava.addEventListener('change', toggleZlavaUI);
-    imgInput.addEventListener('input', renderPreview);
+  
 
     toggleZlavaUI();
     loadFromApi();
@@ -229,7 +235,7 @@ form input[type="checkbox"]{ width:auto; height:auto; }
         editIndexInput.value = -1;
         submitBtn.textContent = 'Odoslať';
         deleteBtn.style.display = 'none';
-        statusBadge.textContent = 'pridávanie';
+        
         zlava.checked = false;
         toggleZlavaUI();
         renderPreview();
@@ -237,7 +243,7 @@ form input[type="checkbox"]{ width:auto; height:auto; }
         editIndexInput.value = index;
         submitBtn.textContent = 'Uložiť zmeny';
         deleteBtn.style.display = 'inline-flex';
-        statusBadge.textContent = 'úprava #' + (index + 1);
+       
         toggleZlavaUI();
         renderPreview();
       }
