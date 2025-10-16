@@ -40,5 +40,18 @@
     "tagy": [
       "jeep"
     ]
+  },
+  {
+    "znacka": "Jeep",
+    "model": "Avenger",
+    "rok": 2024,
+    "palivo": "Benzín / Hybrid",
+    "prevodovka": "AT • Adventure",
+    "stara_cena": "26 740€",
+    "nova_cena": "24490€",
+    "obrazok": "https://raw.githubusercontent.com/martin18f/ppauto/main/uploads/1760655225681-IoQ24unINctyfVwC4zrHOYBE2k.avif",
+    "tagy": [
+      "jeep"
+    ]
   }
 ]
