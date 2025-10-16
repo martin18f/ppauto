@@ -8,7 +8,10 @@
     "stara_cena": "43 840 €",
     "nova_cena": "39 900 €",
     "obrazok": "img/subarubrz2024.avif",
-    "tagy": ["subaru", "skladom"]
+    "tagy": [
+      "subaru",
+      "skladom"
+    ]
   },
   {
     "znacka": "Subaru",
@@ -19,17 +22,10 @@
     "stara_cena": "52 640 €",
     "nova_cena": "",
     "obrazok": "img/outback2025-1.jpg",
-    "tagy": ["subaru", "skladom", "novinky"]
-  },
-  {
-    "znacka": "Subaru",
-    "model": "OUTBACK",
-    "rok": 2025,
-    "palivo": "Benzín",
-    "prevodovka": "AT • Premium",
-    "stara_cena": "52 640 €",
-    "nova_cena": "55588€",
-    "obrazok": "img/outback2025-1.jpg",
-    "tagy": ["subaru", "skladom", "novinky"]
+    "tagy": [
+      "subaru",
+      "skladom",
+      "novinky"
+    ]
   }
 ]
