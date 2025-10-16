@@ -53,5 +53,18 @@
     "tagy": [
       "jeep"
     ]
+  },
+  {
+    "znacka": "Jeep",
+    "model": "Wrangler",
+    "rok": 2024,
+    "palivo": "Benzín / Hybrid",
+    "prevodovka": "AT • Rubicon",
+    "stara_cena": "69 990€",
+    "nova_cena": "",
+    "obrazok": "https://raw.githubusercontent.com/martin18f/ppauto/main/uploads/1760656031285-q3hX5FLMjokir0g41zjAKsY8p0.avif",
+    "tagy": [
+      "jeep"
+    ]
   }
 ]
