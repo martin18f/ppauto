@@ -2,6 +2,25 @@
 <html lang="sk">
 <head>
   <meta charset="UTF-8" />
+  <script>
+  (function(){
+    // počas vývoja si môžeš prepnúť SKIP_GATE = true
+    var SKIP_GATE = false;
+    var url = new URL(location.href);
+    var brandParam = url.searchParams.get('brand');
+    var saved = localStorage.getItem('ppauto:brand');
+
+    if (brandParam) {
+      // ak prichádzam z vyber-znacky, ulož značku
+      try { localStorage.setItem('ppauto:brand', brandParam); } catch(e){}
+      return;
+    }
+    if (!saved && !SKIP_GATE) {
+      location.replace('vyber-znacky.html');
+    }
+  })();
+</script>
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin panel – PP AUTO</title>
   <link rel="stylesheet" href="style.css"/>

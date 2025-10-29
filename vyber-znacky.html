@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Vyber značku • PP AUTO</title>
+  <link rel="preload" href="vyber-znacky.css" as="style">
+  <link rel="stylesheet" href="vyber-znacky.css">
+  <script>
+  try { localStorage.removeItem('ppauto:brand'); } catch (e) {}
+</script>
+</head>
+<body>
+  <div class="bg"></div>
+
+  <main class="wrap">
+    <header class="top">
+      <div class="logo-dot"></div>
+      <h1>PP AUTO s.r.o.</h1>
+      <p>Vyberte si značku, ktorú chcete prehliadať</p>
+    </header>
+
+    <section class="grid">
+      <!-- SUBARU -->
+      <article class="card subaru" data-brand="subaru">
+        <div class="media">
+          <img src="img/subarubrz2024.avif" alt="Subaru – ilustračné vozidlo" loading="eager">
+          <div class="shine"></div>
+        </div>
+        <div class="body">
+          <div class="brandline">
+            <!-- jednoduché inline „logo“ (možno nahradiť SVG) -->
+            <span class="dot dot-blue"></span>
+            <h3>Subaru</h3>
+          </div>
+          <p>Symetrický AWD, BOXER motory a bezpečnosť EyeSight.</p>
+          <button class="btn enter">Vstúpiť</button>
+        </div>
+      </article>
+
+      <!-- KGM -->
+      <article class="card kgm" data-brand="kgm">
+        <div class="media">
+          <!-- nahraď podľa tvojho obrázka KGM (Torres, Rexton, …) -->
+          <img src="img/kgm-placeholder.avif" alt="KGM – ilustračné vozidlo" loading="lazy" onerror="this.src='img/subaruoutback2025magnetitgrey.avif'">
+          <div class="shine"></div>
+        </div>
+        <div class="body">
+          <div class="brandline">
+            <span class="dot dot-green"></span>
+            <h3>KGM</h3>
+          </div>
+          <p>Moderné SUV a robustná 4×4 technika.</p>
+          <button class="btn enter">Vstúpiť</button>
+        </div>
+      </article>
+
+      <!-- JEEP -->
+      <article class="card jeep" data-brand="jeep">
+        <div class="media">
+          <img src="img/grandcherokke2024red.avif" alt="Jeep – ilustračné vozidlo" loading="lazy">
+          <div class="shine"></div>
+        </div>
+        <div class="body">
+          <div class="brandline">
+            <span class="dot dot-yellow"></span>
+            <h3>Jeep</h3>
+          </div>
+          <p>DNA terénu a sloboda na každom kilometri.</p>
+          <button class="btn enter">Vstúpiť</button>
+        </div>
+      </article>
+    </section>
+
+    <footer class="foot">
+      <button class="btn ghost" id="skipOnce">Zobraziť všetko (bez výberu)</button>
+    </footer>
+  </main>
+
+  <script src="vyber-znacky.js" defer></script>
+</body>
+</html>

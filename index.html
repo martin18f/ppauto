@@ -2,6 +2,21 @@
 <html lang="sk">
 <head>
   <meta charset="utf-8" />
+  <script>
+  (function () {
+    // Pre istotu odstráň starý localStorage kľúč (ak niekedy existoval)
+    try { localStorage.removeItem('ppauto:brand'); } catch (e) {}
+
+    var brand = new URL(location.href).searchParams.get('brand');
+
+    // Bez parametra ?brand= pošli používateľa na "výber značky"
+    if (!brand) {
+      location.replace('vyber-znacky.html');
+    }
+  })();
+</script>
+
+
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PP AUTO s.r.o. – Subaru • KGM • Jeep | Poprad</title>
   <meta name="description" content="Autorizovaný predaj a servis Subaru, KGM a Jeep v Poprade. Skladové vozidlá, testovacie jazdy, financovanie, servis a náhradné diely." />
