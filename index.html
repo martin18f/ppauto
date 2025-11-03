@@ -2,19 +2,22 @@
 <html lang="sk">
 <head>
   <meta charset="utf-8" />
-  <script>
+    <script>
   (function () {
-    // Pre istotu odstráň starý localStorage kľúč (ak niekedy existoval)
-    try { localStorage.removeItem('ppauto:brand'); } catch (e) {}
+    // spúšťaj len na index.html
+    const currentPage = location.pathname.split('/').pop(); // napr. "index.html" alebo "admin.html"
 
-    var brand = new URL(location.href).searchParams.get('brand');
+    if (currentPage === '' || currentPage === 'index.html') {
+      // zmaž predchádzajúci localStorage, pre istotu
+      try { localStorage.removeItem('ppauto:brand'); } catch (e) {}
 
-    // Bez parametra ?brand= pošli používateľa na "výber značky"
-    if (!brand) {
-      location.replace('vyber-znacky.html');
+      // ak chýba parameter brand, presmeruj na výber značky
+      const hasBrand = new URL(location.href).searchParams.get('brand');
+      if (!hasBrand) location.replace('vyber-znacky.html');
     }
   })();
 </script>
+
 
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
