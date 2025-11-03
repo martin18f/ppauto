@@ -3,19 +3,21 @@
 <head>
   <meta charset="utf-8" />
     <script>
-  (function () {
-    // spúšťaj len na index.html
-    const currentPage = location.pathname.split('/').pop(); // napr. "index.html" alebo "admin.html"
+(function () {
+  const path = location.pathname;
+  const file = path.split('/').pop();
 
-    if (currentPage === '' || currentPage === 'index.html') {
-      // zmaž predchádzajúci localStorage, pre istotu
-      try { localStorage.removeItem('ppauto:brand'); } catch (e) {}
+  // Nech presmerovanie beží len na úvodnej stránke (index.html alebo root),
+  // ale NIE na admin.html, vyber-znacky.html, ani iných podstránkach
+  const isIndex = file === '' || file === 'index.html';
+  const isAdmin = file === 'admin.html' || path.includes('/admin');
 
-      // ak chýba parameter brand, presmeruj na výber značky
-      const hasBrand = new URL(location.href).searchParams.get('brand');
-      if (!hasBrand) location.replace('vyber-znacky.html');
-    }
-  })();
+  if (isIndex && !isAdmin) {
+    try { localStorage.removeItem('ppauto:brand'); } catch (e) {}
+    const hasBrand = new URL(location.href).searchParams.get('brand');
+    if (!hasBrand) location.replace('vyber-znacky.html');
+  }
+})();
 </script>
 
 
