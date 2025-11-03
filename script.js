@@ -139,8 +139,9 @@ function initFiltery() {
  */
 async function nacitajAuta() {
   try {
-    // Použi '/api/cars' ak máš backend endpoint; pre statiku zmeň na 'data/auta.json'
-    const response = await fetch('/api/cars', { cache: 'no-store' });
+    // 🔹 automatická detekcia prostredia
+    const isLocal = location.protocol === 'file:' || location.hostname === 'localhost';
+    const response = await fetch(isLocal ? 'data/auta.json' : '/api/cars', { cache: 'no-store' });
     const auta = await response.json();
 
     const container = document.getElementById('inventory');
@@ -152,19 +153,11 @@ async function nacitajAuta() {
     container.innerHTML = '';
     auta.forEach(auto => container.appendChild(vykresliKartu(auto)));
 
-    // 1) Tabs
     initFiltery();
-
-    // 2) Nastav brand kontext z URL
     BRAND_CTX = getBrandFromURL();
-
-    // 3) Pre brand kontext orež záložky (nech vidno len Všetko/Novinky/Predvádzacie/Jazdené)
     pruneTabsForBrand();
-
-    // 4) Aplikuj default filter "Všetko" v rámci brand kontextu
     applyFilters('all');
 
-    // 5) Vyčisti URL, aby ďalší reload poslal užívateľa späť na výber značky
     try { history.replaceState({}, '', 'index.html'); } catch (e) {}
 
     console.log('✅ Načítané autá:', auta.length, '| BRAND_CTX =', BRAND_CTX || 'none');
@@ -172,5 +165,6 @@ async function nacitajAuta() {
     console.error('❌ Chyba pri načítaní zoznamu áut:', error);
   }
 }
+
 
 document.addEventListener('DOMContentLoaded', nacitajAuta);
