@@ -2,12 +2,10 @@
 <html lang="sk">
 <head>
   <meta charset="UTF-8" />
-    
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin panel – PP AUTO</title>
   <link rel="stylesheet" href="style.css"/>
-  
+
   <style>
     body { padding: 32px; background: var(--bg); color: var(--text); }
     .wrap { display: grid; grid-template-columns: 420px 1fr; gap: 24px; align-items: start; }
@@ -32,55 +30,41 @@
     .preview { border:1px dashed var(--line); border-radius: 12px; padding: 8px; display:grid; place-items:center; background: #0e141c; }
     .preview img { max-width: 100%; height: auto; display:block; border-radius: 8px; }
     @media (max-width: 1024px){ .wrap { grid-template-columns: 1fr; } }
+
     form .row{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  align-items: end;               /* spodky polí v jednom riadku */
-}
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      align-items: end;
+    }
+    form .row > div,
+    #povodnaCenaWrap,
+    #novaCenaWrap,
+    form > div:not(.row):not(.actions){
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    form label{ margin-bottom: 0; line-height: 1.2; }
+    form input:not([type="checkbox"]):not([type="file"]),
+    form select, form textarea{ width:100%; height:42px; }
+    form input[type="checkbox"]{ width:auto; height:auto; }
 
-/* každý field = label nad inputom + rovnaké medzery */
-form .row > div,
-#povodnaCenaWrap,
-#novaCenaWrap,
-form > div:not(.row):not(.actions){
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-form label{ margin-bottom: 0; line-height: 1.2; }
-form input:not([type="checkbox"]):not([type="file"]),
-form select, form textarea{ width:100%; height:42px; }
-
-form input[type="checkbox"]{ width:auto; height:auto; }
-
-
-/* riadok s obrázkom: URL širší ako upload */
-/* riadok s obrázkom je 1 stĺpec */
-.row--image{ grid-template-columns: 1fr; }
-
-/* zarovnaj file input doprava */
-.upload-inline{
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 8px;
-}
-
-/* výška zhodná s ostatnými poľami */
-.upload-inline input[type="file"]{ height:42px; }
-
-.upload-inline .btnx{ height:42px; }
-
-/* mierna rezerva pod náhľad */
-.preview{ margin-top: 8px; }
+    .row--image{ grid-template-columns: 1fr; }
+    .upload-inline{
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+    }
+    .upload-inline input[type="file"]{ height:42px; }
+    .upload-inline .btnx{ height:42px; }
+    .preview{ margin-top: 8px; }
   </style>
 </head>
 <body>
 
   <h2>🛠️ Admin panel – správa áut</h2>
-  
 
   <div class="wrap">
     <!-- FORM -->
@@ -90,71 +74,67 @@ form input[type="checkbox"]{ width:auto; height:auto; }
       <div class="row">
         <div>
           <label>Značka</label>
-          <input type="text" id="znacka" placeholder="Subaru" />
+          <input type="text" id="znacka" name="znacka" placeholder="Subaru" />
         </div>
         <div>
           <label>Model</label>
-          <input type="text" id="model" placeholder="BRZ" />
+          <input type="text" id="model" name="model" placeholder="BRZ" />
         </div>
       </div>
 
       <div class="row">
         <div>
           <label>Rok</label>
-          <input type="number" id="rok" placeholder="2024" />
+          <input type="number" id="rok" name="rok" placeholder="2024" />
         </div>
         <div>
           <label>Palivo</label>
-          <input type="text" id="palivo" placeholder="Benzín"/>
+          <input type="text" id="palivo" name="palivo" placeholder="Benzín"/>
         </div>
       </div>
 
       <div>
         <label>Prevodovka / Výbava</label>
-        <input type="text" id="prevodovka" placeholder="AT • Premium"/>
+        <input type="text" id="prevodovka" name="prevodovka" placeholder="AT • Premium"/>
       </div>
 
       <div id="povodnaCenaWrap">
         <label>Pôvodná cena (alebo aktuálna, ak zľava NIE JE)</label>
-        <input type="text" id="stara_cena" placeholder="43 840 €"/>
+        <input type="text" id="stara_cena" name="stara_cena" placeholder="43 840 €"/>
       </div>
 
       <div id="novaCenaWrap" style="display:none">
         <label>Aktuálna cena po zľave</label>
-        <input type="text" id="nova_cena" placeholder="39 900 €"/>
+        <input type="text" id="nova_cena" name="nova_cena" placeholder="39 900 €"/>
         <div class="hint">Zobrazí sa zelenou, „Pôvodná cena“ bude prečiarknutá.</div>
       </div>
 
       <div>
-  <label>Obrázok</label>
-  <!-- skryté pole – sem sa po odoslaní uloží URL z uploadu -->
-  <input type="hidden" id="obrazok" />
+        <label>Obrázok</label>
 
-  <div class="row row--image">
-    <div class="upload-inline">
-      <input type="file" id="fileInput" accept="image/*" />
-      <!-- tlačidlo Nahrať sme odstránili -->
-    </div>
-  </div>
+        <!-- skryté pole – sem sa po odoslaní uloží URL z uploadu -->
+        <input type="hidden" id="obrazok" name="obrazok" />
 
-  <div class="preview" id="imgPreview">
-    <small class="hint">Vyber súbor. Pri „Odoslať“ sa automaticky nahrá a uloží.</small>
-  </div>
-</div>
+        <div class="row row--image">
+          <div class="upload-inline">
+            <input type="file" id="fileInput" accept="image/*" />
+          </div>
+        </div>
 
-
-
+        <div class="preview" id="imgPreview">
+          <small class="hint">Vyber súbor. Pri „Odoslať“ sa automaticky nahrá a uloží.</small>
+        </div>
+      </div>
 
       <div>
         <label>Tagy (čiarkou oddelené)</label>
-        <input type="text" id="tagy" placeholder="subaru, skladom"/>
+        <input type="text" id="tagy" name="tagy" placeholder="subaru, skladom"/>
       </div>
 
       <div class="actions">
         <button class="btnx primary" id="submitBtn" type="submit">Odoslať</button>
         <button class="btnx" type="button" id="resetBtn">Vyčistiť formulár</button>
         <button class="btnx danger" type="button" id="deleteBtn" style="display:none">Vymazať vybrané</button>
-        
       </div>
 
       <!-- skryté: index upravovaného záznamu -->
@@ -170,22 +150,20 @@ form input[type="checkbox"]{ width:auto; height:auto; }
           <button class="btnx" id="reloadBtn" type="button">Načítať zo súboru</button>
         </div>
       </div>
+
       <table id="carsTable">
         <thead>
-  <tr>
-    <th>
-      <input type="checkbox" id="checkAll">
-    </th>
-    <th>#</th>
-    <th>Značka</th>
-    <th>Model</th>
-    <th>Rok</th>
-    <th>Cena</th>
-    <th>Tagy</th>
-    <th>Akcie</th>
-  </tr>
-</thead>
-
+          <tr>
+            <th><input type="checkbox" id="checkAll"></th>
+            <th>#</th>
+            <th>Značka</th>
+            <th>Model</th>
+            <th>Rok</th>
+            <th>Cena</th>
+            <th>Tagy</th>
+            <th>Akcie</th>
+          </tr>
+        </thead>
         <tbody><!-- render --></tbody>
       </table>
     </div>
@@ -194,31 +172,50 @@ form input[type="checkbox"]{ width:auto; height:auto; }
   <script>
     // ====== STATE ======
     let cars = [];
+
     const form = document.getElementById('carForm');
-    
     const editIndexInput = document.getElementById('editIndex');
     const submitBtn = document.getElementById('submitBtn');
     const deleteBtn = document.getElementById('deleteBtn');
+
     const zlava = document.getElementById('zlava');
-    const povodnaCenaWrap = document.getElementById('povodnaCenaWrap');
     const novaCenaWrap = document.getElementById('novaCenaWrap');
+
     const imgInput = document.getElementById('obrazok');
     const imgPreview = document.getElementById('imgPreview');
+    const fileEl = document.getElementById('fileInput');
+
     const tableBody = document.querySelector('#carsTable tbody');
     const searchInput = document.getElementById('search');
+    const checkAll = document.getElementById('checkAll');
 
     // ====== INIT ======
     document.getElementById('reloadBtn').addEventListener('click', loadFromApi);
-
     document.getElementById('exportBtn').addEventListener('click', exportJSON);
     document.getElementById('resetBtn').addEventListener('click', () => setFormMode('create'));
     deleteBtn.addEventListener('click', onDeleteSelected);
     searchInput.addEventListener('input', renderTable);
     zlava.addEventListener('change', toggleZlavaUI);
-  
+
+    // select-all checkbox
+    checkAll.addEventListener('change', () => {
+      document.querySelectorAll('.row-check').forEach(cb => cb.checked = checkAll.checked);
+      updateBulkDeleteUI();
+    });
+
+    // náhľad po výbere súboru
+    fileEl.addEventListener('change', () => {
+      if (!fileEl.files || !fileEl.files[0]) {
+        imgPreview.innerHTML = '<small class="hint">Vyber súbor. Pri „Odoslať“ sa automaticky nahrá a uloží.</small>';
+        return;
+      }
+      const url = URL.createObjectURL(fileEl.files[0]);
+      imgPreview.innerHTML = `<img src="${url}" alt="náhľad">`;
+    });
 
     toggleZlavaUI();
     loadFromApi();
+    renderPreview();
 
     // ====== UI HELPERS ======
     function toggleZlavaUI(){
@@ -226,17 +223,18 @@ form input[type="checkbox"]{ width:auto; height:auto; }
         novaCenaWrap.style.display = 'block';
       } else {
         novaCenaWrap.style.display = 'none';
+        // bezpečné: máme name="nova_cena"
         form.nova_cena.value = '';
       }
     }
 
     function renderPreview(){
-      const url = imgInput.value.trim();
+      const url = (imgInput.value || '').trim();
       if (!url) {
-        imgPreview.innerHTML = '<small class="hint">Náhľad sa zobrazí po vyplnení poľa.</small>';
+        imgPreview.innerHTML = '<small class="hint">Vyber súbor. Pri „Odoslať“ sa automaticky nahrá a uloží.</small>';
         return;
       }
-      imgPreview.innerHTML = '<img src="'+url+'" alt="náhľad obrázka">';
+      imgPreview.innerHTML = `<img src="${url}" alt="náhľad obrázka">`;
     }
 
     function setFormMode(mode, index = -1){
@@ -245,46 +243,48 @@ form input[type="checkbox"]{ width:auto; height:auto; }
         editIndexInput.value = -1;
         submitBtn.textContent = 'Odoslať';
         deleteBtn.style.display = 'none';
-        
+        checkAll.checked = false;
+
         zlava.checked = false;
         toggleZlavaUI();
+
+        // reset file input aj skrytého obrázka
+        imgInput.value = '';
+        fileEl.value = '';
         renderPreview();
       } else if (mode === 'edit') {
-  editIndexInput.value = index;
-  submitBtn.textContent = 'Uložiť zmeny';
+        editIndexInput.value = index;
+        submitBtn.textContent = 'Uložiť zmeny';
 
-  deleteBtn.style.display = 'none'; // ⬅️ TU
+        // “Vymazať vybrané” pri editácii nechaj skryté (podľa tvojho pôvodného UX)
+        deleteBtn.style.display = 'none';
 
-  toggleZlavaUI();
-  renderPreview();
-}
+        toggleZlavaUI();
+        renderPreview();
+      }
+    }
+
+    function updateBulkDeleteUI(){
+      const all = document.querySelectorAll('.row-check');
+      const checked = document.querySelectorAll('.row-check:checked');
+
+      checkAll.checked = all.length > 0 && all.length === checked.length;
+      deleteBtn.style.display = checked.length ? 'inline-flex' : 'none';
     }
 
     // ====== DATA IO ======
     async function loadFromApi(){
-  try {
-    const res = await fetch('/api/cars', { cache: 'no-store' });
-    if (!res.ok) throw new Error('GET /api/cars failed: ' + res.status);
-    cars = await res.json();
-    renderTable();
-  } catch (e) {
-    console.error('Nepodarilo sa načítať /api/cars', e);
-    cars = [];
-    renderTable();
-  }
-}
-
-// náhľad po výbere súboru (pred odoslaním)
-const fileEl = document.getElementById('fileInput');
-fileEl.addEventListener('change', () => {
-  if (!fileEl.files || !fileEl.files[0]) {
-    imgPreview.innerHTML = '<small class="hint">Vyber súbor. Pri „Odoslať“ sa automaticky nahrá a uloží.</small>';
-    return;
-  }
-  const url = URL.createObjectURL(fileEl.files[0]);
-  imgPreview.innerHTML = `<img src="${url}" alt="náhľad">`;
-});
-
+      try {
+        const res = await fetch('/api/cars', { cache: 'no-store' });
+        if (!res.ok) throw new Error('GET /api/cars failed: ' + res.status);
+        cars = await res.json();
+        renderTable();
+      } catch (e) {
+        console.error('Nepodarilo sa načítať /api/cars', e);
+        cars = [];
+        renderTable();
+      }
+    }
 
     function exportJSON(){
       const blob = new Blob([JSON.stringify(cars, null, 2)], { type: 'application/json' });
@@ -300,6 +300,10 @@ fileEl.addEventListener('change', () => {
 
     // ====== TABLE RENDER ======
     function renderTable(){
+      // reset “select all” a bulk delete pri každom renderi
+      checkAll.checked = false;
+      deleteBtn.style.display = 'none';
+
       const q = searchInput.value.trim().toLowerCase();
       tableBody.innerHTML = '';
 
@@ -310,202 +314,229 @@ fileEl.addEventListener('change', () => {
           return !q || hay.includes(q);
         })
         .forEach((c) => {
-  const tr = document.createElement('tr');
+          const tr = document.createElement('tr');
 
-  const cenaLabel = (c.nova_cena && String(c.nova_cena).trim() !== '')
-    ? `${c.stara_cena || ''} → ${c.nova_cena}`
-    : (c.stara_cena || '—');
+          const cenaLabel = (c.nova_cena && String(c.nova_cena).trim() !== '')
+            ? `${c.stara_cena || ''} → ${c.nova_cena}`
+            : (c.stara_cena || '—');
 
-  tr.innerHTML = `
-    <td>
-      <input type="checkbox" class="row-check" data-index="${c._i}">
-    </td>
-    <td>${c._i + 1}</td>
-    <td>${c.znacka || ''}</td>
-    <td>${c.model || ''}</td>
-    <td>${c.rok || ''}</td>
-    <td>${cenaLabel}</td>
-    <td>${(c.tagy || []).join(', ')}</td>
-    <td class="cell-actions">
-      <button class="btnx" data-edit="${c._i}">Upraviť</button>
-      <button class="btnx danger" data-del="${c._i}">Vymazať</button>
-    </td>
-  `;
+          tr.innerHTML = `
+            <td>
+              <input type="checkbox" class="row-check" data-index="${c._i}">
+            </td>
+            <td>${c._i + 1}</td>
+            <td>${c.znacka || ''}</td>
+            <td>${c.model || ''}</td>
+            <td>${c.rok ?? ''}</td>
+            <td>${cenaLabel}</td>
+            <td>${(c.tagy || []).join(', ')}</td>
+            <td class="cell-actions">
+              <button class="btnx" type="button" data-edit="${c._i}">Upraviť</button>
+              <button class="btnx danger" type="button" data-del="${c._i}">Vymazať</button>
+            </td>
+          `;
 
-  tableBody.appendChild(tr);
+          tableBody.appendChild(tr);
 
-// Upraviť
-tr.querySelector('[data-edit]').addEventListener('click', () => {
-  onEdit(c._i);
-});
+          // Upraviť
+          tr.querySelector('[data-edit]').addEventListener('click', () => onEdit(c._i));
 
-// Vymazať
-tr.querySelector('[data-del]').addEventListener('click', () => {
-  onDelete(c._i);
-});
+          // Vymazať
+          tr.querySelector('[data-del]').addEventListener('click', () => onDelete(c._i));
 
-  // ✅ SEM PATRÍ
-  tr.querySelector('.row-check').addEventListener('change', () => {
-    const all = document.querySelectorAll('.row-check');
-    const checked = document.querySelectorAll('.row-check:checked');
-    checkAll.checked = all.length === checked.length;
-    deleteBtn.style.display = checked.length ? 'inline-flex' : 'none';
-  });
-});
-
+          // checkbox v riadku
+          tr.querySelector('.row-check').addEventListener('change', updateBulkDeleteUI);
+        });
     }
 
     // ====== CRUD ======
     form.addEventListener('submit', async (e) => {
-  e.preventDefault();
+      e.preventDefault();
 
       const idx = parseInt(editIndexInput.value, 10);
-const isEdit = Number.isInteger(idx) && idx >= 0;
+      const isEdit = Number.isInteger(idx) && idx >= 0;
 
+      // Validácia (minimálna)
+      const rokRaw = (form.rok.value || '').trim();
+      if (!form.znacka.value.trim() || !form.model.value.trim()) {
+        alert('Vyplň značku a model.');
+        return;
+      }
+      if (!rokRaw) {
+        alert('Vyplň rok.');
+        return;
+      }
 
-  // 1) prípadný upload nového súboru
-  const fileEl = document.getElementById('fileInput');
-  let imageUrl = form.obrazok.value.trim(); // existujúca URL pri editácii
+      // 1) prípadný upload nového súboru
+      let imageUrl = (form.obrazok.value || '').trim(); // existujúca URL pri editácii
 
-  if (fileEl.files && fileEl.files[0]) {
-    if (fileEl.files[0].size > 10 * 1024 * 1024) {
-      alert('Súbor je príliš veľký (max 10 MB).');
-      return;
-    }
-    const base64 = await fileToBase64(fileEl.files[0]);
-    const up = await fetch('/api/upload-image', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        filename: fileEl.files[0].name,
-        contentBase64: base64
-      })
+      if (fileEl.files && fileEl.files[0]) {
+        if (fileEl.files[0].size > 10 * 1024 * 1024) {
+          alert('Súbor je príliš veľký (max 10 MB).');
+          return;
+        }
+
+        const base64 = await fileToBase64(fileEl.files[0]);
+        const up = await fetch('/api/upload-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            filename: fileEl.files[0].name,
+            contentBase64: base64
+          })
+        });
+
+        if (!up.ok) {
+          const t = await up.text().catch(() => '');
+          console.error('Upload failed:', up.status, t);
+          alert('Nahratie obrázka zlyhalo.');
+          return;
+        }
+
+        const upData = await up.json().catch(() => ({}));
+        imageUrl = upData.url || '';
+        form.obrazok.value = imageUrl; // uložíme aj do hidden inputu
+      }
+
+      // 2) dáta auta
+      const maZlavu = zlava.checked;
+      const data = {
+        znacka: form.znacka.value.trim(),
+        model: form.model.value.trim(),
+        rok: Number(rokRaw),
+        palivo: form.palivo.value.trim(),
+        prevodovka: form.prevodovka.value.trim(),
+        stara_cena: (form.stara_cena.value || '').trim(),
+        nova_cena: maZlavu ? (form.nova_cena.value || '').trim() : '',
+        obrazok: imageUrl,
+        tagy: (form.tagy.value || '').split(',').map(t => t.trim()).filter(Boolean)
+      };
+
+      // 3) uloženie auta cez API
+      try {
+        let r;
+        if (isEdit) {
+          r = await fetch(`/api/cars?index=${idx}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+        } else {
+          r = await fetch('/api/cars', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+        }
+
+        if (!r.ok) {
+          const t = await r.text().catch(() => '');
+          console.error('Save failed:', r.status, t);
+          alert('Uloženie zlyhalo (' + r.status + '). Pozri konzolu.');
+          return;
+        }
+
+        // 4) refresh + reset
+        await loadFromApi();
+        setFormMode('create');
+
+      } catch (err) {
+        console.error(err);
+        alert('Uloženie zlyhalo (chyba siete alebo servera).');
+      }
     });
-    if (!up.ok) {
-      const t = await up.text();
-      console.error('Upload failed:', t);
-      alert('Nahratie obrázka zlyhalo.');
-      return;
-    }
-    const upData = await up.json();
-    imageUrl = upData.url || '';
-    form.obrazok.value = imageUrl; // uložíme aj do hidden inputu
-  }
-
- 
-  // 2) dáta auta
-  const maZlavu = zlava.checked;
-  const data = {
-    znacka: form.znacka.value.trim(),
-    model: form.model.value.trim(),
-    rok: Number(form.rok.value),
-    palivo: form.palivo.value.trim(),
-    prevodovka: form.prevodovka.value.trim(),
-    stara_cena: (form.stara_cena.value || '').trim(),
-    nova_cena: maZlavu ? (form.nova_cena.value || '').trim() : '',
-    obrazok: imageUrl,
-    tagy: form.tagy.value.split(',').map(t => t.trim()).filter(Boolean)
-  };
-
-  // 3) uloženie auta cez API
-  if (isEdit) {
-    await fetch(`/api/cars?index=${idx}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-  } else {
-    await fetch('/api/cars', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-  }
-
-  // 4) refresh + reset
-  await loadFromApi();
-  setFormMode('create');
-});
-
-
 
     function onEdit(index){
       const a = cars[index];
+      if (!a) return;
+
       form.znacka.value = a.znacka || '';
       form.model.value = a.model || '';
-      form.rok.value = a.rok || '';
+      form.rok.value = a.rok ?? '';
       form.palivo.value = a.palivo || '';
       form.prevodovka.value = a.prevodovka || '';
       form.stara_cena.value = a.stara_cena || '';
       form.nova_cena.value = a.nova_cena || '';
       form.obrazok.value = a.obrazok || '';
       form.tagy.value = (a.tagy || []).join(', ');
+
       zlava.checked = !!(a.nova_cena && String(a.nova_cena).trim() !== '');
       toggleZlavaUI();
+
+      // pri editácii je lepšie resetnúť file input, aby sa zbytočne neuploadoval starý výber
+      fileEl.value = '';
+
       renderPreview();
       setFormMode('edit', index);
+
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     async function onDelete(index){
-  if (!confirm('Naozaj vymazať toto auto?')) return;
-  await fetch(`/api/cars?index=${index}`, { method: 'DELETE' });
-  await loadFromApi();
-  setFormMode('create');
-}
+      if (!confirm('Naozaj vymazať toto auto?')) return;
 
+      try {
+        const r = await fetch(`/api/cars?index=${index}`, { method: 'DELETE' });
+        if (!r.ok) {
+          const t = await r.text().catch(() => '');
+          console.error('Delete failed:', r.status, t);
+          alert('Vymazanie zlyhalo (' + r.status + '). Pozri konzolu.');
+          return;
+        }
+        await loadFromApi();
+        setFormMode('create');
+      } catch (err) {
+        console.error(err);
+        alert('Vymazanie zlyhalo (chyba siete alebo servera).');
+      }
+    }
 
     async function onDeleteSelected(){
-  const checked = [...document.querySelectorAll('.row-check:checked')];
-  if (checked.length === 0) {
-    alert('Nevybral si žiadne autá.');
-    return;
-  }
+      const checked = [...document.querySelectorAll('.row-check:checked')];
+      if (checked.length === 0) {
+        alert('Nevybral si žiadne autá.');
+        return;
+      }
 
-  if (!confirm(`Naozaj vymazať ${checked.length} áut?`)) return;
+      if (!confirm(`Naozaj vymazať ${checked.length} áut?`)) return;
 
-  // indexy zoradiť zostupne (aby sa neposúvali)
-  const indexes = checked
-    .map(ch => parseInt(ch.dataset.index, 10))
-    .sort((a, b) => b - a);
+      // indexy zoradiť zostupne (aby sa neposúvali)
+      const indexes = checked
+        .map(ch => parseInt(ch.dataset.index, 10))
+        .sort((a, b) => b - a);
 
-  for (const idx of indexes) {
-    await fetch(`/api/cars?index=${idx}`, { method: 'DELETE' });
-  }
+      try {
+        for (const idx of indexes) {
+          const r = await fetch(`/api/cars?index=${idx}`, { method: 'DELETE' });
+          if (!r.ok) {
+            const t = await r.text().catch(() => '');
+            console.error('Delete failed:', r.status, t);
+            alert('Vymazanie zlyhalo (' + r.status + '). Pozri konzolu.');
+            return;
+          }
+        }
+        await loadFromApi();
+        setFormMode('create');
+      } catch (err) {
+        console.error(err);
+        alert('Vymazanie zlyhalo (chyba siete alebo servera).');
+      }
+    }
 
-  await loadFromApi();
-  setFormMode('create');
-}
-
+    // premeni File na čisté base64 (bez data: prefixu)
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('Nepodarilo sa načítať súbor.'));
+        reader.onload = () => {
+          const result = reader.result; // data:*;base64,xxxx
+          const base64 = String(result).split(',')[1]; // odstrániť "data:...;base64,"
+          resolve(base64);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
   </script>
-  <script>
-
-    const checkAll = document.getElementById('checkAll');
-
-checkAll.addEventListener('change', () => {
-  document
-    .querySelectorAll('.row-check')
-    .forEach(cb => cb.checked = checkAll.checked);
-
-  deleteBtn.style.display = checkAll.checked ? 'inline-flex' : 'none';
-});
-
-  // premeni File na čisté base64 (bez data: prefixu)
-  function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = () => reject(new Error('Nepodarilo sa načítať súbor.'));
-      reader.onload = () => {
-        const result = reader.result; // data:*;base64,xxxx
-        const base64 = String(result).split(',')[1]; // odstrániť "data:...;base64,"
-        resolve(base64);
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  
-</script>
 
 </body>
 </html>
