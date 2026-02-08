@@ -326,5 +326,18 @@
     "tagy": [
       "jeep"
     ]
+  },
+  {
+    "znacka": "Fiat",
+    "model": "600e",
+    "rok": 2024,
+    "palivo": "Elektromotor",
+    "prevodovka": "AT",
+    "stara_cena": "",
+    "nova_cena": "",
+    "obrazok": "",
+    "tagy": [
+      "jeep"
+    ]
   }
 ]
