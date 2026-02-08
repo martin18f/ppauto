@@ -341,23 +341,21 @@ tableBody.addEventListener('click', (e) => {
             : (c.stara_cena || '—');
 
           tr.innerHTML = `
-            <td>
-              <input type="checkbox" class="row-check" data-index="${c._i}">
-            </td>
-            <td>${c._i + 1}</td>
-            <td>${c.znacka || ''}</td>
-            <td>${c.model || ''}</td>
-            <td>${c.rok ?? ''}</td>
-            <td>${cenaLabel}</td>
-            <td>${(c.tagy || []).join(', ')}</td>
-            <button class="btnx" type="button" data-edit="${c._i}">Upraviť</button>
-<button class="btnx danger" type="button" data-del="${c._i}">Vymazať</button>
+  <td>
+    <input type="checkbox" class="row-check" data-index="${c._i}">
+  </td>
+  <td>${c._i + 1}</td>
+  <td>${c.znacka || ''}</td>
+  <td>${c.model || ''}</td>
+  <td>${c.rok ?? ''}</td>
+  <td>${cenaLabel}</td>
+  <td>${(c.tagy || []).join(', ')}</td>
+  <td class="cell-actions">
+    <button class="btnx" type="button" data-edit="${c._i}">Upraviť</button>
+    <button class="btnx danger" type="button" data-del="${c._i}">Vymazať</button>
+  </td>
+`;
 
-            <td class="cell-actions">
-              <button class="btnx" type="button" data-edit="${c._i}">Upraviť</button>
-              <button class="btnx danger" type="button" data-del="${c._i}">Vymazať</button>
-            </td>
-          `;
 
           tableBody.appendChild(tr);
 
