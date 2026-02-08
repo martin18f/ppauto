@@ -274,5 +274,18 @@
     "tagy": [
       "jeep"
     ]
+  },
+  {
+    "znacka": "Jeep",
+    "model": "Compass",
+    "rok": 2025,
+    "palivo": "Hybrid",
+    "prevodovka": "AT",
+    "stara_cena": "",
+    "nova_cena": "",
+    "obrazok": "",
+    "tagy": [
+      "jeep"
+    ]
   }
 ]
