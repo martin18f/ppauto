@@ -334,6 +334,16 @@ fileEl.addEventListener('change', () => {
 
   tableBody.appendChild(tr);
 
+// Upraviť
+tr.querySelector('[data-edit]').addEventListener('click', () => {
+  onEdit(c._i);
+});
+
+// Vymazať
+tr.querySelector('[data-del]').addEventListener('click', () => {
+  onDelete(c._i);
+});
+
   // ✅ SEM PATRÍ
   tr.querySelector('.row-check').addEventListener('change', () => {
     const all = document.querySelectorAll('.row-check');

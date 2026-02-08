@@ -1,125 +1,190 @@
 const { chromium } = require('playwright');
 
-const EUROTIP_URL =
-  'https://eurotip-vozidla.sk/?field_zna_ka_tid_selective=1214';
+const EUROTIP_URL = 'https://eurotip-vozidla.sk/?field_zna_ka_tid_selective=1214'; // Jeep filter
+const BRAND_NAME = 'Jeep';
 
-// ⬇️ SEM DAJ TVOJU ADRESU ADMIN PANELU
+// ⬇️ SEM DAJ TVOJ ADMIN
 const ADMIN_URL = 'https://ppauto.sk/admin.html';
 
-// --- helper: normalizácia prevodovky + výbavy (MOŽNOSŤ A)
-function buildPrevodovka(title, rawGearbox) {
-  let at = '';
-  if (rawGearbox.toLowerCase().includes('automat')) {
-    at = 'AT';
+// Bezpečné prepínače
+const HEADLESS = false;   // pri debugovaní daj false
+const DRY_RUN = false;    // najprv true (len vypíše), potom false (bude ukladať)
+const MAX_CARS = 50;     // poistka
+
+function norm(s) {
+  return String(s || '').replace(/\s+/g, ' ').trim();
+}
+
+function getExpectedTotalFromPageText(text) {
+  const m = text.match(/Spolu:\s*(\d+)\s*áut/i);
+  return m ? parseInt(m[1], 10) : null;
+}
+
+function gearboxAbbrev(raw) {
+  const g = norm(raw).toLowerCase();
+  if (g.includes('automat')) return 'AT';
+  if (g.includes('manu')) return 'MT';
+  return '';
+}
+
+// ✅ whitelist trimov – presne tie, čo máš v súhrne
+const KNOWN_TRIMS = [
+  'Axenture',
+  'Altitude',
+  'Summit',
+  'Night Eagle II',
+  'High Upland',
+  'First Edition'
+];
+
+function detectTrimFromTitle(title) {
+  const t = norm(title).toLowerCase();
+  for (const k of KNOWN_TRIMS) {
+    if (t.includes(k.toLowerCase())) return k;
   }
+  return '';
+}
 
-  // výbava z názvu
-  const knownTrims = [
-    'First Edition',
-    'Altitude',
-    'Summit',
-    'Limited',
-    'Longitude',
-    'Trailhawk',
-    'Overland',
-    'S'
-  ];
+// MOŽNOSŤ A: "AT • First Edition"
+function buildPrevodovkaA(title, rawGearbox) {
+  const abbr = gearboxAbbrev(rawGearbox);
+  const trim = detectTrimFromTitle(title);
 
-  let trim = '';
-  for (const t of knownTrims) {
-    if (title.toLowerCase().includes(t.toLowerCase())) {
-      trim = t;
-      break;
-    }
-  }
-
-  if (at && trim) return `${at} • ${trim}`;
-  if (at) return at;
+  if (abbr && trim) return `${abbr} • ${trim}`;
+  if (abbr) return abbr;
   if (trim) return trim;
-  return rawGearbox.trim();
+  return norm(rawGearbox);
+}
+
+async function scrapeEurotipJeep(page) {
+  await page.goto(EUROTIP_URL, { waitUntil: 'networkidle' });
+
+  // 1) zober očakávaný počet “Spolu: X áut” (ak je na stránke)
+  const expectedTotal = await page.evaluate(() => {
+    return document.body ? document.body.innerText : '';
+  }).then(getExpectedTotalFromPageText);
+
+  // 2) nájdi správny “view” kontajner: ten, ktorý obsahuje filter select
+  const view = page.locator('div.view').filter({
+    has: page.locator('form:has(select[name="field_zna_ka_tid_selective"])')
+  }).first();
+
+  await view.waitFor({ state: 'visible', timeout: 45000 });
+
+  // 3) riadky len v tomto view (tým odstrihneme iné views-row bloky)
+  const rows = view.locator('.view-content .views-row');
+  await rows.first().waitFor({ state: 'visible', timeout: 45000 });
+
+  // 4) vytiahni dáta z riadkov
+  const raw = await rows.evaluateAll((els) => {
+    const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim();
+    const pick = (root, sel) => norm(root.querySelector(sel)?.textContent || '');
+    const attr = (root, sel, a) => root.querySelector(sel)?.getAttribute(a) || '';
+
+    return els.map((row) => {
+      const title = pick(row, '.views-field-title a');
+      const href = attr(row, '.views-field-title a', 'href');
+      const znacka = pick(row, '.views-field-field-zna-ka .field-content');
+      const model = pick(row, '.views-field-field-model .field-content');
+      const rok = pick(row, '.views-field-field-rok .field-content');
+      const palivo = pick(row, '.views-field-field-palivo .field-content');
+      const prevodovkaRaw = pick(row, '.views-field-field-prevodovka .field-content');
+
+      // “vyzerá ako karta auta”
+      const looksLikeCar = Boolean(title && href && znacka && model && rok && palivo);
+
+      return looksLikeCar
+        ? { title, href, znacka, model, rok, palivo, prevodovkaRaw }
+        : null;
+    }).filter(Boolean);
+  });
+
+  // 5) tvrdý filter len Jeep
+  const onlyJeep = raw.filter(c => norm(c.znacka) === BRAND_NAME);
+
+  // 6) dedup iba podľa href (odstráni DOM duplicity, ale zachová reálne rozdielne autá)
+  const byHref = new Map();
+  for (const c of onlyJeep) {
+    const key = c.href.trim();
+    if (!byHref.has(key)) byHref.set(key, c);
+  }
+
+  const unique = Array.from(byHref.values()).slice(0, MAX_CARS);
+
+  // 7) bezpečnostná brzda: ak stránka hovorí “Spolu: 11” a my máme iné číslo -> STOP
+  if (expectedTotal !== null && unique.length !== expectedTotal) {
+    const list = unique.map(x => `- ${x.title} | ${x.palivo} | ${x.href}`).join('\n');
+    throw new Error(
+      `STOP: Eurotip hlási "Spolu: ${expectedTotal} áut", ale scraper našiel ${unique.length}.\n` +
+      `Neukladám nič. Zoznam, čo scraper našiel:\n${list}`
+    );
+  }
+
+  return { expectedTotal, cars: unique };
+}
+
+async function submitToAdmin(adminPage, car) {
+  await adminPage.goto(ADMIN_URL, { waitUntil: 'networkidle' });
+  await adminPage.waitForSelector('#carForm', { timeout: 45000 });
+
+  const prevodovka = buildPrevodovkaA(car.title, car.prevodovkaRaw);
+
+  await adminPage.fill('#znacka', norm(car.znacka));
+  await adminPage.fill('#model', norm(car.model));
+  await adminPage.fill('#rok', String(parseInt(norm(car.rok), 10) || ''));
+  await adminPage.fill('#palivo', norm(car.palivo));
+  await adminPage.fill('#prevodovka', norm(prevodovka));
+
+  // Tagy vždy jeep
+  await adminPage.fill('#tagy', 'jeep');
+
+  // klik submit + čakaj na POST /api/cars (ak tvoj admin posiela cez fetch)
+  await Promise.all([
+    adminPage.waitForResponse(r =>
+      r.url().includes('/api/cars') && r.request().method() === 'POST',
+      { timeout: 45000 }
+    ),
+    adminPage.click('#submitBtn')
+  ]);
 }
 
 (async () => {
-  const browser = await chromium.launch({
-    headless: false, // 🔁 prepni na false ak chceš vidieť čo robí
-    slowMo: 0
-  });
+  const browser = await chromium.launch({ headless: HEADLESS });
 
-  const page = await browser.newPage();
+  const listPage = await browser.newPage();
+  const adminPage = await browser.newPage();
 
-  // =====================================================
-  // 1️⃣ EUROTIP – EXTRAKCIA
-  // =====================================================
-  console.log('🔍 Načítavam Eurotip…');
-  await page.goto(EUROTIP_URL, { waitUntil: 'networkidle' });
+  try {
+    console.log('🔍 Eurotip: načítavam Jeep…');
+    const { expectedTotal, cars } = await scrapeEurotipJeep(listPage);
 
-  await page.waitForSelector('.views-row');
-
-  const cars = await page.$$eval('.views-row', rows =>
-    rows.map(row => {
-      const get = sel =>
-        row.querySelector(sel)?.textContent?.trim() || '';
-
-      const title = get('.views-field-title a');
-      const znacka = get('.views-field-field-zna-ka .field-content');
-      const model = get('.views-field-field-model .field-content');
-      const rok = get('.views-field-field-rok .field-content');
-      const palivo = get('.views-field-field-palivo .field-content');
-      const prevodovkaRaw = get(
-        '.views-field-field-prevodovka .field-content'
+    console.log(`✅ Eurotip: našiel som ${cars.length} áut${expectedTotal !== null ? ` (Spolu: ${expectedTotal})` : ''}`);
+    console.log('📋 Zoznam (čo budem spracovávať):');
+    cars.forEach((c, i) => {
+      const prev = buildPrevodovkaA(c.title, c.prevodovkaRaw);
+      console.log(
+        `${i + 1}. ${c.znacka} ${c.model} (${c.rok}) | ${c.palivo} | ${prev} | ${c.href}`
       );
-
-      return {
-        title,
-        znacka,
-        model,
-        rok,
-        palivo,
-        prevodovkaRaw
-      };
-    })
-  );
-
-  console.log(`✅ Nájdených áut: ${cars.length}`);
-
-  // =====================================================
-  // 2️⃣ ADMIN PANEL – VYPLNENIE + SUBMIT
-  // =====================================================
-  for (const car of cars) {
-    const prevodovka = buildPrevodovka(
-      car.title,
-      car.prevodovkaRaw
-    );
-
-    console.log(
-      `➡️ Pridávam: ${car.znacka} ${car.model} (${car.rok})`
-    );
-
-    await page.goto(ADMIN_URL, { waitUntil: 'networkidle' });
-    await page.waitForSelector('#carForm');
-
-    await page.fill('#znacka', car.znacka);
-    await page.fill('#model', car.model);
-    await page.fill('#rok', car.rok);
-    await page.fill('#palivo', car.palivo);
-    await page.fill('#prevodovka', prevodovka);
-
-    // TAGY – vždy jeep
-    await page.fill('#tagy', 'jeep');
-
-    // SUBMIT
-    await page.evaluate(() => {
-      document
-        .querySelector('#carForm')
-        .dispatchEvent(
-          new Event('submit', { bubbles: true, cancelable: true })
-        );
     });
 
-    // rezerva pre API
-    await page.waitForTimeout(1200);
-  }
+    if (DRY_RUN) {
+      console.log('🧪 DRY_RUN=true → nič neukladám. Keď je zoznam OK, nastav DRY_RUN=false.');
+      await browser.close();
+      return;
+    }
 
-  await browser.close();
-  console.log('🎉 HOTOVO – všetky autá spracované');
+    let added = 0;
+    for (const c of cars) {
+      console.log(`➡️ Ukladám: ${c.title} | ${c.href}`);
+      await submitToAdmin(adminPage, c);
+      added++;
+    }
+
+    console.log(`🎉 HOTOVO: uložené = ${added}`);
+    await browser.close();
+  } catch (err) {
+    console.error('❌ Chyba:', err?.message || err);
+    await browser.close();
+    process.exit(1);
+  }
 })();
