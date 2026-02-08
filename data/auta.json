@@ -157,5 +157,18 @@
     "tagy": [
       "jeep"
     ]
+  },
+  {
+    "znacka": "Jeep",
+    "model": "Compass",
+    "rok": 2023,
+    "palivo": "Benzín",
+    "prevodovka": "MT • Night Eagle II",
+    "stara_cena": "",
+    "nova_cena": "",
+    "obrazok": "",
+    "tagy": [
+      "jeep"
+    ]
   }
 ]
