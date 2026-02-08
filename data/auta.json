@@ -391,5 +391,18 @@
     "tagy": [
       "jeep"
     ]
+  },
+  {
+    "znacka": "Fiat",
+    "model": "Ducato",
+    "rok": 2023,
+    "palivo": "Elektromotor",
+    "prevodovka": "AT",
+    "stara_cena": "",
+    "nova_cena": "",
+    "obrazok": "",
+    "tagy": [
+      "jeep"
+    ]
   }
 ]
