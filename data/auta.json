@@ -79,16 +79,5 @@
     "tagy": [
       "jeep"
     ]
-  },
-  {
-    "znacka": "541fs65f1asfas",
-    "model": "OUTBACK",
-    "rok": 545,
-    "palivo": "6465",
-    "prevodovka": "AT • Rubicon",
-    "stara_cena": "",
-    "nova_cena": "",
-    "obrazok": "https://raw.githubusercontent.com/martin18f/ppauto/main/uploads/1770588075908-autosalon1.jpeg",
-    "tagy": []
   }
 ]
