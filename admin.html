@@ -339,6 +339,10 @@ fileEl.addEventListener('change', () => {
     form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
+      const idx = parseInt(editIndexInput.value, 10);
+const isEdit = Number.isInteger(idx) && idx >= 0;
+
+
   // 1) prípadný upload nového súboru
   const fileEl = document.getElementById('fileInput');
   let imageUrl = form.obrazok.value.trim(); // existujúca URL pri editácii
