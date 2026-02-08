@@ -261,5 +261,18 @@
     "tagy": [
       "jeep"
     ]
+  },
+  {
+    "znacka": "BMW",
+    "model": "Rad 3 GT",
+    "rok": 2014,
+    "palivo": "Diesel",
+    "prevodovka": "AT",
+    "stara_cena": "",
+    "nova_cena": "",
+    "obrazok": "",
+    "tagy": [
+      "jeep"
+    ]
   }
 ]
