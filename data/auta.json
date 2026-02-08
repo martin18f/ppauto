@@ -92,5 +92,18 @@
     "tagy": [
       "jeep"
     ]
+  },
+  {
+    "znacka": "Jeep",
+    "model": "Compass",
+    "rok": 2023,
+    "palivo": "Hybrid",
+    "prevodovka": "AT • S",
+    "stara_cena": "",
+    "nova_cena": "",
+    "obrazok": "",
+    "tagy": [
+      "jeep"
+    ]
   }
 ]
