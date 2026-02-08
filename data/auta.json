@@ -222,5 +222,18 @@
     "tagy": [
       "jeep"
     ]
+  },
+  {
+    "znacka": "Jeep",
+    "model": "Avenger",
+    "rok": 2025,
+    "palivo": "Benzín",
+    "prevodovka": "AT",
+    "stara_cena": "",
+    "nova_cena": "",
+    "obrazok": "",
+    "tagy": [
+      "jeep"
+    ]
   }
 ]
