@@ -430,5 +430,18 @@
     "tagy": [
       "jeep"
     ]
+  },
+  {
+    "znacka": "Fiat",
+    "model": "Ducato",
+    "rok": 2024,
+    "palivo": "Diesel",
+    "prevodovka": "Manuálna",
+    "stara_cena": "",
+    "nova_cena": "",
+    "obrazok": "",
+    "tagy": [
+      "jeep"
+    ]
   }
 ]
