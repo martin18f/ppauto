@@ -172,16 +172,20 @@ form input[type="checkbox"]{ width:auto; height:auto; }
       </div>
       <table id="carsTable">
         <thead>
-          <tr>
-            <th>#</th>
-            <th>Značka</th>
-            <th>Model</th>
-            <th>Rok</th>
-            <th>Cena</th>
-            <th>Tagy</th>
-            <th>Akcie</th>
-          </tr>
-        </thead>
+  <tr>
+    <th>
+      <input type="checkbox" id="checkAll">
+    </th>
+    <th>#</th>
+    <th>Značka</th>
+    <th>Model</th>
+    <th>Rok</th>
+    <th>Cena</th>
+    <th>Tagy</th>
+    <th>Akcie</th>
+  </tr>
+</thead>
+
         <tbody><!-- render --></tbody>
       </table>
     </div>
@@ -246,13 +250,14 @@ form input[type="checkbox"]{ width:auto; height:auto; }
         toggleZlavaUI();
         renderPreview();
       } else if (mode === 'edit') {
-        editIndexInput.value = index;
-        submitBtn.textContent = 'Uložiť zmeny';
-        deleteBtn.style.display = 'inline-flex';
-       
-        toggleZlavaUI();
-        renderPreview();
-      }
+  editIndexInput.value = index;
+  submitBtn.textContent = 'Uložiť zmeny';
+
+  deleteBtn.style.display = 'none'; // ⬅️ TU
+
+  toggleZlavaUI();
+  renderPreview();
+}
     }
 
     // ====== DATA IO ======
@@ -304,35 +309,40 @@ fileEl.addEventListener('change', () => {
           const hay = [c.znacka, c.model, c.rok, c.palivo, c.prevodovka, (c.tagy||[]).join(' ')].join(' ').toLowerCase();
           return !q || hay.includes(q);
         })
-        .forEach((c, idx) => {
-          const tr = document.createElement('tr');
+        .forEach((c) => {
+  const tr = document.createElement('tr');
 
-          const cenaLabel = (c.nova_cena && String(c.nova_cena).trim() !== '')
-            ? `${c.stara_cena || ''} → ${c.nova_cena}`
-            : (c.stara_cena || '—');
+  const cenaLabel = (c.nova_cena && String(c.nova_cena).trim() !== '')
+    ? `${c.stara_cena || ''} → ${c.nova_cena}`
+    : (c.stara_cena || '—');
 
-          tr.innerHTML = `
-            <td>${c._i + 1}</td>
-            <td>${c.znacka || ''}</td>
-            <td>${c.model || ''}</td>
-            <td>${c.rok || ''}</td>
-            <td>${cenaLabel}</td>
-            <td>${(c.tagy || []).join(', ')}</td>
-            <td class="cell-actions">
-              <button class="btnx" data-edit="${c._i}">Upraviť</button>
-              <button class="btnx danger" data-del="${c._i}">Vymazať</button>
-            </td>
-          `;
-          tableBody.appendChild(tr);
-        });
+  tr.innerHTML = `
+    <td>
+      <input type="checkbox" class="row-check" data-index="${c._i}">
+    </td>
+    <td>${c._i + 1}</td>
+    <td>${c.znacka || ''}</td>
+    <td>${c.model || ''}</td>
+    <td>${c.rok || ''}</td>
+    <td>${cenaLabel}</td>
+    <td>${(c.tagy || []).join(', ')}</td>
+    <td class="cell-actions">
+      <button class="btnx" data-edit="${c._i}">Upraviť</button>
+      <button class="btnx danger" data-del="${c._i}">Vymazať</button>
+    </td>
+  `;
 
-      // akcie
-      tableBody.querySelectorAll('[data-edit]').forEach(btn => {
-        btn.addEventListener('click', () => onEdit(parseInt(btn.dataset.edit, 10)));
-      });
-      tableBody.querySelectorAll('[data-del]').forEach(btn => {
-        btn.addEventListener('click', () => onDelete(parseInt(btn.dataset.del, 10)));
-      });
+  tableBody.appendChild(tr);
+
+  // ✅ SEM PATRÍ
+  tr.querySelector('.row-check').addEventListener('change', () => {
+    const all = document.querySelectorAll('.row-check');
+    const checked = document.querySelectorAll('.row-check:checked');
+    checkAll.checked = all.length === checked.length;
+    deleteBtn.style.display = checked.length ? 'inline-flex' : 'none';
+  });
+});
+
     }
 
     // ====== CRUD ======
@@ -435,13 +445,41 @@ const isEdit = Number.isInteger(idx) && idx >= 0;
 }
 
 
-    function onDeleteSelected(){
-      const idx = parseInt(editIndexInput.value, 10);
-      if (!(Number.isInteger(idx) && idx >= 0)) return;
-      onDelete(idx);
-    }
+    async function onDeleteSelected(){
+  const checked = [...document.querySelectorAll('.row-check:checked')];
+  if (checked.length === 0) {
+    alert('Nevybral si žiadne autá.');
+    return;
+  }
+
+  if (!confirm(`Naozaj vymazať ${checked.length} áut?`)) return;
+
+  // indexy zoradiť zostupne (aby sa neposúvali)
+  const indexes = checked
+    .map(ch => parseInt(ch.dataset.index, 10))
+    .sort((a, b) => b - a);
+
+  for (const idx of indexes) {
+    await fetch(`/api/cars?index=${idx}`, { method: 'DELETE' });
+  }
+
+  await loadFromApi();
+  setFormMode('create');
+}
+
   </script>
   <script>
+
+    const checkAll = document.getElementById('checkAll');
+
+checkAll.addEventListener('change', () => {
+  document
+    .querySelectorAll('.row-check')
+    .forEach(cb => cb.checked = checkAll.checked);
+
+  deleteBtn.style.display = checkAll.checked ? 'inline-flex' : 'none';
+});
+
   // premeni File na čisté base64 (bez data: prefixu)
   function fileToBase64(file) {
     return new Promise((resolve, reject) => {
