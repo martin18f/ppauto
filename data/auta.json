@@ -339,5 +339,18 @@
     "tagy": [
       "jeep"
     ]
+  },
+  {
+    "znacka": "Fiat",
+    "model": "Dobló",
+    "rok": 2025,
+    "palivo": "Diesel",
+    "prevodovka": "AT",
+    "stara_cena": "",
+    "nova_cena": "",
+    "obrazok": "",
+    "tagy": [
+      "jeep"
+    ]
   }
 ]
