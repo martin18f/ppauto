@@ -190,6 +190,26 @@
     const checkAll = document.getElementById('checkAll');
 
     // ====== INIT ======
+    // Delegovaný klik pre Upraviť / Vymazať (funguje aj po re-renderi)
+tableBody.addEventListener('click', (e) => {
+  const editBtn = e.target.closest('[data-edit]');
+  if (editBtn) {
+    e.preventDefault();
+    const idx = parseInt(editBtn.dataset.edit, 10);
+    if (!Number.isNaN(idx)) onEdit(idx);
+    return;
+  }
+
+  const delBtn = e.target.closest('[data-del]');
+  if (delBtn) {
+    e.preventDefault();
+    const idx = parseInt(delBtn.dataset.del, 10);
+    if (!Number.isNaN(idx)) onDelete(idx);
+    return;
+  }
+});
+
+    
     document.getElementById('reloadBtn').addEventListener('click', loadFromApi);
     document.getElementById('exportBtn').addEventListener('click', exportJSON);
     document.getElementById('resetBtn').addEventListener('click', () => setFormMode('create'));
@@ -330,6 +350,9 @@
             <td>${c.rok ?? ''}</td>
             <td>${cenaLabel}</td>
             <td>${(c.tagy || []).join(', ')}</td>
+            <button class="btnx" type="button" data-edit="${c._i}">Upraviť</button>
+<button class="btnx danger" type="button" data-del="${c._i}">Vymazať</button>
+
             <td class="cell-actions">
               <button class="btnx" type="button" data-edit="${c._i}">Upraviť</button>
               <button class="btnx danger" type="button" data-del="${c._i}">Vymazať</button>
@@ -338,11 +361,7 @@
 
           tableBody.appendChild(tr);
 
-          // Upraviť
-          tr.querySelector('[data-edit]').addEventListener('click', () => onEdit(c._i));
-
-          // Vymazať
-          tr.querySelector('[data-del]').addEventListener('click', () => onDelete(c._i));
+          
 
           // checkbox v riadku
           tr.querySelector('.row-check').addEventListener('change', updateBulkDeleteUI);
