@@ -209,5 +209,18 @@
     "tagy": [
       "jeep"
     ]
+  },
+  {
+    "znacka": "Jeep",
+    "model": "Compass",
+    "rok": 2023,
+    "palivo": "Hybrid",
+    "prevodovka": "AT • High Upland",
+    "stara_cena": "",
+    "nova_cena": "",
+    "obrazok": "",
+    "tagy": [
+      "jeep"
+    ]
   }
 ]
