@@ -177,7 +177,7 @@
   // Ak admin.html otváraš lokálne (file://) alebo z inej domény,
   // nastav sem tvoju Vercel doménu, napr.: "https://ppauto-admin.vercel.app"
   const API_BASE = (location.protocol === 'file:')
-    ? 'https://TVOJ-PROJEKT.vercel.app'   // <-- ZMEŇ!
+    ? 'https://ppauto.sk/admin.html'   // <-- ZMEŇ!
     : location.origin;
 
   const apiUrl = (path) => `${API_BASE}${path}`;
