@@ -170,390 +170,432 @@
   </div>
 
   <script>
-    // ====== STATE ======
-    let cars = [];
+  // =============================
+  // CONFIG
+  // =============================
+  // Ak admin.html beží na rovnakej doméne ako /api, nechaj to tak (origin).
+  // Ak admin.html otváraš lokálne (file://) alebo z inej domény,
+  // nastav sem tvoju Vercel doménu, napr.: "https://ppauto-admin.vercel.app"
+  const API_BASE = (location.protocol === 'file:')
+    ? 'https://TVOJ-PROJEKT.vercel.app'   // <-- ZMEŇ!
+    : location.origin;
 
-    const form = document.getElementById('carForm');
-    const editIndexInput = document.getElementById('editIndex');
-    const submitBtn = document.getElementById('submitBtn');
-    const deleteBtn = document.getElementById('deleteBtn');
+  const apiUrl = (path) => `${API_BASE}${path}`;
 
-    const zlava = document.getElementById('zlava');
-    const novaCenaWrap = document.getElementById('novaCenaWrap');
+  // =============================
+  // STATE + ELEMENTS
+  // =============================
+  let cars = [];
 
-    const imgInput = document.getElementById('obrazok');
-    const imgPreview = document.getElementById('imgPreview');
-    const fileEl = document.getElementById('fileInput');
+  const form = document.getElementById('carForm');
+  const editIndexInput = document.getElementById('editIndex');
+  const submitBtn = document.getElementById('submitBtn');
+  const deleteBtn = document.getElementById('deleteBtn');
 
-    const tableBody = document.querySelector('#carsTable tbody');
-    const searchInput = document.getElementById('search');
-    const checkAll = document.getElementById('checkAll');
+  const zlava = document.getElementById('zlava');
+  const novaCenaWrap = document.getElementById('novaCenaWrap');
 
-    // ====== INIT ======
-    // Delegovaný klik pre Upraviť / Vymazať (funguje aj po re-renderi)
-tableBody.addEventListener('click', (e) => {
-  const editBtn = e.target.closest('[data-edit]');
-  if (editBtn) {
-    e.preventDefault();
-    const idx = parseInt(editBtn.dataset.edit, 10);
-    if (!Number.isNaN(idx)) onEdit(idx);
-    return;
-  }
+  const imgInput = document.getElementById('obrazok');
+  const imgPreview = document.getElementById('imgPreview');
+  const fileEl = document.getElementById('fileInput');
 
-  const delBtn = e.target.closest('[data-del]');
-  if (delBtn) {
-    e.preventDefault();
-    const idx = parseInt(delBtn.dataset.del, 10);
-    if (!Number.isNaN(idx)) onDelete(idx);
-    return;
-  }
-});
+  const tableBody = document.querySelector('#carsTable tbody');
+  const searchInput = document.getElementById('search');
+  const checkAll = document.getElementById('checkAll');
 
-    
-    document.getElementById('reloadBtn').addEventListener('click', loadFromApi);
-    document.getElementById('exportBtn').addEventListener('click', exportJSON);
-    document.getElementById('resetBtn').addEventListener('click', () => setFormMode('create'));
-    deleteBtn.addEventListener('click', onDeleteSelected);
-    searchInput.addEventListener('input', renderTable);
-    zlava.addEventListener('change', toggleZlavaUI);
+  // =============================
+  // INIT
+  // =============================
+  // Delegovaný klik pre Upraviť / Vymazať (funguje aj po re-renderi)
+  if (tableBody) {
+    tableBody.addEventListener('click', (e) => {
+      // ochrana pre prípad, že target nie je Element
+      const el = (e.target instanceof Element) ? e.target : e.target?.parentElement;
+      if (!el) return;
 
-    // select-all checkbox
-    checkAll.addEventListener('change', () => {
-      document.querySelectorAll('.row-check').forEach(cb => cb.checked = checkAll.checked);
-      updateBulkDeleteUI();
-    });
-
-    // náhľad po výbere súboru
-    fileEl.addEventListener('change', () => {
-      if (!fileEl.files || !fileEl.files[0]) {
-        imgPreview.innerHTML = '<small class="hint">Vyber súbor. Pri „Odoslať“ sa automaticky nahrá a uloží.</small>';
+      const editBtn = el.closest('[data-edit]');
+      if (editBtn) {
+        e.preventDefault();
+        const idx = parseInt(editBtn.dataset.edit, 10);
+        if (!Number.isNaN(idx)) onEdit(idx);
         return;
       }
-      const url = URL.createObjectURL(fileEl.files[0]);
-      imgPreview.innerHTML = `<img src="${url}" alt="náhľad">`;
-    });
 
-    toggleZlavaUI();
-    loadFromApi();
-    renderPreview();
-
-    // ====== UI HELPERS ======
-    function toggleZlavaUI(){
-      if (zlava.checked) {
-        novaCenaWrap.style.display = 'block';
-      } else {
-        novaCenaWrap.style.display = 'none';
-        // bezpečné: máme name="nova_cena"
-        form.nova_cena.value = '';
-      }
-    }
-
-    function renderPreview(){
-      const url = (imgInput.value || '').trim();
-      if (!url) {
-        imgPreview.innerHTML = '<small class="hint">Vyber súbor. Pri „Odoslať“ sa automaticky nahrá a uloží.</small>';
+      const delBtn = el.closest('[data-del]');
+      if (delBtn) {
+        e.preventDefault();
+        const idx = parseInt(delBtn.dataset.del, 10);
+        if (!Number.isNaN(idx)) onDelete(idx);
         return;
       }
-      imgPreview.innerHTML = `<img src="${url}" alt="náhľad obrázka">`;
+    });
+  } else {
+    console.error('Chýba #carsTable tbody – nenašiel som tableBody.');
+  }
+
+  document.getElementById('reloadBtn').addEventListener('click', loadFromApi);
+  document.getElementById('exportBtn').addEventListener('click', exportJSON);
+  document.getElementById('resetBtn').addEventListener('click', () => setFormMode('create'));
+  deleteBtn.addEventListener('click', onDeleteSelected);
+  searchInput.addEventListener('input', renderTable);
+  zlava.addEventListener('change', toggleZlavaUI);
+
+  // select-all checkbox
+  checkAll.addEventListener('change', () => {
+    document.querySelectorAll('.row-check').forEach(cb => cb.checked = checkAll.checked);
+    updateBulkDeleteUI();
+  });
+
+  // náhľad po výbere súboru
+  fileEl.addEventListener('change', () => {
+    if (!fileEl.files || !fileEl.files[0]) {
+      imgPreview.innerHTML = '<small class="hint">Vyber súbor. Pri „Odoslať“ sa automaticky nahrá a uloží.</small>';
+      return;
     }
+    const url = URL.createObjectURL(fileEl.files[0]);
+    imgPreview.innerHTML = `<img src="${url}" alt="náhľad">`;
+  });
 
-    function setFormMode(mode, index = -1){
-      if (mode === 'create') {
-        form.reset();
-        editIndexInput.value = -1;
-        submitBtn.textContent = 'Odoslať';
-        deleteBtn.style.display = 'none';
-        checkAll.checked = false;
+  toggleZlavaUI();
+  loadFromApi();
+  renderPreview();
 
-        zlava.checked = false;
-        toggleZlavaUI();
-
-        // reset file input aj skrytého obrázka
-        imgInput.value = '';
-        fileEl.value = '';
-        renderPreview();
-      } else if (mode === 'edit') {
-        editIndexInput.value = index;
-        submitBtn.textContent = 'Uložiť zmeny';
-
-        // “Vymazať vybrané” pri editácii nechaj skryté (podľa tvojho pôvodného UX)
-        deleteBtn.style.display = 'none';
-
-        toggleZlavaUI();
-        renderPreview();
-      }
+  // =============================
+  // UI HELPERS
+  // =============================
+  function toggleZlavaUI() {
+    if (zlava.checked) {
+      novaCenaWrap.style.display = 'block';
+    } else {
+      novaCenaWrap.style.display = 'none';
+      // bezpečne cez elements (spoľahlivejšie než form.nova_cena)
+      const novaCenaEl = form.elements['nova_cena'];
+      if (novaCenaEl) novaCenaEl.value = '';
     }
+  }
 
-    function updateBulkDeleteUI(){
-      const all = document.querySelectorAll('.row-check');
-      const checked = document.querySelectorAll('.row-check:checked');
-
-      checkAll.checked = all.length > 0 && all.length === checked.length;
-      deleteBtn.style.display = checked.length ? 'inline-flex' : 'none';
+  function renderPreview() {
+    const url = (imgInput.value || '').trim();
+    if (!url) {
+      imgPreview.innerHTML = '<small class="hint">Vyber súbor. Pri „Odoslať“ sa automaticky nahrá a uloží.</small>';
+      return;
     }
+    imgPreview.innerHTML = `<img src="${url}" alt="náhľad obrázka">`;
+  }
 
-    // ====== DATA IO ======
-    async function loadFromApi(){
-      try {
-        const res = await fetch('/api/cars', { cache: 'no-store' });
-        if (!res.ok) throw new Error('GET /api/cars failed: ' + res.status);
-        cars = await res.json();
-        renderTable();
-      } catch (e) {
-        console.error('Nepodarilo sa načítať /api/cars', e);
-        cars = [];
-        renderTable();
-      }
-    }
-
-    function exportJSON(){
-      const blob = new Blob([JSON.stringify(cars, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'auta.json';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    }
-
-    // ====== TABLE RENDER ======
-    function renderTable(){
-      // reset “select all” a bulk delete pri každom renderi
-      checkAll.checked = false;
+  function setFormMode(mode, index = -1) {
+    if (mode === 'create') {
+      form.reset();
+      editIndexInput.value = -1;
+      submitBtn.textContent = 'Odoslať';
       deleteBtn.style.display = 'none';
+      checkAll.checked = false;
 
-      const q = searchInput.value.trim().toLowerCase();
-      tableBody.innerHTML = '';
-
-      cars
-        .map((c, i) => ({...c, _i: i}))
-        .filter(c => {
-          const hay = [c.znacka, c.model, c.rok, c.palivo, c.prevodovka, (c.tagy||[]).join(' ')].join(' ').toLowerCase();
-          return !q || hay.includes(q);
-        })
-        .forEach((c) => {
-          const tr = document.createElement('tr');
-
-          const cenaLabel = (c.nova_cena && String(c.nova_cena).trim() !== '')
-            ? `${c.stara_cena || ''} → ${c.nova_cena}`
-            : (c.stara_cena || '—');
-
-          tr.innerHTML = `
-  <td>
-    <input type="checkbox" class="row-check" data-index="${c._i}">
-  </td>
-  <td>${c._i + 1}</td>
-  <td>${c.znacka || ''}</td>
-  <td>${c.model || ''}</td>
-  <td>${c.rok ?? ''}</td>
-  <td>${cenaLabel}</td>
-  <td>${(c.tagy || []).join(', ')}</td>
-  <td class="cell-actions">
-    <button class="btnx" type="button" data-edit="${c._i}">Upraviť</button>
-    <button class="btnx danger" type="button" data-del="${c._i}">Vymazať</button>
-  </td>
-`;
-
-
-          tableBody.appendChild(tr);
-
-          
-
-          // checkbox v riadku
-          tr.querySelector('.row-check').addEventListener('change', updateBulkDeleteUI);
-        });
-    }
-
-    // ====== CRUD ======
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const idx = parseInt(editIndexInput.value, 10);
-      const isEdit = Number.isInteger(idx) && idx >= 0;
-
-      // Validácia (minimálna)
-      const rokRaw = (form.rok.value || '').trim();
-      if (!form.znacka.value.trim() || !form.model.value.trim()) {
-        alert('Vyplň značku a model.');
-        return;
-      }
-      if (!rokRaw) {
-        alert('Vyplň rok.');
-        return;
-      }
-
-      // 1) prípadný upload nového súboru
-      let imageUrl = (form.obrazok.value || '').trim(); // existujúca URL pri editácii
-
-      if (fileEl.files && fileEl.files[0]) {
-        if (fileEl.files[0].size > 10 * 1024 * 1024) {
-          alert('Súbor je príliš veľký (max 10 MB).');
-          return;
-        }
-
-        const base64 = await fileToBase64(fileEl.files[0]);
-        const up = await fetch('/api/upload-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            filename: fileEl.files[0].name,
-            contentBase64: base64
-          })
-        });
-
-        if (!up.ok) {
-          const t = await up.text().catch(() => '');
-          console.error('Upload failed:', up.status, t);
-          alert('Nahratie obrázka zlyhalo.');
-          return;
-        }
-
-        const upData = await up.json().catch(() => ({}));
-        imageUrl = upData.url || '';
-        form.obrazok.value = imageUrl; // uložíme aj do hidden inputu
-      }
-
-      // 2) dáta auta
-      const maZlavu = zlava.checked;
-      const data = {
-        znacka: form.znacka.value.trim(),
-        model: form.model.value.trim(),
-        rok: Number(rokRaw),
-        palivo: form.palivo.value.trim(),
-        prevodovka: form.prevodovka.value.trim(),
-        stara_cena: (form.stara_cena.value || '').trim(),
-        nova_cena: maZlavu ? (form.nova_cena.value || '').trim() : '',
-        obrazok: imageUrl,
-        tagy: (form.tagy.value || '').split(',').map(t => t.trim()).filter(Boolean)
-      };
-
-      // 3) uloženie auta cez API
-      try {
-        let r;
-        if (isEdit) {
-          r = await fetch(`/api/cars?index=${idx}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-          });
-        } else {
-          r = await fetch('/api/cars', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-          });
-        }
-
-        if (!r.ok) {
-          const t = await r.text().catch(() => '');
-          console.error('Save failed:', r.status, t);
-          alert('Uloženie zlyhalo (' + r.status + '). Pozri konzolu.');
-          return;
-        }
-
-        // 4) refresh + reset
-        await loadFromApi();
-        setFormMode('create');
-
-      } catch (err) {
-        console.error(err);
-        alert('Uloženie zlyhalo (chyba siete alebo servera).');
-      }
-    });
-
-    function onEdit(index){
-      const a = cars[index];
-      if (!a) return;
-
-      form.znacka.value = a.znacka || '';
-      form.model.value = a.model || '';
-      form.rok.value = a.rok ?? '';
-      form.palivo.value = a.palivo || '';
-      form.prevodovka.value = a.prevodovka || '';
-      form.stara_cena.value = a.stara_cena || '';
-      form.nova_cena.value = a.nova_cena || '';
-      form.obrazok.value = a.obrazok || '';
-      form.tagy.value = (a.tagy || []).join(', ');
-
-      zlava.checked = !!(a.nova_cena && String(a.nova_cena).trim() !== '');
+      zlava.checked = false;
       toggleZlavaUI();
 
-      // pri editácii je lepšie resetnúť file input, aby sa zbytočne neuploadoval starý výber
+      imgInput.value = '';
       fileEl.value = '';
-
       renderPreview();
-      setFormMode('edit', index);
+    } else if (mode === 'edit') {
+      editIndexInput.value = index;
+      submitBtn.textContent = 'Uložiť zmeny';
+      deleteBtn.style.display = 'none';
+      toggleZlavaUI();
+      renderPreview();
+    }
+  }
 
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+  function updateBulkDeleteUI() {
+    const all = document.querySelectorAll('.row-check');
+    const checked = document.querySelectorAll('.row-check:checked');
+
+    checkAll.checked = all.length > 0 && all.length === checked.length;
+    deleteBtn.style.display = checked.length ? 'inline-flex' : 'none';
+  }
+
+  // =============================
+  // DATA IO
+  // =============================
+  async function loadFromApi() {
+    try {
+      const res = await fetch(apiUrl('/api/cars'), { cache: 'no-store' });
+      if (!res.ok) {
+        const t = await res.text().catch(() => '');
+        throw new Error(`GET /api/cars failed: ${res.status} ${t}`);
+      }
+      cars = await res.json();
+      renderTable();
+    } catch (e) {
+      console.error('Nepodarilo sa načítať /api/cars', e);
+      cars = [];
+      renderTable();
+    }
+  }
+
+  function exportJSON() {
+    const blob = new Blob([JSON.stringify(cars, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'auta.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // =============================
+  // TABLE RENDER
+  // =============================
+  function renderTable() {
+    checkAll.checked = false;
+    deleteBtn.style.display = 'none';
+
+    const q = searchInput.value.trim().toLowerCase();
+    tableBody.innerHTML = '';
+
+    cars
+      .map((c, i) => ({ ...c, _i: i }))
+      .filter(c => {
+        const hay = [
+          c.znacka, c.model, c.rok, c.palivo, c.prevodovka,
+          (c.tagy || []).join(' ')
+        ].join(' ').toLowerCase();
+        return !q || hay.includes(q);
+      })
+      .forEach((c) => {
+        const tr = document.createElement('tr');
+
+        const cenaLabel = (c.nova_cena && String(c.nova_cena).trim() !== '')
+          ? `${c.stara_cena || ''} → ${c.nova_cena}`
+          : (c.stara_cena || '—');
+
+        tr.innerHTML = `
+          <td>
+            <input type="checkbox" class="row-check" data-index="${c._i}">
+          </td>
+          <td>${c._i + 1}</td>
+          <td>${c.znacka || ''}</td>
+          <td>${c.model || ''}</td>
+          <td>${c.rok ?? ''}</td>
+          <td>${cenaLabel}</td>
+          <td>${(c.tagy || []).join(', ')}</td>
+          <td class="cell-actions">
+            <button class="btnx" type="button" data-edit="${c._i}">Upraviť</button>
+            <button class="btnx danger" type="button" data-del="${c._i}">Vymazať</button>
+          </td>
+        `;
+
+        tableBody.appendChild(tr);
+
+        tr.querySelector('.row-check').addEventListener('change', updateBulkDeleteUI);
+      });
+  }
+
+  // =============================
+  // CRUD
+  // =============================
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const idx = parseInt(editIndexInput.value, 10);
+    const isEdit = Number.isInteger(idx) && idx >= 0;
+
+    const rokRaw = (form.elements['rok']?.value || '').trim();
+    const znackaVal = (form.elements['znacka']?.value || '').trim();
+    const modelVal = (form.elements['model']?.value || '').trim();
+
+    if (!znackaVal || !modelVal) {
+      alert('Vyplň značku a model.');
+      return;
+    }
+    if (!rokRaw) {
+      alert('Vyplň rok.');
+      return;
     }
 
-    async function onDelete(index){
-      if (!confirm('Naozaj vymazať toto auto?')) return;
+    // 1) upload (ak je vybraný nový súbor)
+    let imageUrl = (form.elements['obrazok']?.value || '').trim();
 
-      try {
-        const r = await fetch(`/api/cars?index=${index}`, { method: 'DELETE' });
+    if (fileEl.files && fileEl.files[0]) {
+      if (fileEl.files[0].size > 10 * 1024 * 1024) {
+        alert('Súbor je príliš veľký (max 10 MB).');
+        return;
+      }
+
+      const base64 = await fileToBase64(fileEl.files[0]);
+
+      const up = await fetch(apiUrl('/api/upload-image'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename: fileEl.files[0].name,
+          contentBase64: base64
+        })
+      });
+
+      if (!up.ok) {
+        const t = await up.text().catch(() => '');
+        console.error('Upload failed:', up.status, t);
+        alert('Nahratie obrázka zlyhalo (' + up.status + '). Pozri konzolu.');
+        return;
+      }
+
+      const upData = await up.json().catch(() => ({}));
+      imageUrl = upData.url || '';
+      form.elements['obrazok'].value = imageUrl;
+    }
+
+    // 2) dáta auta
+    const maZlavu = zlava.checked;
+
+    const data = {
+      znacka: znackaVal,
+      model: modelVal,
+      rok: Number(rokRaw),
+      palivo: (form.elements['palivo']?.value || '').trim(),
+      prevodovka: (form.elements['prevodovka']?.value || '').trim(),
+      stara_cena: (form.elements['stara_cena']?.value || '').trim(),
+      nova_cena: maZlavu ? (form.elements['nova_cena']?.value || '').trim() : '',
+      obrazok: imageUrl,
+      tagy: (form.elements['tagy']?.value || '')
+        .split(',')
+        .map(t => t.trim())
+        .filter(Boolean)
+    };
+
+    // 3) uloženie cez API
+    try {
+      let r;
+      if (isEdit) {
+        r = await fetch(apiUrl(`/api/cars?index=${idx}`), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+      } else {
+        r = await fetch(apiUrl('/api/cars'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+      }
+
+      if (!r.ok) {
+        const t = await r.text().catch(() => '');
+        console.error('Save failed:', r.status, t);
+        alert('Uloženie zlyhalo (' + r.status + '). Pozri konzolu.');
+        return;
+      }
+
+      await loadFromApi();
+      setFormMode('create');
+
+    } catch (err) {
+      console.error(err);
+      alert('Uloženie zlyhalo (chyba siete alebo servera).');
+    }
+  });
+
+  function onEdit(index) {
+    const a = cars[index];
+    if (!a) return;
+
+    form.elements['znacka'].value = a.znacka || '';
+    form.elements['model'].value = a.model || '';
+    form.elements['rok'].value = a.rok ?? '';
+    form.elements['palivo'].value = a.palivo || '';
+    form.elements['prevodovka'].value = a.prevodovka || '';
+    form.elements['stara_cena'].value = a.stara_cena || '';
+    form.elements['nova_cena'].value = a.nova_cena || '';
+    form.elements['obrazok'].value = a.obrazok || '';
+    form.elements['tagy'].value = (a.tagy || []).join(', ');
+
+    zlava.checked = !!(a.nova_cena && String(a.nova_cena).trim() !== '');
+    toggleZlavaUI();
+
+    fileEl.value = '';
+    renderPreview();
+    setFormMode('edit', index);
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function onDelete(index) {
+    if (!confirm('Naozaj vymazať toto auto?')) return;
+
+    try {
+      const r = await fetch(apiUrl(`/api/cars?index=${index}`), { method: 'DELETE' });
+
+      if (!r.ok) {
+        const t = await r.text().catch(() => '');
+        console.error('Delete failed:', r.status, t);
+        alert('Vymazanie zlyhalo (' + r.status + '). Pozri konzolu.');
+        return;
+      }
+
+      await loadFromApi();
+      setFormMode('create');
+
+    } catch (err) {
+      console.error(err);
+      alert('Vymazanie zlyhalo (chyba siete alebo servera).');
+    }
+  }
+
+  async function onDeleteSelected() {
+    const checked = [...document.querySelectorAll('.row-check:checked')];
+
+    if (checked.length === 0) {
+      alert('Nevybral si žiadne autá.');
+      return;
+    }
+
+    if (!confirm(`Naozaj vymazať ${checked.length} áut?`)) return;
+
+    const indexes = checked
+      .map(ch => parseInt(ch.dataset.index, 10))
+      .filter(n => !Number.isNaN(n))
+      .sort((a, b) => b - a);
+
+    try {
+      for (const idx of indexes) {
+        const r = await fetch(apiUrl(`/api/cars?index=${idx}`), { method: 'DELETE' });
         if (!r.ok) {
           const t = await r.text().catch(() => '');
           console.error('Delete failed:', r.status, t);
           alert('Vymazanie zlyhalo (' + r.status + '). Pozri konzolu.');
           return;
         }
-        await loadFromApi();
-        setFormMode('create');
-      } catch (err) {
-        console.error(err);
-        alert('Vymazanie zlyhalo (chyba siete alebo servera).');
-      }
-    }
-
-    async function onDeleteSelected(){
-      const checked = [...document.querySelectorAll('.row-check:checked')];
-      if (checked.length === 0) {
-        alert('Nevybral si žiadne autá.');
-        return;
       }
 
-      if (!confirm(`Naozaj vymazať ${checked.length} áut?`)) return;
+      await loadFromApi();
+      setFormMode('create');
 
-      // indexy zoradiť zostupne (aby sa neposúvali)
-      const indexes = checked
-        .map(ch => parseInt(ch.dataset.index, 10))
-        .sort((a, b) => b - a);
-
-      try {
-        for (const idx of indexes) {
-          const r = await fetch(`/api/cars?index=${idx}`, { method: 'DELETE' });
-          if (!r.ok) {
-            const t = await r.text().catch(() => '');
-            console.error('Delete failed:', r.status, t);
-            alert('Vymazanie zlyhalo (' + r.status + '). Pozri konzolu.');
-            return;
-          }
-        }
-        await loadFromApi();
-        setFormMode('create');
-      } catch (err) {
-        console.error(err);
-        alert('Vymazanie zlyhalo (chyba siete alebo servera).');
-      }
+    } catch (err) {
+      console.error(err);
+      alert('Vymazanie zlyhalo (chyba siete alebo servera).');
     }
+  }
 
-    // premeni File na čisté base64 (bez data: prefixu)
-    function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onerror = () => reject(new Error('Nepodarilo sa načítať súbor.'));
-        reader.onload = () => {
-          const result = reader.result; // data:*;base64,xxxx
-          const base64 = String(result).split(',')[1]; // odstrániť "data:...;base64,"
-          resolve(base64);
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-  </script>
+  // =============================
+  // UTILS
+  // =============================
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Nepodarilo sa načítať súbor.'));
+      reader.onload = () => {
+        const result = reader.result; // data:*;base64,xxxx
+        const base64 = String(result).split(',')[1];
+        resolve(base64);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+</script>
+
 
 </body>
 </html>
