@@ -1,65 +1,60 @@
-const { Resend } = require('resend');
+import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-function norm(s) {
-  return String(s || '').trim();
-}
-
-function isEmail(s) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
-}
-
-module.exports = async (req, res) => {
-  if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'Method not allowed' });
-
+export default async function handler(req, res) {
   try {
+    if (req.method !== 'POST') {
+      res.setHeader('Allow', ['POST']);
+      return res.status(405).json({ ok: false, error: 'Method Not Allowed' });
+    }
+
+    const { RESEND_API_KEY, CONTACT_TO_EMAIL, CONTACT_FROM_EMAIL } = process.env;
+
+    if (!RESEND_API_KEY) {
+      return res.status(500).json({ ok: false, error: 'Missing env: RESEND_API_KEY' });
+    }
+    if (!CONTACT_TO_EMAIL) {
+      return res.status(500).json({ ok: false, error: 'Missing env: CONTACT_TO_EMAIL' });
+    }
+
     const { meno, email, telefon, sprava, website } = req.body || {};
 
-    // honeypot: ak bot vyplní hidden pole, tvárime sa OK a nič neposielame
-    if (norm(website)) return res.status(200).json({ ok: true });
-
-    const name = norm(meno);
-    const fromEmail = norm(email);
-    const phone = norm(telefon);
-    const message = norm(sprava);
-
-    // minimálna validácia
-    if (!name || !fromEmail || !message) {
-      return res.status(400).json({ ok: false, error: 'Missing required fields' });
-    }
-    if (!isEmail(fromEmail)) {
-      return res.status(400).json({ ok: false, error: 'Invalid email' });
+    // honeypot
+    if (website) {
+      return res.status(200).json({ ok: true });
     }
 
-    const to = process.env.CONTACT_TO;          // ✅ sem dáš svoj mail cez ENV
-    const from = process.env.CONTACT_FROM;      // napr. "PP AUTO <noreply@ppauto.sk>"
+    if (!meno || !email || !sprava) {
+      return res.status(400).json({ ok: false, error: 'Chýbajú povinné polia.' });
+    }
 
-    if (!to) return res.status(500).json({ ok: false, error: 'CONTACT_TO not set' });
-    if (!from) return res.status(500).json({ ok: false, error: 'CONTACT_FROM not set' });
+    const resend = new Resend(RESEND_API_KEY);
 
-    const subject = `PP AUTO – nová správa z webu (${name})`;
+    // Ak nemáš overenú doménu v Resend, dočasne použi onboarding@resend.dev
+    const from = CONTACT_FROM_EMAIL || 'PP AUTO <onboarding@resend.dev>';
 
-    const text =
-`Meno: ${name}
-Email: ${fromEmail}
-Telefón: ${phone || '-'}
----
-Správa:
-${message}
-`;
-
-    await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from,
-      to,
-      reply_to: fromEmail,
-      subject,
-      text
+      to: [CONTACT_TO_EMAIL],
+      replyTo: email,
+      subject: `PP AUTO – Kontakt: ${meno}`,
+      text: [
+        `Meno: ${meno}`,
+        `E-mail: ${email}`,
+        `Telefón: ${telefon || '-'}`,
+        '',
+        'Správa:',
+        String(sprava)
+      ].join('\n')
     });
 
-    return res.status(200).json({ ok: true });
-  } catch (err) {
-    console.error('CONTACT API error:', err);
-    return res.status(500).json({ ok: false, error: 'Server error' });
+    if (error) {
+      console.error('Resend error:', error);
+      return res.status(502).json({ ok: false, error: 'Resend error' });
+    }
+
+    return res.status(200).json({ ok: true, id: data?.id });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ ok: false, error: e?.message || 'Internal error' });
   }
-};
+}
