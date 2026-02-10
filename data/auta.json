@@ -192,5 +192,19 @@
       "jeep"
     ],
     "skryte": false
+  },
+  {
+    "znacka": "Jeep",
+    "model": "Compass",
+    "rok": 2025,
+    "palivo": "Hybrid",
+    "prevodovka": "AT • First Edition",
+    "stara_cena": "",
+    "nova_cena": "",
+    "obrazok": "",
+    "tagy": [
+      "jeep"
+    ],
+    "skryte": false
   }
 ]
