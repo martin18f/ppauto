@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin panel – PP AUTO</title>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="admin.css">
+
 
   <style>
     body { padding: 32px; background: var(--bg); color: var(--text); }
@@ -68,9 +69,26 @@
 
   <div class="wrap">
     <!-- FORM -->
-    <form id="carForm">
-      <label><input type="checkbox" id="zlava"> Toto auto je v zľave</label>
-      <label><input type="checkbox" id="skryte"> Skryť auto z ponuky (nezobrazí sa na webe)</label>
+    <form id="carForm" class="admin-form">
+      <label class="pp-check pp-check--lg">
+  <input type="checkbox" id="zlava">
+  <svg viewBox="0 0 18 18" aria-hidden="true">
+    <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 16,17 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
+    <polyline points="1 9 7 14 15 4"></polyline>
+  </svg>
+  <span class="pp-check__text">Toto auto je v zľave</span>
+</label>
+
+      <label class="pp-check pp-check--lg">
+  <input type="checkbox" id="zlava">
+  <svg viewBox="0 0 18 18" aria-hidden="true">
+    <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 16,17 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
+    <polyline points="1 9 7 14 15 4"></polyline>
+  </svg>
+  <span class="pp-check__text">Skryť auto z ponuky (nezobrazí sa na webe)</span>
+</label>
+
+
       <div class="row">
         <div>
           <label>Značka</label>
@@ -97,6 +115,53 @@
         <label>Prevodovka / Výbava</label>
         <input type="text" id="prevodovka" name="prevodovka" placeholder="AT • Premium"/>
       </div>
+
+      <div class="row">
+  <div>
+    <label>Objem motora (cm³)</label>
+    <input type="number" id="objem" name="objem" placeholder="1995" />
+  </div>
+
+  <div>
+    <label>Výkon motora (kW)</label>
+    <input type="number" id="vykon" name="vykon" placeholder="100" />
+  </div>
+</div>
+
+<div class="row">
+  <div>
+    <label>Najazdené (km)</label>
+    <input type="number" id="najazdene" name="najazdene" placeholder="10" />
+  </div>
+
+  <div>
+    <label>Karoséria</label>
+    <input type="text" id="karoseria" name="karoseria" placeholder="SUV" />
+  </div>
+</div>
+
+<div class="row">
+  <div>
+    <label>Pohon</label>
+    <input type="text" id="pohon" name="pohon" placeholder="4x4" />
+  </div>
+
+  <div>
+    <label>Farba</label>
+    <input type="text" id="farba" name="farba" placeholder="Modrá" />
+  </div>
+</div>
+
+<label class="pp-check pp-check--lg">
+  <input type="checkbox" id="zlava">
+  <svg viewBox="0 0 18 18" aria-hidden="true">
+    <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 16,17 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
+    <polyline points="1 9 7 14 15 4"></polyline>
+  </svg>
+  <span class="pp-check__text">Metalíza</span>
+</label>
+
+
 
       <div id="povodnaCenaWrap">
         <label>Pôvodná cena (alebo aktuálna, ak zľava NIE JE)</label>
@@ -131,6 +196,75 @@
         <input type="text" id="tagy" name="tagy" placeholder="subaru, skladom"/>
       </div>
 
+      <div>
+  
+<label>Výbava</label>
+
+<div class="vybava-grid">
+  <label><input type="checkbox" value="Klimatizácia dvojzónová"> Klimatizácia dvojzónová</label>
+  <label><input type="checkbox" value="Elektrické okná 4x"> Elektrické okná 4x</label>
+  <label><input type="checkbox" value="360° kamera"> 360° kamera</label>
+  <label><input type="checkbox" value="ABS"> ABS</label>
+  <label><input type="checkbox" value="Adaptívny tempomat"> Adaptívny tempomat</label>
+
+  <label><input type="checkbox" value="Airbagy"> Airbagy</label>
+  <label><input type="checkbox" value="Airbagy - počet"> Airbagy - počet</label>
+  <label><input type="checkbox" value="Android Auto"> Android Auto</label>
+  <label><input type="checkbox" value="Apple CarPlay"> Apple CarPlay</label>
+  <label><input type="checkbox" value="Asistent jazdných pruhov"> Asistent jazdných pruhov</label>
+
+  <label><input type="checkbox" value="Asistent rozjazdu do kopca"> Asistent rozjazdu do kopca</label>
+  <label><input type="checkbox" value="ASR"> ASR</label>
+  <label><input type="checkbox" value="Autorádio"> Autorádio</label>
+  <label><input type="checkbox" value="Bezdrôtové nabíjanie pre smartphony"> Bezdrôtové nabíjanie pre smartphony</label>
+  <label><input type="checkbox" value="Bezklúčové otváranie dverí"> Bezklúčové otváranie dverí</label>
+
+  <label><input type="checkbox" value="Bezklúčové štartovanie"> Bezklúčové štartovanie</label>
+  <label><input type="checkbox" value="Bluetooth handsfree"> Bluetooth handsfree</label>
+  <label><input type="checkbox" value="Brzdový asistent"> Brzdový asistent</label>
+  <label><input type="checkbox" value="Centrálne zamykanie"> Centrálne zamykanie</label>
+  <label><input type="checkbox" value="Dažďový senzor"> Dažďový senzor</label>
+
+  <label><input type="checkbox" value="Deaktivácia airbagov"> Deaktivácia airbagov</label>
+  <label><input type="checkbox" value="Diaľkové ovládanie zamykania"> Diaľkové ovládanie zamykania</label>
+  <label><input type="checkbox" value="Dotykový displej"> Dotykový displej</label>
+  <label><input type="checkbox" value="EBD"> EBD</label>
+  <label><input type="checkbox" value="EBV"> EBV</label>
+
+  <label><input type="checkbox" value="Elektrické okná"> Elektrické okná</label>
+  <label><input type="checkbox" value="Elektrické sedadlá"> Elektrické sedadlá</label>
+  <label><input type="checkbox" value="Elektrické zrkadlá"> Elektrické zrkadlá</label>
+  <label><input type="checkbox" value="ESP"> ESP</label>
+  <label><input type="checkbox" value="Hliníkové disky"> Hliníkové disky</label>
+
+  <label><input type="checkbox" value="Hmlovky"> Hmlovky</label>
+  <label><input type="checkbox" value="Imobilizér"> Imobilizér</label>
+  <label><input type="checkbox" value="Isofix"> Isofix</label>
+  <label><input type="checkbox" value="Klimatizácia"> Klimatizácia</label>
+  <label><input type="checkbox" value="Kontrola mŕtveho uhla"> Kontrola mŕtveho uhla</label>
+
+  <label><input type="checkbox" value="Lakťová opierka"> Lakťová opierka</label>
+  <label><input type="checkbox" value="LED svetlomety"> LED svetlomety</label>
+  <label><input type="checkbox" value="LED svietenie"> LED svietenie</label>
+  <label><input type="checkbox" value="Multifunkčný volant"> Multifunkčný volant</label>
+  <label><input type="checkbox" value="Natáčacie svetlomety"> Natáčacie svetlomety</label>
+
+  <label><input type="checkbox" value="Ostrekovače svetlometov"> Ostrekovače svetlometov</label>
+  <label><input type="checkbox" value="Palubný počítač"> Palubný počítač</label>
+  <label><input type="checkbox" value="Parkovacia kamera"> Parkovacia kamera</label>
+  <label><input type="checkbox" value="Parkovacie senzory"> Parkovacie senzory</label>
+  <label><input type="checkbox" value="Strešný nosič"> Strešný nosič</label>
+
+  <label><input type="checkbox" value="Svetelný senzor"> Svetelný senzor</label>
+  <label><input type="checkbox" value="Systém kontroly tlaku v pneumatikách (TPMS)"> Systém kontroly tlaku v pneumatikách (TPMS)</label>
+  <label><input type="checkbox" value="Tempomat"> Tempomat</label>
+  <label><input type="checkbox" value="Vyhrievané sedadlá"> Vyhrievané sedadlá</label>
+</div>
+
+  
+</div>
+
+
       <div class="actions">
         <button class="btnx primary" id="submitBtn" type="submit">Odoslať</button>
         <button class="btnx" type="button" id="resetBtn">Vyčistiť formulár</button>
@@ -161,7 +295,16 @@
       <table id="carsTable">
         <thead>
           <tr>
-            <th><input type="checkbox" id="checkAll"></th>
+            <th style="width:44px; text-align:center;">
+  <label class="pp-check pp-check--sm" title="Označiť všetky">
+    <input type="checkbox" id="checkAll">
+    <svg viewBox="0 0 18 18" aria-hidden="true">
+      <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 16,17 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
+      <polyline points="1 9 7 14 15 4"></polyline>
+    </svg>
+  </label>
+</th>
+
             <th>#</th>
             <th>Značka</th>
             <th>Model</th>
@@ -260,7 +403,7 @@
   document.getElementById('reloadBtn').addEventListener('click', loadFromApi);
   document.getElementById('exportBtn').addEventListener('click', exportJSON);
   document.getElementById('resetBtn').addEventListener('click', () => setFormMode('create'));
-
+ 
   deleteBtn.addEventListener('click', onDeleteSelected);
   hideBtn.addEventListener('click', () => onSetHiddenSelected(true));
   unhideBtn.addEventListener('click', () => onSetHiddenSelected(false));
@@ -316,6 +459,10 @@
   function setFormMode(mode, index = -1) {
     if (mode === 'create') {
       form.reset();
+      form.querySelectorAll('.vybava-grid input[type="checkbox"]')
+      .forEach(cb => cb.checked = false);
+
+      form.elements['metaliza'].checked = false;
       editIndexInput.value = -1;
       submitBtn.textContent = 'Odoslať';
 
@@ -441,7 +588,14 @@
 
         tr.innerHTML = `
           <td>
-            <input type="checkbox" class="row-check" data-index="${c._i}">
+            <label class="pp-check pp-check--sm">
+  <input type="checkbox" class="row-check" data-index="0">
+  <svg viewBox="0 0 18 18" aria-hidden="true">
+    <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 16,17 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
+    <polyline points="1 9 7 14 15 4"></polyline>
+  </svg>
+</label>
+
           </td>
           <td>${c._i + 1}</td>
           <td>${c.znacka || ''}</td>
@@ -535,9 +689,20 @@
         .split(',')
         .map(t => t.trim())
         .filter(Boolean),
-
+      
       // NOVÉ:
-      skryte: !!skryte.checked
+      skryte: !!skryte.checked,
+      objem: form.elements['objem']?.value ? Number(form.elements['objem'].value) : null,
+      vykon: form.elements['vykon']?.value ? Number(form.elements['vykon'].value) : null,
+      najazdene: form.elements['najazdene']?.value ? Number(form.elements['najazdene'].value) : null,
+      karoseria: (form.elements['karoseria']?.value || '').trim(),
+      pohon: (form.elements['pohon']?.value || '').trim(),
+      farba: (form.elements['farba']?.value || '').trim(),
+      metaliza: !!form.elements['metaliza']?.checked,
+      vybava: [...form.querySelectorAll('.vybava-grid input[type="checkbox"]:checked')]
+      .map(cb => cb.value),
+
+
     };
 
     // 3) uloženie cez API
@@ -586,6 +751,25 @@
     form.elements['nova_cena'].value = a.nova_cena || '';
     form.elements['obrazok'].value = a.obrazok || '';
     form.elements['tagy'].value = (a.tagy || []).join(', ');
+    form.elements['objem'].value = a.objem ?? '';
+    form.elements['vykon'].value = a.vykon ?? '';
+    form.elements['najazdene'].value = a.najazdene ?? '';
+    form.elements['karoseria'].value = a.karoseria || '';
+    form.elements['pohon'].value = a.pohon || '';
+    form.elements['farba'].value = a.farba || '';
+    form.elements['metaliza'].checked = a.metaliza === true;
+    // Výbava – reset
+    form.querySelectorAll('.vybava-grid input[type="checkbox"]')
+      .forEach(cb => cb.checked = false);
+
+    // Výbava – znovu zaškrtnúť
+    const vybavaSet = new Set(a.vybava || []);
+
+    form.querySelectorAll('.vybava-grid input[type="checkbox"]').forEach(cb => {
+      cb.checked = vybavaSet.has(cb.value);
+    });
+
+
 
     zlava.checked = !!(a.nova_cena && String(a.nova_cena).trim() !== '');
     skryte.checked = isHidden(a);

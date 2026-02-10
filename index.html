@@ -6,7 +6,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PP AUTO s.r.o. – Subaru • KGM • Jeep | Poprad</title>
   <meta name="description" content="Autorizovaný predaj a servis Subaru, KGM a Jeep v Poprade. Skladové vozidlá, testovacie jazdy, financovanie, servis a náhradné diely." />
+  <script>
+  (function () {
+    try {
+      var b =
+        (localStorage.getItem('ppauto.brand') ||
+          sessionStorage.getItem('ppauto.brand') ||
+          '').toLowerCase().trim();
+
+      if (b === 'subaru' || b === 'kgm' || b === 'jeep') {
+        document.documentElement.setAttribute('data-brand', b);
+      }
+    } catch (e) {}
+  })();
+</script>
   <link rel="stylesheet" href="style.css">
+  
 </head>
 <body>
   
@@ -412,9 +427,13 @@
     </div>
   </form>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 (() => {
+  emailjs.init({
+    publicKey: '_7xrgG31AEooF0kcr'
+  });
+
   const form = document.getElementById('contactForm');
   if (!form) return;
 
@@ -427,7 +446,6 @@
     const fd = new FormData(form);
     const payload = Object.fromEntries(fd.entries());
 
-    // honeypot – ak bot vyplní skryté pole, ticho to “prijmeme”
     if (payload.website) {
       if (status) status.textContent = 'Ďakujeme! Správa bola odoslaná.';
       form.reset();
@@ -440,27 +458,28 @@
     if (status) status.textContent = '';
 
     try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      const contactNumber = Math.floor(Math.random() * 100000);
 
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok || !json.ok) throw new Error(json.error || ('HTTP ' + res.status));
+      await emailjs.sendForm(
+        'service_i68hphn',
+        'template_ntrqrhh',
+        form,
+        { contact_number: contactNumber }
+      );
 
       if (status) status.textContent = 'Ďakujeme! Správa bola odoslaná.';
       form.reset();
+
     } catch (err) {
       console.error(err);
       if (status) status.textContent = 'Nepodarilo sa odoslať. Skúste neskôr.';
-      else alert('Nepodarilo sa odoslať. Skúste neskôr.');
     } finally {
       btn.disabled = false;
       btn.textContent = oldText;
     }
   });
 })();
+
 </script>
 
 

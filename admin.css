@@ -971,3 +971,145 @@ html[data-brand] #ponuka .filter-row .tag[data-filter="jeep"] {
   font-weight: 400;
   cursor: pointer;
 }
+
+/* =========================
+   PP AUTO – unified SVG checkbox
+   používaš takto:
+   <label class="pp-check">
+     <input type="checkbox" ...>
+     <svg ...>...</svg>
+     <span class="pp-check__text">Text</span> (voliteľné)
+   </label>
+   ========================= */
+
+.pp-check{
+  --sz: 18px; /* default veľkosť */
+  cursor: pointer;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  -webkit-tap-highlight-color: transparent;
+  transform: translate3d(0, 0, 0);
+  user-select: none;
+}
+
+/* input schovaný, ale stále funkčný */
+.pp-check > input[type="checkbox"]{
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pp-check::before{
+  content:"";
+  position:absolute;
+  top: calc(var(--sz) * -0.83);
+  left: calc(var(--sz) * -0.83);
+  width: calc(var(--sz) * 2.66);
+  height: calc(var(--sz) * 2.66);
+  border-radius: 50%;
+  background: rgba(34,50,84,0.03);
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+
+.pp-check svg{
+  width: var(--sz);
+  height: var(--sz);
+  position: relative;
+  z-index: 1;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke: #c8ccd4;
+  stroke-width: 1.5;
+  transition: all .2s ease;
+}
+
+.pp-check svg path{
+  stroke-dasharray: 60;
+  stroke-dashoffset: 0;
+}
+
+.pp-check svg polyline{
+  stroke-dasharray: 22;
+  stroke-dashoffset: 66;
+}
+
+.pp-check:hover::before{ opacity: 1; }
+.pp-check:hover svg{ stroke: #4285f4; }
+
+/* checked stav */
+.pp-check > input[type="checkbox"]:checked + svg{ stroke: #4285f4; }
+.pp-check > input[type="checkbox"]:checked + svg path{
+  stroke-dashoffset: 60;
+  transition: all .3s linear;
+}
+.pp-check > input[type="checkbox"]:checked + svg polyline{
+  stroke-dashoffset: 42;
+  transition: all .2s linear;
+  transition-delay: .15s;
+}
+
+/* focus (tab) */
+.pp-check > input[type="checkbox"]:focus-visible + svg{
+  outline: 2px solid #ffffff55;
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* varianty veľkostí */
+.pp-check--sm{ --sz: 16px; gap: 8px; }
+.pp-check--lg{ --sz: 20px; }
+
+/* text vedľa checkboxu */
+.pp-check__text{ line-height: 1.2; }
+
+/* zmenší len tie 3 checkboxy vo formulári */
+.pp-check:has(> input#zlava),
+.pp-check:has(> input#skryte),
+.pp-check:has(> input#metaliza){
+  --sz: 18px;
+  gap: 8px;
+}
+
+/* aby neboli také “biele” */
+.pp-check:has(> input#zlava) svg,
+.pp-check:has(> input#skryte) svg,
+.pp-check:has(> input#metaliza) svg{
+  stroke: #98a2b3;
+  stroke-width: 1.4;
+}
+
+
+/* farba ikonky pri hoveri */
+.pp-check:has(> input#zlava):hover svg,
+.pp-check:has(> input#skryte):hover svg,
+.pp-check:has(> input#metaliza):hover svg {
+  stroke: #4285f4; /* menej biela, jemne tmavšia */
+}
+
+/* 1. stĺpec (checkboxy) vždy vycentrovať */
+#carsTable th:first-child,
+#carsTable td:first-child{
+  text-align: center;
+  width: 44px;
+}
+
+/* aby sa label presne vycentroval v bunke */
+#carsTable th:first-child .pp-check,
+#carsTable td:first-child .pp-check{
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* voliteľné: zrušiť bočné paddingy len v 1. stĺpci (ak to stále uteká) */
+#carsTable th:first-child,
+#carsTable td:first-child{
+  padding-left: 0;
+  padding-right: 0;
+}
+
+
