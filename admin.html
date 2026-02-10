@@ -70,7 +70,7 @@
     <!-- FORM -->
     <form id="carForm">
       <label><input type="checkbox" id="zlava"> Toto auto je v zľave</label>
-
+      <label><input type="checkbox" id="skryte"> Skryť auto z ponuky (nezobrazí sa na webe)</label>
       <div class="row">
         <div>
           <label>Značka</label>
@@ -135,6 +135,8 @@
         <button class="btnx primary" id="submitBtn" type="submit">Odoslať</button>
         <button class="btnx" type="button" id="resetBtn">Vyčistiť formulár</button>
         <button class="btnx danger" type="button" id="deleteBtn" style="display:none">Vymazať vybrané</button>
+        <button class="btnx" type="button" id="hideBtn" style="display:none">Skryť vybrané</button>
+        <button class="btnx" type="button" id="unhideBtn" style="display:none">Zobraziť vybrané</button>
       </div>
 
       <!-- skryté: index upravovaného záznamu -->
@@ -146,9 +148,14 @@
       <div class="toolbar">
         <div class="search"><input type="text" id="search" placeholder="Hľadať v ponuke…"></div>
         <div class="actions">
-          <button class="btnx" id="exportBtn" type="button">Exportovať auta.json</button>
-          <button class="btnx" id="reloadBtn" type="button">Načítať zo súboru</button>
-        </div>
+  <label class="pill-mini" style="display:flex; gap:6px; align-items:center; cursor:pointer;">
+    <input type="checkbox" id="showHidden">
+    Zobraziť skryté
+  </label>
+  <button class="btnx" id="exportBtn" type="button">Exportovať auta.json</button>
+  <button class="btnx" id="reloadBtn" type="button">Načítať zo súboru</button>
+</div>
+
       </div>
 
       <table id="carsTable">
@@ -160,6 +167,7 @@
             <th>Model</th>
             <th>Rok</th>
             <th>Cena</th>
+            <th>Stav</th>
             <th>Tagy</th>
             <th>Akcie</th>
           </tr>
@@ -173,11 +181,8 @@
   // =============================
   // CONFIG
   // =============================
-  // Ak admin.html beží na rovnakej doméne ako /api, nechaj to tak (origin).
-  // Ak admin.html otváraš lokálne (file://) alebo z inej domény,
-  // nastav sem tvoju Vercel doménu, napr.: "https://ppauto-admin.vercel.app"
   const API_BASE = (location.protocol === 'file:')
-    ? 'https://ppauto.sk/admin.html'   // <-- ZMEŇ!
+    ? 'https://ppauto.sk/admin.html'   // <-- ak otváraš admin.html lokálne, nechaj tu tvoju Vercel doménu
     : location.origin;
 
   const apiUrl = (path) => `${API_BASE}${path}`;
@@ -190,9 +195,13 @@
   const form = document.getElementById('carForm');
   const editIndexInput = document.getElementById('editIndex');
   const submitBtn = document.getElementById('submitBtn');
+
   const deleteBtn = document.getElementById('deleteBtn');
+  const hideBtn = document.getElementById('hideBtn');
+  const unhideBtn = document.getElementById('unhideBtn');
 
   const zlava = document.getElementById('zlava');
+  const skryte = document.getElementById('skryte');
   const novaCenaWrap = document.getElementById('novaCenaWrap');
 
   const imgInput = document.getElementById('obrazok');
@@ -202,14 +211,13 @@
   const tableBody = document.querySelector('#carsTable tbody');
   const searchInput = document.getElementById('search');
   const checkAll = document.getElementById('checkAll');
+  const showHidden = document.getElementById('showHidden');
 
   // =============================
   // INIT
   // =============================
-  // Delegovaný klik pre Upraviť / Vymazať (funguje aj po re-renderi)
   if (tableBody) {
     tableBody.addEventListener('click', (e) => {
-      // ochrana pre prípad, že target nie je Element
       const el = (e.target instanceof Element) ? e.target : e.target?.parentElement;
       if (!el) return;
 
@@ -228,6 +236,22 @@
         if (!Number.isNaN(idx)) onDelete(idx);
         return;
       }
+
+      const hideOneBtn = el.closest('[data-hide]');
+      if (hideOneBtn) {
+        e.preventDefault();
+        const idx = parseInt(hideOneBtn.dataset.hide, 10);
+        if (!Number.isNaN(idx)) onSetHidden([idx], true);
+        return;
+      }
+
+      const unhideOneBtn = el.closest('[data-unhide]');
+      if (unhideOneBtn) {
+        e.preventDefault();
+        const idx = parseInt(unhideOneBtn.dataset.unhide, 10);
+        if (!Number.isNaN(idx)) onSetHidden([idx], false);
+        return;
+      }
     });
   } else {
     console.error('Chýba #carsTable tbody – nenašiel som tableBody.');
@@ -236,17 +260,20 @@
   document.getElementById('reloadBtn').addEventListener('click', loadFromApi);
   document.getElementById('exportBtn').addEventListener('click', exportJSON);
   document.getElementById('resetBtn').addEventListener('click', () => setFormMode('create'));
+
   deleteBtn.addEventListener('click', onDeleteSelected);
+  hideBtn.addEventListener('click', () => onSetHiddenSelected(true));
+  unhideBtn.addEventListener('click', () => onSetHiddenSelected(false));
+
   searchInput.addEventListener('input', renderTable);
   zlava.addEventListener('change', toggleZlavaUI);
+  showHidden.addEventListener('change', renderTable);
 
-  // select-all checkbox
   checkAll.addEventListener('change', () => {
     document.querySelectorAll('.row-check').forEach(cb => cb.checked = checkAll.checked);
-    updateBulkDeleteUI();
+    updateBulkActionUI();
   });
 
-  // náhľad po výbere súboru
   fileEl.addEventListener('change', () => {
     if (!fileEl.files || !fileEl.files[0]) {
       imgPreview.innerHTML = '<small class="hint">Vyber súbor. Pri „Odoslať“ sa automaticky nahrá a uloží.</small>';
@@ -261,14 +288,17 @@
   renderPreview();
 
   // =============================
-  // UI HELPERS
+  // HELPERS
   // =============================
+  function isHidden(car) {
+    return !!(car && (car.skryte === true || car.hidden === true));
+  }
+
   function toggleZlavaUI() {
     if (zlava.checked) {
       novaCenaWrap.style.display = 'block';
     } else {
       novaCenaWrap.style.display = 'none';
-      // bezpečne cez elements (spoľahlivejšie než form.nova_cena)
       const novaCenaEl = form.elements['nova_cena'];
       if (novaCenaEl) novaCenaEl.value = '';
     }
@@ -288,10 +318,14 @@
       form.reset();
       editIndexInput.value = -1;
       submitBtn.textContent = 'Odoslať';
+
       deleteBtn.style.display = 'none';
+      hideBtn.style.display = 'none';
+      unhideBtn.style.display = 'none';
       checkAll.checked = false;
 
       zlava.checked = false;
+      skryte.checked = false;
       toggleZlavaUI();
 
       imgInput.value = '';
@@ -300,18 +334,42 @@
     } else if (mode === 'edit') {
       editIndexInput.value = index;
       submitBtn.textContent = 'Uložiť zmeny';
+
       deleteBtn.style.display = 'none';
+      hideBtn.style.display = 'none';
+      unhideBtn.style.display = 'none';
+
       toggleZlavaUI();
       renderPreview();
     }
   }
 
-  function updateBulkDeleteUI() {
-    const all = document.querySelectorAll('.row-check');
-    const checked = document.querySelectorAll('.row-check:checked');
+  function getSelectedIndexes() {
+    return [...document.querySelectorAll('.row-check:checked')]
+      .map(ch => parseInt(ch.dataset.index, 10))
+      .filter(n => !Number.isNaN(n));
+  }
 
-    checkAll.checked = all.length > 0 && all.length === checked.length;
-    deleteBtn.style.display = checked.length ? 'inline-flex' : 'none';
+  function updateBulkActionUI() {
+    const all = document.querySelectorAll('.row-check');
+    const selected = getSelectedIndexes();
+
+    checkAll.checked = all.length > 0 && selected.length === all.length;
+
+    if (!selected.length) {
+      deleteBtn.style.display = 'none';
+      hideBtn.style.display = 'none';
+      unhideBtn.style.display = 'none';
+      return;
+    }
+
+    deleteBtn.style.display = 'inline-flex';
+
+    const hasVisible = selected.some(i => !isHidden(cars[i]));
+    const hasHidden = selected.some(i => isHidden(cars[i]));
+
+    hideBtn.style.display = hasVisible ? 'inline-flex' : 'none';
+    unhideBtn.style.display = hasHidden ? 'inline-flex' : 'none';
   }
 
   // =============================
@@ -319,7 +377,8 @@
   // =============================
   async function loadFromApi() {
     try {
-      const res = await fetch(apiUrl('/api/cars'), { cache: 'no-store' });
+      // Admin vždy načíta všetko (aj skryté)
+      const res = await fetch(apiUrl('/api/cars?include_hidden=1'), { cache: 'no-store' });
       if (!res.ok) {
         const t = await res.text().catch(() => '');
         throw new Error(`GET /api/cars failed: ${res.status} ${t}`);
@@ -351,6 +410,8 @@
   function renderTable() {
     checkAll.checked = false;
     deleteBtn.style.display = 'none';
+    hideBtn.style.display = 'none';
+    unhideBtn.style.display = 'none';
 
     const q = searchInput.value.trim().toLowerCase();
     tableBody.innerHTML = '';
@@ -358,10 +419,14 @@
     cars
       .map((c, i) => ({ ...c, _i: i }))
       .filter(c => {
+        // filtrovanie skrytých v tabuľke (len v admin view)
+        if (!showHidden.checked && isHidden(c)) return false;
+
         const hay = [
           c.znacka, c.model, c.rok, c.palivo, c.prevodovka,
           (c.tagy || []).join(' ')
         ].join(' ').toLowerCase();
+
         return !q || hay.includes(q);
       })
       .forEach((c) => {
@@ -370,6 +435,9 @@
         const cenaLabel = (c.nova_cena && String(c.nova_cena).trim() !== '')
           ? `${c.stara_cena || ''} → ${c.nova_cena}`
           : (c.stara_cena || '—');
+
+        const hidden = isHidden(c);
+        if (hidden) tr.style.opacity = '0.55';
 
         tr.innerHTML = `
           <td>
@@ -380,16 +448,20 @@
           <td>${c.model || ''}</td>
           <td>${c.rok ?? ''}</td>
           <td>${cenaLabel}</td>
+          <td>${hidden ? '<span class="pill-mini">SKRYTÉ</span>' : ''}</td>
           <td>${(c.tagy || []).join(', ')}</td>
           <td class="cell-actions">
             <button class="btnx" type="button" data-edit="${c._i}">Upraviť</button>
+            ${hidden
+              ? `<button class="btnx" type="button" data-unhide="${c._i}">Zobraziť</button>`
+              : `<button class="btnx" type="button" data-hide="${c._i}">Skryť</button>`
+            }
             <button class="btnx danger" type="button" data-del="${c._i}">Vymazať</button>
           </td>
         `;
 
         tableBody.appendChild(tr);
-
-        tr.querySelector('.row-check').addEventListener('change', updateBulkDeleteUI);
+        tr.querySelector('.row-check').addEventListener('change', updateBulkActionUI);
       });
   }
 
@@ -462,7 +534,10 @@
       tagy: (form.elements['tagy']?.value || '')
         .split(',')
         .map(t => t.trim())
-        .filter(Boolean)
+        .filter(Boolean),
+
+      // NOVÉ:
+      skryte: !!skryte.checked
     };
 
     // 3) uloženie cez API
@@ -513,6 +588,8 @@
     form.elements['tagy'].value = (a.tagy || []).join(', ');
 
     zlava.checked = !!(a.nova_cena && String(a.nova_cena).trim() !== '');
+    skryte.checked = isHidden(a);
+
     toggleZlavaUI();
 
     fileEl.value = '';
@@ -545,19 +622,17 @@
   }
 
   async function onDeleteSelected() {
-    const checked = [...document.querySelectorAll('.row-check:checked')];
+    const selected = getSelectedIndexes();
 
-    if (checked.length === 0) {
+    if (!selected.length) {
       alert('Nevybral si žiadne autá.');
       return;
     }
 
-    if (!confirm(`Naozaj vymazať ${checked.length} áut?`)) return;
+    if (!confirm(`Naozaj vymazať ${selected.length} áut?`)) return;
 
-    const indexes = checked
-      .map(ch => parseInt(ch.dataset.index, 10))
-      .filter(n => !Number.isNaN(n))
-      .sort((a, b) => b - a);
+    // zoradiť zostupne (aby sa neposúvali indexy)
+    const indexes = [...selected].sort((a, b) => b - a);
 
     try {
       for (const idx of indexes) {
@@ -579,6 +654,50 @@
     }
   }
 
+  async function onSetHiddenSelected(hidden) {
+    const selected = getSelectedIndexes();
+    if (!selected.length) {
+      alert('Nevybral si žiadne autá.');
+      return;
+    }
+
+    const txt = hidden ? `Naozaj skryť ${selected.length} áut?` : `Naozaj zobraziť ${selected.length} áut?`;
+    if (!confirm(txt)) return;
+
+    await onSetHidden(selected, hidden);
+  }
+
+  async function onSetHidden(indexes, hidden) {
+    try {
+      for (const idx of indexes) {
+        const current = cars[idx];
+        if (!current) continue;
+
+        const updated = { ...current, skryte: !!hidden };
+
+        const r = await fetch(apiUrl(`/api/cars?index=${idx}`), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updated)
+        });
+
+        if (!r.ok) {
+          const t = await r.text().catch(() => '');
+          console.error('Hide/Unhide failed:', r.status, t);
+          alert('Skrytie/Zobrazenie zlyhalo (' + r.status + '). Pozri konzolu.');
+          return;
+        }
+      }
+
+      await loadFromApi();
+      setFormMode('create');
+
+    } catch (err) {
+      console.error(err);
+      alert('Skrytie/Zobrazenie zlyhalo (chyba siete alebo servera).');
+    }
+  }
+
   // =============================
   // UTILS
   // =============================
@@ -587,7 +706,7 @@
       const reader = new FileReader();
       reader.onerror = () => reject(new Error('Nepodarilo sa načítať súbor.'));
       reader.onload = () => {
-        const result = reader.result; // data:*;base64,xxxx
+        const result = reader.result;
         const base64 = String(result).split(',')[1];
         resolve(base64);
       };
@@ -595,6 +714,7 @@
     });
   }
 </script>
+
 
 
 </body>
