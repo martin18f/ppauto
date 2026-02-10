@@ -9,9 +9,18 @@
     "nova_cena": "",
     "obrazok": "img/subaruoutback2025magnetitgrey.avif",
     "tagy": [
-      "subaru",
-      "skladom",
-      "novinky"
+      "subaru"
+    ],
+    "skryte": false,
+    "objem": null,
+    "vykon": null,
+    "najazdene": null,
+    "karoseria": "",
+    "pohon": "",
+    "farba": "",
+    "metaliza": false,
+    "vybava": [
+      "360° kamera"
     ]
   },
   {
