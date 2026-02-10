@@ -122,5 +122,19 @@
       "jeep"
     ],
     "skryte": false
+  },
+  {
+    "znacka": "Jeep",
+    "model": "Avenger",
+    "rok": 2025,
+    "palivo": "Benzín",
+    "prevodovka": "MT • Axenture",
+    "stara_cena": "",
+    "nova_cena": "",
+    "obrazok": "",
+    "tagy": [
+      "jeep"
+    ],
+    "skryte": false
   }
 ]
