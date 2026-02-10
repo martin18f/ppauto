@@ -1108,5 +1108,37 @@
       "subaru"
     ],
     "skryte": true
+  },
+  {
+    "id": "zeny-zenam-cycycy-12313",
+    "znacka": "Ženy ženám",
+    "model": "cycycy",
+    "rok": 12313,
+    "palivo": "fdsfsfsf",
+    "prevodovka": "sdfsf",
+    "stara_cena": "",
+    "nova_cena": "",
+    "titulka": "https://raw.githubusercontent.com/martin18f/ppauto/main/uploads/1770720274799-1760655131689-d6UD9ckWGIYI9WdOtIZIbSwhkQ.avif",
+    "galeria": [
+      "https://raw.githubusercontent.com/martin18f/ppauto/main/uploads/1770720274799-1760655131689-d6UD9ckWGIYI9WdOtIZIbSwhkQ.avif",
+      "https://raw.githubusercontent.com/martin18f/ppauto/main/uploads/1770720277210-1760655225681-IoQ24unINctyfVwC4zrHOYBE2k.avif",
+      "https://raw.githubusercontent.com/martin18f/ppauto/main/uploads/1770720279257-1760656031285-q3hX5FLMjokir0g41zjAKsY8p0.avif",
+      "https://raw.githubusercontent.com/martin18f/ppauto/main/uploads/1770720281362-1760656999635-L9AYy0iWcLbEUcUTb6pBOx3g9jE.avif",
+      "https://raw.githubusercontent.com/martin18f/ppauto/main/uploads/1770720283309-1770588074978-autosalon1.jpeg",
+      "https://raw.githubusercontent.com/martin18f/ppauto/main/uploads/1770720285640-1770588075908-autosalon1.jpeg"
+    ],
+    "obrazok": "https://raw.githubusercontent.com/martin18f/ppauto/main/uploads/1770720274799-1760655131689-d6UD9ckWGIYI9WdOtIZIbSwhkQ.avif",
+    "tagy": [
+      "kgm"
+    ],
+    "skryte": false,
+    "objem": 5456,
+    "vykon": 353,
+    "najazdene": 33535,
+    "karoseria": "3353",
+    "pohon": "353533",
+    "farba": "3533",
+    "metaliza": false,
+    "vybava": []
   }
 ]
