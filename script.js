@@ -1,10 +1,43 @@
 // ==============================
 // Ponuka áut + filtrovanie + brand kontext (pamätá si výber)
-// + úprava sekcií: Značky (nadpis + 1 tile) + Testimonials (nadpis + texty)
+// + Modely áut pás (Subaru/KGM/Jeep) + filter podľa modelu
 // ==============================
 
-let BRAND_CTX = null; // 'subaru' | 'kgm' | 'jeep' | null
 const BRAND_STORAGE_KEY = 'ppauto.brand';
+
+const BRAND_FILTERS = new Set(['subaru', 'kgm', 'jeep']);
+
+let BRAND_CTX = null;        // 'subaru' | 'kgm' | 'jeep' | null (len brand režim z vyber-znacky/storage)
+let ACTIVE_FILTER = 'all';   // aktuálne kliknutý filter v lište
+let ACTIVE_MODEL = null;     // slug modelu (napr. "forester", "grand-cherokee")
+let MODELS_BRAND = null;     // pre ktorý brand je práve vykreslený pás modelov
+
+
+
+const MODEL_STRIP_CONFIG = {
+  subaru: [
+    { key: 'forester',   name: 'FORESTER',   img: 'img/models/subaru/forester.png',   alt: 'Subaru Forester' },
+    { key: 'outback',    name: 'OUTBACK',    img: 'img/models/subaru/outback.png',    alt: 'Subaru Outback' },
+    { key: 'solterra',   name: 'SOLTERRA',   img: 'img/models/subaru/solterra.png',   alt: 'Subaru Solterra' },
+    { key: 'crosstrek',  name: 'CROSSTREK',  img: 'img/models/subaru/crosstrek.png',  alt: 'Subaru Crosstrek' },
+    { key: 'brz',        name: 'BRZ',        img: 'img/models/subaru/brz.png',        alt: 'Subaru BRZ' },
+  ],
+  kgm: [
+    { key: 'torres',     name: 'TORRES',     img: 'img/models/kgm/torres.png',        alt: 'KGM Torres' },
+    { key: 'korando',    name: 'KORANDO',    img: 'img/models/kgm/korando.png',       alt: 'KGM Korando' },
+    { key: 'tivoli',     name: 'TIVOLI',     img: 'img/models/kgm/tivoli.png',        alt: 'KGM Tivoli' },
+    { key: 'rexton',     name: 'REXTON',     img: 'img/models/kgm/rexton.png',        alt: 'KGM Rexton' },
+    { key: 'musso',      name: 'MUSSO',      img: 'img/models/kgm/musso.png',         alt: 'KGM Musso' },
+  ],
+  jeep: [
+    { key: 'avenger',         name: 'AVENGER',        img: 'img/models/jeep/avenger.png',        alt: 'Jeep Avenger' },
+    { key: 'renegade',        name: 'RENEGADE',       img: 'img/models/jeep/renegade.png',       alt: 'Jeep Renegade' },
+    { key: 'compass',         name: 'COMPASS',        img: 'img/models/jeep/compass.png',        alt: 'Jeep Compass' },
+    { key: 'wrangler',        name: 'WRANGLER',       img: 'img/models/jeep/wrangler.png',       alt: 'Jeep Wrangler' },
+    { key: 'grand-cherokee',  name: 'GRAND CHEROKEE', img: 'img/models/jeep/grand-cherokee.png', alt: 'Jeep Grand Cherokee' },
+  ],
+};
+
 
 const BRAND_LABEL = {
   subaru: 'Subaru',
@@ -132,7 +165,7 @@ function pruneTabsForBrand() {
 
   const allowed = new Set(['all', 'novinky', 'skladom']);
   buttons.forEach(btn => {
-    const v = (btn.getAttribute('data-filter') || '').toLowerCase();
+    const v = (btn.getAttribute('data-filter') || '').toLowerCase().trim();
     btn.style.display = allowed.has(v) ? '' : 'none';
   });
 
@@ -144,27 +177,68 @@ function pruneTabsForBrand() {
   }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * Aplikuje filtrovanie: brand (ak je) + vybraná kategória (Novinky/Skladom)
  */
 function applyFilters(filter) {
   const cards = document.querySelectorAll('#inventory .car');
-  const f = (filter || 'all').toLowerCase();
+  const f = (filter || 'all').toLowerCase().trim();
+
+  ACTIVE_FILTER = f;
+
+const isBrandFilter = BRAND_FILTERS.has(f);
+
+// kliknutá značka má prednosť (inak brand režim z BRAND_CTX)
+const brandView = isBrandFilter ? f : (BRAND_CTX || null);
+
+// drž CSS/HTML brand v synchronizácii (ak máš štýly podľa data-brand)
+if (brandView) document.documentElement.setAttribute('data-brand', brandView);
+else document.documentElement.removeAttribute('data-brand');
+
+  // ukáž/prekresli pás modelov podľa aktuálnej značky
+  syncModelsStrip(brandView);
 
   cards.forEach(card => {
     const make = (card.dataset.make || '').toLowerCase().trim();
     const tags = (card.dataset.tags || '').toLowerCase().split(/\s+/).filter(Boolean);
+    const model = (card.dataset.model || '').toLowerCase().trim();
 
-    const brandOK = !BRAND_CTX || (make === BRAND_CTX || tags.includes(BRAND_CTX));
+    // značka: buď z BRAND_CTX alebo z kliknutej značky v lište
+    const brandOK = !brandView || (make === brandView || tags.includes(brandView));
 
+    // kategória: len keď filter NIE JE značka
     let catOK = true;
-    if (f !== 'all') {
+    if (!isBrandFilter && f !== 'all') {
       catOK = tags.includes(f);
     }
 
-    card.classList.toggle('is-hidden', !(brandOK && catOK));
+    // model: len keď sme vo "view" konkrétnej značky
+    let modelOK = true;
+    if (brandView && ACTIVE_MODEL) {
+    modelOK = (model === ACTIVE_MODEL) || model.startsWith(ACTIVE_MODEL + '-');
+    }
+
+    card.classList.toggle('is-hidden', !(brandOK && catOK && modelOK));
   });
+
+  updateModelActiveUI();
+  applyBrandSections();
 }
+
+
 
 /**
  * Upraví len to, čo chceš:
@@ -172,20 +246,21 @@ function applyFilters(filter) {
  * - testimonials: nadpis = "Čo o nás hovoria zákazníci" + zmení 3 quote (aby nesedeli na inú značku)
  */
 function applyBrandSections() {
+  const brand = getBrandView(ACTIVE_FILTER);
+
   // --- ZNAČKY ---
   const znacky = document.getElementById('znacky');
   if (znacky) {
     const head = znacky.querySelector('.section-head h3');
 
-    if (!BRAND_CTX) {
-      // default
+    if (!brand) {
       if (head) head.textContent = 'Naše značky';
       znacky.querySelectorAll('.brand-tile').forEach(tile => (tile.style.display = ''));
     } else {
-      const label = BRAND_LABEL[BRAND_CTX] || 'Naše značky';
+      const label = BRAND_LABEL[brand] || 'Naše značky';
       if (head) head.textContent = label;
 
-      const cfg = BRAND_CONFIG[BRAND_CTX];
+      const cfg = BRAND_CONFIG[brand];
 
       znacky.querySelectorAll('.brand-tile').forEach(tile => {
         const h4 = (tile.querySelector('h4')?.textContent || '').toLowerCase().trim();
@@ -207,12 +282,12 @@ function applyBrandSections() {
     const sec = testiWrap.closest('section');
     const titleEl = sec?.querySelector('.section-head h3');
 
-    if (!BRAND_CTX) {
+    if (!brand) {
       if (titleEl) titleEl.textContent = 'Čo hovoria zákazníci';
       return;
     }
 
-    const cfg = BRAND_CONFIG[BRAND_CTX];
+    const cfg = BRAND_CONFIG[brand];
     if (!cfg) return;
 
     if (titleEl) titleEl.textContent = cfg.testiTitle;
@@ -228,6 +303,53 @@ function applyBrandSections() {
   }
 }
 
+
+// ==============================
+// Detail stránka auta – stabilné ID (slug)
+// - ak auto už má `id`, použije sa
+// - inak sa vygeneruje z: znacka-model-rok (+ -2, -3 pri duplicite)
+// ==============================
+function slugify(input) {
+  return String(input || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-{2,}/g, '-');
+}
+
+function resolveCarId(auto, baseCounts, usedIds) {
+  const existing = (auto?.id || '').toString().trim();
+  if (existing) {
+    if (usedIds) usedIds.add(existing);
+    return existing;
+  }
+
+  const base = slugify(`${auto?.znacka || ''}-${auto?.model || ''}-${auto?.rok ?? ''}`) || 'auto';
+  const used = usedIds || new Set();
+
+  // ak je základ voľný, použijeme ho
+  if (!used.has(base) && !(baseCounts.get(base) > 0)) {
+    used.add(base);
+    baseCounts.set(base, 1);
+    return base;
+  }
+
+  // inak pridáme suffix -2, -3, ... a vyhneme sa kolíziám aj s existujúcimi ID
+  let n = Math.max(baseCounts.get(base) || 1, 1);
+  let candidate = '';
+  while (true) {
+    n += 1;
+    candidate = `${base}-${n}`;
+    if (!used.has(candidate)) break;
+  }
+  baseCounts.set(base, n);
+  used.add(candidate);
+  return candidate;
+}
+
 /**
  * Vytvorí DOM element <article> pre jedno auto
  */
@@ -236,6 +358,13 @@ function vykresliKartu(auto) {
   article.className = 'car';
   article.dataset.make = (auto.znacka || '').toLowerCase().trim();
   article.dataset.tags = (auto.tagy || []).join(' ').toLowerCase().trim();
+
+  article.dataset.model = slugify(auto.model || '');
+
+  const carId = auto.__resolvedId || (auto.id || '').toString().trim();
+  const detailHref = carId ? `auto.html?id=${encodeURIComponent(carId)}` : '#kontakt';
+
+  const coverImg = (Array.isArray(auto.obrazky) && auto.obrazky.length ? auto.obrazky[0] : auto.obrazok) || '';
 
   const maZlavu = !!(auto.nova_cena && String(auto.nova_cena).trim() !== '');
   let priceHTML = '';
@@ -259,7 +388,7 @@ function vykresliKartu(auto) {
 
   article.innerHTML = `
     <div class="img">
-      <img src="${auto.obrazok}" alt="${auto.rok || ''} ${auto.znacka || ''} ${auto.model || ''}">
+      <img src="${coverImg}" alt="${auto.rok || ''} ${auto.znacka || ''} ${auto.model || ''}">
     </div>
     <div class="body">
       <h4>${auto.rok || ''} ${(auto.znacka || '').toUpperCase()} ${auto.model || ''}</h4>
@@ -274,7 +403,7 @@ function vykresliKartu(auto) {
         <div class="price-group">
           ${priceHTML}
         </div>
-        <a class="pill" href="#kontakt">Zistiť viac</a>
+        <a class="pill" href="${detailHref}">Zistiť viac</a>
       </div>
     </div>
   `;
@@ -291,7 +420,7 @@ function initFiltery() {
       buttons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
-      const filter = (btn.getAttribute('data-filter') || 'all').toLowerCase();
+      const filter = (btn.getAttribute('data-filter') || 'all').toLowerCase().trim();
       applyFilters(filter);
     });
   });
@@ -305,6 +434,20 @@ async function nacitajAuta() {
     const response = await fetch('/api/cars', { cache: 'no-store' });
     const auta = await response.json();
 
+    // Stabilné ID pre linky na detail (aj pre staré záznamy bez `id`)
+    // stabilné (a nekolidujúce) ID pre detail stránky
+    const idCounts = new Map();
+    const usedIds = new Set(
+      auta
+        .map(a => (a && a.id ? String(a.id).trim() : ''))
+        .filter(Boolean)
+    );
+
+    auta.forEach(a => {
+      if (!a) return;
+      a.__resolvedId = resolveCarId(a, idCounts, usedIds);
+    });
+
     const container = document.getElementById('inventory');
     if (!container) {
       console.error('❌ Nenašiel som #inventory vo vašom HTML.');
@@ -312,7 +455,13 @@ async function nacitajAuta() {
     }
 
     container.innerHTML = '';
-    auta.forEach(auto => container.appendChild(vykresliKartu(auto)));
+
+    auta.forEach(auto => {
+      // /api/cars už vracia len viditeľné autá, ale necháme aj tento safeguard
+      if (!auto || auto.skryte === true) return;
+      container.appendChild(vykresliKartu(auto));
+    });
+
 
     initFiltery();
     pruneTabsForBrand();
@@ -322,16 +471,116 @@ async function nacitajAuta() {
   } catch (error) {
     console.error('❌ Chyba pri načítaní zoznamu áut:', error);
   }
+  
 }
 
 
-// Bootstrap
 document.addEventListener('DOMContentLoaded', () => {
   BRAND_CTX = resolveBrandContext();
   if (BRAND_CTX) document.documentElement.setAttribute('data-brand', BRAND_CTX);
-else document.documentElement.removeAttribute('data-brand');
-     // ✅ teraz sa pamätá aj po refresh
-  applyBrandSections();                 // ✅ Naše značky -> Jeep/Subaru/KGM
-  cleanBrandParamFromURL();             // URL ostane "čisté", ale brand ostáva v storage
+  else document.documentElement.removeAttribute('data-brand');
+
+  applyBrandSections();
+  cleanBrandParamFromURL();
+
+  initModelsStrip();
+  syncModelsStrip('all');
+
   nacitajAuta();
 });
+
+function getBrandView(filterValue) {
+  const f = (filterValue || ACTIVE_FILTER || 'all').toLowerCase().trim();
+
+  // keď user klikne na značku, tá má prednosť
+  if (BRAND_FILTERS.has(f)) return f;
+
+  // inak (Novinky/Skladom/Všetko) sa riadime brand režimom
+  return BRAND_CTX;
+}
+
+function renderModelsStrip(brand) {
+  const strip = document.getElementById('models-strip');
+  const row = document.getElementById('models-strip-row');
+  if (!strip || !row) return;
+
+  const list = MODEL_STRIP_CONFIG[brand] || [];
+
+  if (!brand || !list.length) {
+    strip.hidden = true;
+    row.innerHTML = '';
+    MODELS_BRAND = null;
+    return;
+  }
+
+  if (MODELS_BRAND && MODELS_BRAND !== brand) {
+    ACTIVE_MODEL = null;
+  }
+  MODELS_BRAND = brand;
+
+  strip.hidden = false;
+
+  row.innerHTML = list.map(m => `
+    <a class="model-tile" href="#" data-model="${m.key}">
+      <div class="model-tile__img">
+        <img src="${m.img}" alt="${m.alt || m.name}" loading="lazy" />
+      </div>
+      <div class="model-tile__name">${m.name}</div>
+    </a>
+  `).join('');
+
+  updateModelActiveUI();
+}
+
+function updateModelActiveUI() {
+  const row = document.getElementById('models-strip-row');
+  if (!row) return;
+
+  row.querySelectorAll('.model-tile').forEach(tile => {
+    const m = (tile.dataset.model || '').toLowerCase().trim();
+    tile.classList.toggle('is-active', !!ACTIVE_MODEL && m === ACTIVE_MODEL);
+  });
+}
+
+function syncModelsStrip(value) {
+  // value môže byť: "subaru" | "kgm" | "jeep" | "all" | "novinky" | ...
+  let brand = null;
+
+  const v = (value || '').toLowerCase();
+  if (v === 'subaru' || v === 'kgm' || v === 'jeep') {
+    brand = v;
+  } else {
+    // keď nie je priamo značka, použijeme aktuálny brand režim
+    brand = BRAND_CTX || null;
+  }
+
+  renderModelsStrip(brand);
+
+  if (!brand && ACTIVE_MODEL) {
+    ACTIVE_MODEL = null;
+    updateModelActiveUI();
+  }
+}
+
+function initModelsStrip() {
+  const row = document.getElementById('models-strip-row');
+  if (!row || row.dataset.inited === '1') return;
+
+  row.dataset.inited = '1';
+
+  row.addEventListener('click', (e) => {
+    const tile = e.target.closest('.model-tile');
+    if (!tile) return;
+
+    // žiadny jump/scroll
+    e.preventDefault();
+
+    const model = (tile.dataset.model || '').toLowerCase().trim();
+    if (!model) return;
+
+    ACTIVE_MODEL = (ACTIVE_MODEL === model) ? null : model;
+
+    updateModelActiveUI();
+    applyFilters(ACTIVE_FILTER);
+  });
+}

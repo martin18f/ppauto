@@ -1,16 +1,22 @@
 <!DOCTYPE html>
 <html lang="sk">
 <head>
+  <script>
+    (async () => {
+      const r = await fetch('/api/auth-check');
+      if (!r.ok) location.href = '/login.html';
+    })();
+  </script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin panel – PP AUTO</title>
   <link rel="stylesheet" href="admin.css">
 
-
   <style>
     body { padding: 32px; background: var(--bg); color: var(--text); }
     .wrap { display: grid; grid-template-columns: 420px 1fr; gap: 24px; align-items: start; }
-    form { display: grid; gap: 10px; background: var(--card); border:1px solid var(--line); border-radius: 16px; padding: 16px; }
+    form.admin-form { display: grid; gap: 10px; background: var(--card); border:1px solid var(--line); border-radius: 16px; padding: 16px; }
     label { font-weight: 600; font-size: 13px; }
     input, select { padding: 10px; border-radius: 10px; border:1px solid var(--line); background: var(--bg-elev); color: var(--text); }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -61,33 +67,97 @@
     .upload-inline input[type="file"]{ height:42px; }
     .upload-inline .btnx{ height:42px; }
     .preview{ margin-top: 8px; }
+    /* PROGRESS OVERLAY */
+.progress-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+.progress-card{
+  width: min(520px, 100%);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+.progress-title{
+  font-weight: 800;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+.progress-bar{
+  width: 100%;
+  height: 10px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-fill{
+  height: 100%;
+  width: 0%;
+  background: #0044d6;
+  transition: width .2s ease;
+}
+.progress-meta{
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.progress-percent{
+  font-variant-numeric: tabular-nums;
+}
+
   </style>
 </head>
-<body>
 
+<body>
   <h2>🛠️ Admin panel – správa áut</h2>
+<!-- PROGRESS OVERLAY -->
+<div id="progressOverlay" class="progress-overlay" hidden>
+  <div class="progress-card">
+    <div class="progress-title">Prebieha spracovanie…</div>
+
+    <div class="progress-bar">
+      <div id="progressFill" class="progress-fill"></div>
+    </div>
+
+    <div class="progress-meta">
+      <div id="progressText">Pripravujem…</div>
+      <div id="progressPercent" class="progress-percent">0%</div>
+    </div>
+  </div>
+</div>
 
   <div class="wrap">
     <!-- FORM -->
     <form id="carForm" class="admin-form">
       <label class="pp-check pp-check--lg">
-  <input type="checkbox" id="zlava">
-  <svg viewBox="0 0 18 18" aria-hidden="true">
-    <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 16,17 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
-    <polyline points="1 9 7 14 15 4"></polyline>
-  </svg>
-  <span class="pp-check__text">Toto auto je v zľave</span>
-</label>
+        <input type="checkbox" id="zlava">
+        <svg viewBox="0 0 18 18" aria-hidden="true">
+          <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 16,17 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
+          <polyline points="1 9 7 14 15 4"></polyline>
+        </svg>
+        <span class="pp-check__text">Toto auto je v zľave</span>
+      </label>
 
       <label class="pp-check pp-check--lg">
-  <input type="checkbox" id="zlava">
-  <svg viewBox="0 0 18 18" aria-hidden="true">
-    <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 16,17 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
-    <polyline points="1 9 7 14 15 4"></polyline>
-  </svg>
-  <span class="pp-check__text">Skryť auto z ponuky (nezobrazí sa na webe)</span>
-</label>
-
+        <input type="checkbox" id="skryte">
+        <svg viewBox="0 0 18 18" aria-hidden="true">
+          <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 17,16 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
+          <polyline points="1 9 7 14 15 4"></polyline>
+        </svg>
+        <span class="pp-check__text">Skryť auto z ponuky (nezobrazí sa na webe)</span>
+      </label>
 
       <div class="row">
         <div>
@@ -111,57 +181,65 @@
         </div>
       </div>
 
-      <div>
-        <label>Prevodovka / Výbava</label>
-        <input type="text" id="prevodovka" name="prevodovka" placeholder="AT • Premium"/>
+      <div class="row">
+  <div>
+    <label>Prevodovka</label>
+    <input type="text" id="typ_prevodovky" name="typ_prevodovky" placeholder="AT/MT/Hybrid" />
+   
+  </div>
+
+  <div>
+    <label>Výbava</label>
+    <input type="text" id="vybava_paket" name="vybava_paket" placeholder="Premium / Limited / Sport..." />
+    
+  </div>
+</div>
+
+
+      <div class="row">
+        <div>
+          <label>Objem motora (cm³)</label>
+          <input type="number" id="objem" name="objem" placeholder="1995" />
+        </div>
+
+        <div>
+          <label>Výkon motora (kW)</label>
+          <input type="number" id="vykon" name="vykon" placeholder="100" />
+        </div>
       </div>
 
       <div class="row">
-  <div>
-    <label>Objem motora (cm³)</label>
-    <input type="number" id="objem" name="objem" placeholder="1995" />
-  </div>
+        <div>
+          <label>Najazdené (km)</label>
+          <input type="number" id="najazdene" name="najazdene" placeholder="10" />
+        </div>
 
-  <div>
-    <label>Výkon motora (kW)</label>
-    <input type="number" id="vykon" name="vykon" placeholder="100" />
-  </div>
-</div>
+        <div>
+          <label>Karoséria</label>
+          <input type="text" id="karoseria" name="karoseria" placeholder="SUV" />
+        </div>
+      </div>
 
-<div class="row">
-  <div>
-    <label>Najazdené (km)</label>
-    <input type="number" id="najazdene" name="najazdene" placeholder="10" />
-  </div>
+      <div class="row">
+        <div>
+          <label>Pohon</label>
+          <input type="text" id="pohon" name="pohon" placeholder="4x4" />
+        </div>
 
-  <div>
-    <label>Karoséria</label>
-    <input type="text" id="karoseria" name="karoseria" placeholder="SUV" />
-  </div>
-</div>
+        <div>
+          <label>Farba</label>
+          <input type="text" id="farba" name="farba" placeholder="Modrá" />
+        </div>
+      </div>
 
-<div class="row">
-  <div>
-    <label>Pohon</label>
-    <input type="text" id="pohon" name="pohon" placeholder="4x4" />
-  </div>
-
-  <div>
-    <label>Farba</label>
-    <input type="text" id="farba" name="farba" placeholder="Modrá" />
-  </div>
-</div>
-
-<label class="pp-check pp-check--lg">
-  <input type="checkbox" id="zlava">
-  <svg viewBox="0 0 18 18" aria-hidden="true">
-    <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 16,17 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
-    <polyline points="1 9 7 14 15 4"></polyline>
-  </svg>
-  <span class="pp-check__text">Metalíza</span>
-</label>
-
-
+      <label class="pp-check pp-check--lg">
+        <input type="checkbox" id="metaliza">
+        <svg viewBox="0 0 18 18" aria-hidden="true">
+          <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 17,16 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
+          <polyline points="1 9 7 14 15 4"></polyline>
+        </svg>
+        <span class="pp-check__text">Metalíza</span>
+      </label>
 
       <div id="povodnaCenaWrap">
         <label>Pôvodná cena (alebo aktuálna, ak zľava NIE JE)</label>
@@ -174,20 +252,21 @@
         <div class="hint">Zobrazí sa zelenou, „Pôvodná cena“ bude prečiarknutá.</div>
       </div>
 
-      <div>
-        <label>Obrázok</label>
-
-        <!-- skryté pole – sem sa po odoslaní uloží URL z uploadu -->
-        <input type="hidden" id="obrazok" name="obrazok" />
-
-        <div class="row row--image">
-          <div class="upload-inline">
-            <input type="file" id="fileInput" accept="image/*" />
-          </div>
+      <!-- TITULNÁ FOTKA -->
+      <div class="form-group">
+        <label>Titulná fotka (pre ponuku áut)</label>
+        <input type="file" id="titulkaInput" accept="image/*">
+        <div id="titulkaPreview" class="preview">
+          <small class="hint">Titulná fotka pre ponuku áut</small>
         </div>
+      </div>
 
-        <div class="preview" id="imgPreview">
-          <small class="hint">Vyber súbor. Pri „Odoslať“ sa automaticky nahrá a uloží.</small>
+      <!-- GALÉRIA -->
+      <div class="form-group">
+        <label>Fotky vozidla (galéria)</label>
+        <input type="file" id="galeriaInput" accept="image/*" multiple>
+        <div id="galeriaPreview" class="preview">
+          <small class="hint">Prvá fotka bude titulná</small>
         </div>
       </div>
 
@@ -197,80 +276,76 @@
       </div>
 
       <div>
-  
-<label>Výbava</label>
+        <div class="actions">
+          <button class="btnx primary" id="submitBtn" type="submit">Odoslať</button>
+          <button class="btnx" type="button" id="resetBtn">Vyčistiť formulár</button>
+          <button class="btnx danger" type="button" id="deleteBtn" style="display:none">Vymazať vybrané</button>
+          <button class="btnx" type="button" id="hideBtn" style="display:none">Skryť vybrané</button>
+          <button class="btnx" type="button" id="unhideBtn" style="display:none">Zobraziť vybrané</button>
+        </div>
 
-<div class="vybava-grid">
-  <label><input type="checkbox" value="Klimatizácia dvojzónová"> Klimatizácia dvojzónová</label>
-  <label><input type="checkbox" value="Elektrické okná 4x"> Elektrické okná 4x</label>
-  <label><input type="checkbox" value="360° kamera"> 360° kamera</label>
-  <label><input type="checkbox" value="ABS"> ABS</label>
-  <label><input type="checkbox" value="Adaptívny tempomat"> Adaptívny tempomat</label>
+        <label>Výbava</label>
 
-  <label><input type="checkbox" value="Airbagy"> Airbagy</label>
-  <label><input type="checkbox" value="Airbagy - počet"> Airbagy - počet</label>
-  <label><input type="checkbox" value="Android Auto"> Android Auto</label>
-  <label><input type="checkbox" value="Apple CarPlay"> Apple CarPlay</label>
-  <label><input type="checkbox" value="Asistent jazdných pruhov"> Asistent jazdných pruhov</label>
+        <div class="vybava-grid">
+          <label><input type="checkbox" value="Klimatizácia dvojzónová"> Klimatizácia dvojzónová</label>
+          <label><input type="checkbox" value="Elektrické okná 4x"> Elektrické okná 4x</label>
+          <label><input type="checkbox" value="360° kamera"> 360° kamera</label>
+          <label><input type="checkbox" value="ABS"> ABS</label>
+          <label><input type="checkbox" value="Adaptívny tempomat"> Adaptívny tempomat</label>
 
-  <label><input type="checkbox" value="Asistent rozjazdu do kopca"> Asistent rozjazdu do kopca</label>
-  <label><input type="checkbox" value="ASR"> ASR</label>
-  <label><input type="checkbox" value="Autorádio"> Autorádio</label>
-  <label><input type="checkbox" value="Bezdrôtové nabíjanie pre smartphony"> Bezdrôtové nabíjanie pre smartphony</label>
-  <label><input type="checkbox" value="Bezklúčové otváranie dverí"> Bezklúčové otváranie dverí</label>
+          <label><input type="checkbox" value="Airbagy"> Airbagy</label>
+          <label><input type="checkbox" value="Airbagy - počet"> Airbagy - počet</label>
+          <label><input type="checkbox" value="Android Auto"> Android Auto</label>
+          <label><input type="checkbox" value="Apple CarPlay"> Apple CarPlay</label>
+          <label><input type="checkbox" value="Asistent jazdných pruhov"> Asistent jazdných pruhov</label>
 
-  <label><input type="checkbox" value="Bezklúčové štartovanie"> Bezklúčové štartovanie</label>
-  <label><input type="checkbox" value="Bluetooth handsfree"> Bluetooth handsfree</label>
-  <label><input type="checkbox" value="Brzdový asistent"> Brzdový asistent</label>
-  <label><input type="checkbox" value="Centrálne zamykanie"> Centrálne zamykanie</label>
-  <label><input type="checkbox" value="Dažďový senzor"> Dažďový senzor</label>
+          <label><input type="checkbox" value="Asistent rozjazdu do kopca"> Asistent rozjazdu do kopca</label>
+          <label><input type="checkbox" value="ASR"> ASR</label>
+          <label><input type="checkbox" value="Autorádio"> Autorádio</label>
+          <label><input type="checkbox" value="Bezdrôtové nabíjanie pre smartphony"> Bezdrôtové nabíjanie pre smartphony</label>
+          <label><input type="checkbox" value="Bezklúčové otváranie dverí"> Bezklúčové otváranie dverí</label>
 
-  <label><input type="checkbox" value="Deaktivácia airbagov"> Deaktivácia airbagov</label>
-  <label><input type="checkbox" value="Diaľkové ovládanie zamykania"> Diaľkové ovládanie zamykania</label>
-  <label><input type="checkbox" value="Dotykový displej"> Dotykový displej</label>
-  <label><input type="checkbox" value="EBD"> EBD</label>
-  <label><input type="checkbox" value="EBV"> EBV</label>
+          <label><input type="checkbox" value="Bezklúčové štartovanie"> Bezklúčové štartovanie</label>
+          <label><input type="checkbox" value="Bluetooth handsfree"> Bluetooth handsfree</label>
+          <label><input type="checkbox" value="Brzdový asistent"> Brzdový asistent</label>
+          <label><input type="checkbox" value="Centrálne zamykanie"> Centrálne zamykanie</label>
+          <label><input type="checkbox" value="Dažďový senzor"> Dažďový senzor</label>
 
-  <label><input type="checkbox" value="Elektrické okná"> Elektrické okná</label>
-  <label><input type="checkbox" value="Elektrické sedadlá"> Elektrické sedadlá</label>
-  <label><input type="checkbox" value="Elektrické zrkadlá"> Elektrické zrkadlá</label>
-  <label><input type="checkbox" value="ESP"> ESP</label>
-  <label><input type="checkbox" value="Hliníkové disky"> Hliníkové disky</label>
+          <label><input type="checkbox" value="Deaktivácia airbagov"> Deaktivácia airbagov</label>
+          <label><input type="checkbox" value="Diaľkové ovládanie zamykania"> Diaľkové ovládanie zamykania</label>
+          <label><input type="checkbox" value="Dotykový displej"> Dotykový displej</label>
+          <label><input type="checkbox" value="EBD"> EBD</label>
+          <label><input type="checkbox" value="EBV"> EBV</label>
 
-  <label><input type="checkbox" value="Hmlovky"> Hmlovky</label>
-  <label><input type="checkbox" value="Imobilizér"> Imobilizér</label>
-  <label><input type="checkbox" value="Isofix"> Isofix</label>
-  <label><input type="checkbox" value="Klimatizácia"> Klimatizácia</label>
-  <label><input type="checkbox" value="Kontrola mŕtveho uhla"> Kontrola mŕtveho uhla</label>
+          <label><input type="checkbox" value="Elektrické okná"> Elektrické okná</label>
+          <label><input type="checkbox" value="Elektrické sedadlá"> Elektrické sedadlá</label>
+          <label><input type="checkbox" value="Elektrické zrkadlá"> Elektrické zrkadlá</label>
+          <label><input type="checkbox" value="ESP"> ESP</label>
+          <label><input type="checkbox" value="Hliníkové disky"> Hliníkové disky</label>
 
-  <label><input type="checkbox" value="Lakťová opierka"> Lakťová opierka</label>
-  <label><input type="checkbox" value="LED svetlomety"> LED svetlomety</label>
-  <label><input type="checkbox" value="LED svietenie"> LED svietenie</label>
-  <label><input type="checkbox" value="Multifunkčný volant"> Multifunkčný volant</label>
-  <label><input type="checkbox" value="Natáčacie svetlomety"> Natáčacie svetlomety</label>
+          <label><input type="checkbox" value="Hmlovky"> Hmlovky</label>
+          <label><input type="checkbox" value="Imobilizér"> Imobilizér</label>
+          <label><input type="checkbox" value="Isofix"> Isofix</label>
+          <label><input type="checkbox" value="Klimatizácia"> Klimatizácia</label>
+          <label><input type="checkbox" value="Kontrola mŕtveho uhla"> Kontrola mŕtveho uhla</label>
 
-  <label><input type="checkbox" value="Ostrekovače svetlometov"> Ostrekovače svetlometov</label>
-  <label><input type="checkbox" value="Palubný počítač"> Palubný počítač</label>
-  <label><input type="checkbox" value="Parkovacia kamera"> Parkovacia kamera</label>
-  <label><input type="checkbox" value="Parkovacie senzory"> Parkovacie senzory</label>
-  <label><input type="checkbox" value="Strešný nosič"> Strešný nosič</label>
+          <label><input type="checkbox" value="Lakťová opierka"> Lakťová opierka</label>
+          <label><input type="checkbox" value="LED svetlomety"> LED svetlomety</label>
+          <label><input type="checkbox" value="LED svietenie"> LED svietenie</label>
+          <label><input type="checkbox" value="Multifunkčný volant"> Multifunkčný volant</label>
+          <label><input type="checkbox" value="Natáčacie svetlomety"> Natáčacie svetlomety</label>
 
-  <label><input type="checkbox" value="Svetelný senzor"> Svetelný senzor</label>
-  <label><input type="checkbox" value="Systém kontroly tlaku v pneumatikách (TPMS)"> Systém kontroly tlaku v pneumatikách (TPMS)</label>
-  <label><input type="checkbox" value="Tempomat"> Tempomat</label>
-  <label><input type="checkbox" value="Vyhrievané sedadlá"> Vyhrievané sedadlá</label>
-</div>
+          <label><input type="checkbox" value="Ostrekovače svetlometov"> Ostrekovače svetlometov</label>
+          <label><input type="checkbox" value="Palubný počítač"> Palubný počítač</label>
+          <label><input type="checkbox" value="Parkovacia kamera"> Parkovacia kamera</label>
+          <label><input type="checkbox" value="Parkovacie senzory"> Parkovacie senzory</label>
+          <label><input type="checkbox" value="Strešný nosič"> Strešný nosič</label>
 
-  
-</div>
-
-
-      <div class="actions">
-        <button class="btnx primary" id="submitBtn" type="submit">Odoslať</button>
-        <button class="btnx" type="button" id="resetBtn">Vyčistiť formulár</button>
-        <button class="btnx danger" type="button" id="deleteBtn" style="display:none">Vymazať vybrané</button>
-        <button class="btnx" type="button" id="hideBtn" style="display:none">Skryť vybrané</button>
-        <button class="btnx" type="button" id="unhideBtn" style="display:none">Zobraziť vybrané</button>
+          <label><input type="checkbox" value="Svetelný senzor"> Svetelný senzor</label>
+          <label><input type="checkbox" value="Systém kontroly tlaku v pneumatikách (TPMS)"> Systém kontroly tlaku v pneumatikách (TPMS)</label>
+          <label><input type="checkbox" value="Tempomat"> Tempomat</label>
+          <label><input type="checkbox" value="Vyhrievané sedadlá"> Vyhrievané sedadlá</label>
+        </div>
       </div>
 
       <!-- skryté: index upravovaného záznamu -->
@@ -281,30 +356,63 @@
     <div class="list">
       <div class="toolbar">
         <div class="search"><input type="text" id="search" placeholder="Hľadať v ponuke…"></div>
-        <div class="actions">
-  <label class="pill-mini" style="display:flex; gap:6px; align-items:center; cursor:pointer;">
-    <input type="checkbox" id="showHidden">
-    Zobraziť skryté
-  </label>
-  <button class="btnx" id="exportBtn" type="button">Exportovať auta.json</button>
-  <button class="btnx" id="reloadBtn" type="button">Načítať zo súboru</button>
-</div>
 
+        <div class="filters" style="display:flex; gap:30px; flex-wrap:wrap; margin-top:8px">
+          <!-- Značka -->
+          <select id="filterBrand">
+            <option value="">Všetky značky</option>
+            <option value="Subaru">Subaru</option>
+            <option value="Jeep">Jeep</option>
+            <option value="KGM">KGM</option>
+          </select>
+
+          <!-- Rok -->
+          <select id="filterYear">
+            <option value="">Všetky roky</option>
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+            <option value="2021">2021</option>
+          </select>
+
+          <!-- Cena -->
+          <select id="filterPrice">
+            <option value="">Všetky ceny</option>
+            <option value="0-20000">do 20 000 €</option>
+            <option value="20000-30000">20 000 – 30 000 €</option>
+            <option value="30000-40000">30 000 – 40 000 €</option>
+            <option value="40000-999999">40 000 €+</option>
+          </select>
+        </div>
+
+        <div class="actions">
+          <label class="pp-check pp-check--sm">
+            <input type="checkbox" id="showHidden">
+            <svg viewBox="0 0 18 18" aria-hidden="true">
+              <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 17,16 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
+              <polyline points="1 9 7 14 15 4"></polyline>
+            </svg>
+            <span class="pp-check__text">Zobraziť skryté</span>
+          </label>
+          <button class="btnx" id="exportBtn" type="button">Exportovať auta.json</button>
+          <button class="btnx" id="reloadBtn" type="button">Načítať zo súboru</button>
+        </div>
       </div>
 
       <table id="carsTable">
         <thead>
           <tr>
             <th style="width:44px; text-align:center;">
-  <label class="pp-check pp-check--sm" title="Označiť všetky">
-    <input type="checkbox" id="checkAll">
-    <svg viewBox="0 0 18 18" aria-hidden="true">
-      <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 16,17 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
-      <polyline points="1 9 7 14 15 4"></polyline>
-    </svg>
-  </label>
-</th>
-
+              <label class="pp-check pp-check--sm" title="Označiť všetky">
+                <input type="checkbox" id="checkAll">
+                <svg viewBox="0 0 18 18" aria-hidden="true">
+                  <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 17,16 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
+                  <polyline points="1 9 7 14 15 4"></polyline>
+                </svg>
+              </label>
+            </th>
             <th>#</th>
             <th>Značka</th>
             <th>Model</th>
@@ -321,283 +429,420 @@
   </div>
 
   <script>
-  // =============================
-  // CONFIG
-  // =============================
-  const API_BASE = (location.protocol === 'file:')
-    ? 'https://ppauto.sk/admin.html'   // <-- ak otváraš admin.html lokálne, nechaj tu tvoju Vercel doménu
-    : location.origin;
+    // =============================
+    // CONFIG
+    // =============================
+    const API_BASE = (location.protocol === 'file:')
+      ? 'https://ppauto.sk'
+      : location.origin;
 
-  const apiUrl = (path) => `${API_BASE}${path}`;
+    const apiUrl = (path) => `${API_BASE}${path}`;
 
-  // =============================
-  // STATE + ELEMENTS
-  // =============================
-  let cars = [];
+    // =============================
+    // STATE + ELEMENTS
+    // =============================
+    let cars = [];
 
-  const form = document.getElementById('carForm');
-  const editIndexInput = document.getElementById('editIndex');
-  const submitBtn = document.getElementById('submitBtn');
+    const filterBrand = document.getElementById('filterBrand');
+    const filterYear = document.getElementById('filterYear');
+    const filterPrice = document.getElementById('filterPrice');
 
-  const deleteBtn = document.getElementById('deleteBtn');
-  const hideBtn = document.getElementById('hideBtn');
-  const unhideBtn = document.getElementById('unhideBtn');
+    const form = document.getElementById('carForm');
+    const editIndexInput = document.getElementById('editIndex');
+    const submitBtn = document.getElementById('submitBtn');
 
-  const zlava = document.getElementById('zlava');
-  const skryte = document.getElementById('skryte');
-  const novaCenaWrap = document.getElementById('novaCenaWrap');
+    const deleteBtn = document.getElementById('deleteBtn');
+    const hideBtn = document.getElementById('hideBtn');
+    const unhideBtn = document.getElementById('unhideBtn');
 
-  const imgInput = document.getElementById('obrazok');
-  const imgPreview = document.getElementById('imgPreview');
-  const fileEl = document.getElementById('fileInput');
+    const zlava = document.getElementById('zlava');
+    const skryte = document.getElementById('skryte');
+    const novaCenaWrap = document.getElementById('novaCenaWrap');
 
-  const tableBody = document.querySelector('#carsTable tbody');
-  const searchInput = document.getElementById('search');
-  const checkAll = document.getElementById('checkAll');
-  const showHidden = document.getElementById('showHidden');
+    const tableBody = document.querySelector('#carsTable tbody');
+    const searchInput = document.getElementById('search');
+    const checkAll = document.getElementById('checkAll');
+    const showHidden = document.getElementById('showHidden');
 
-  // =============================
-  // INIT
-  // =============================
-  if (tableBody) {
-    tableBody.addEventListener('click', (e) => {
-      const el = (e.target instanceof Element) ? e.target : e.target?.parentElement;
-      if (!el) return;
+    // nové: titulka + galéria
+    const titulkaInput = document.getElementById('titulkaInput');
+    const galeriaInput = document.getElementById('galeriaInput');
+    const titulkaPreview = document.getElementById('titulkaPreview');
+    const galeriaPreview = document.getElementById('galeriaPreview');
 
-      const editBtn = el.closest('[data-edit]');
-      if (editBtn) {
-        e.preventDefault();
-        const idx = parseInt(editBtn.dataset.edit, 10);
-        if (!Number.isNaN(idx)) onEdit(idx);
-        return;
-      }
+    // =============================
+    // INIT
+    // =============================
+    if (tableBody) {
+      tableBody.addEventListener('click', (e) => {
+        const el = (e.target instanceof Element) ? e.target : e.target?.parentElement;
+        if (!el) return;
 
-      const delBtn = el.closest('[data-del]');
-      if (delBtn) {
-        e.preventDefault();
-        const idx = parseInt(delBtn.dataset.del, 10);
-        if (!Number.isNaN(idx)) onDelete(idx);
-        return;
-      }
+        const editBtn = el.closest('[data-edit]');
+        if (editBtn) {
+          e.preventDefault();
+          const idx = parseInt(editBtn.dataset.edit, 10);
+          if (!Number.isNaN(idx)) onEdit(idx);
+          return;
+        }
 
-      const hideOneBtn = el.closest('[data-hide]');
-      if (hideOneBtn) {
-        e.preventDefault();
-        const idx = parseInt(hideOneBtn.dataset.hide, 10);
-        if (!Number.isNaN(idx)) onSetHidden([idx], true);
-        return;
-      }
+        const delBtn = el.closest('[data-del]');
+        if (delBtn) {
+          e.preventDefault();
+          const idx = parseInt(delBtn.dataset.del, 10);
+          if (!Number.isNaN(idx)) onDelete(idx);
+          return;
+        }
 
-      const unhideOneBtn = el.closest('[data-unhide]');
-      if (unhideOneBtn) {
-        e.preventDefault();
-        const idx = parseInt(unhideOneBtn.dataset.unhide, 10);
-        if (!Number.isNaN(idx)) onSetHidden([idx], false);
-        return;
-      }
-    });
-  } else {
-    console.error('Chýba #carsTable tbody – nenašiel som tableBody.');
-  }
+        const hideOneBtn = el.closest('[data-hide]');
+        if (hideOneBtn) {
+          e.preventDefault();
+          const idx = parseInt(hideOneBtn.dataset.hide, 10);
+          if (!Number.isNaN(idx)) onSetHidden([idx], true);
+          return;
+        }
 
-  document.getElementById('reloadBtn').addEventListener('click', loadFromApi);
-  document.getElementById('exportBtn').addEventListener('click', exportJSON);
-  document.getElementById('resetBtn').addEventListener('click', () => setFormMode('create'));
- 
-  deleteBtn.addEventListener('click', onDeleteSelected);
-  hideBtn.addEventListener('click', () => onSetHiddenSelected(true));
-  unhideBtn.addEventListener('click', () => onSetHiddenSelected(false));
-
-  searchInput.addEventListener('input', renderTable);
-  zlava.addEventListener('change', toggleZlavaUI);
-  showHidden.addEventListener('change', renderTable);
-
-  checkAll.addEventListener('change', () => {
-    document.querySelectorAll('.row-check').forEach(cb => cb.checked = checkAll.checked);
-    updateBulkActionUI();
-  });
-
-  fileEl.addEventListener('change', () => {
-    if (!fileEl.files || !fileEl.files[0]) {
-      imgPreview.innerHTML = '<small class="hint">Vyber súbor. Pri „Odoslať“ sa automaticky nahrá a uloží.</small>';
-      return;
-    }
-    const url = URL.createObjectURL(fileEl.files[0]);
-    imgPreview.innerHTML = `<img src="${url}" alt="náhľad">`;
-  });
-
-  toggleZlavaUI();
-  loadFromApi();
-  renderPreview();
-
-  // =============================
-  // HELPERS
-  // =============================
-  function isHidden(car) {
-    return !!(car && (car.skryte === true || car.hidden === true));
-  }
-
-  function toggleZlavaUI() {
-    if (zlava.checked) {
-      novaCenaWrap.style.display = 'block';
+        const unhideOneBtn = el.closest('[data-unhide]');
+        if (unhideOneBtn) {
+          e.preventDefault();
+          const idx = parseInt(unhideOneBtn.dataset.unhide, 10);
+          if (!Number.isNaN(idx)) onSetHidden([idx], false);
+          return;
+        }
+      });
     } else {
-      novaCenaWrap.style.display = 'none';
-      const novaCenaEl = form.elements['nova_cena'];
-      if (novaCenaEl) novaCenaEl.value = '';
-    }
-  }
-
-  function renderPreview() {
-    const url = (imgInput.value || '').trim();
-    if (!url) {
-      imgPreview.innerHTML = '<small class="hint">Vyber súbor. Pri „Odoslať“ sa automaticky nahrá a uloží.</small>';
-      return;
-    }
-    imgPreview.innerHTML = `<img src="${url}" alt="náhľad obrázka">`;
-  }
-
-  function setFormMode(mode, index = -1) {
-    if (mode === 'create') {
-      form.reset();
-      form.querySelectorAll('.vybava-grid input[type="checkbox"]')
-      .forEach(cb => cb.checked = false);
-
-      form.elements['metaliza'].checked = false;
-      editIndexInput.value = -1;
-      submitBtn.textContent = 'Odoslať';
-
-      deleteBtn.style.display = 'none';
-      hideBtn.style.display = 'none';
-      unhideBtn.style.display = 'none';
-      checkAll.checked = false;
-
-      zlava.checked = false;
-      skryte.checked = false;
-      toggleZlavaUI();
-
-      imgInput.value = '';
-      fileEl.value = '';
-      renderPreview();
-    } else if (mode === 'edit') {
-      editIndexInput.value = index;
-      submitBtn.textContent = 'Uložiť zmeny';
-
-      deleteBtn.style.display = 'none';
-      hideBtn.style.display = 'none';
-      unhideBtn.style.display = 'none';
-
-      toggleZlavaUI();
-      renderPreview();
-    }
-  }
-
-  function getSelectedIndexes() {
-    return [...document.querySelectorAll('.row-check:checked')]
-      .map(ch => parseInt(ch.dataset.index, 10))
-      .filter(n => !Number.isNaN(n));
-  }
-
-  function updateBulkActionUI() {
-    const all = document.querySelectorAll('.row-check');
-    const selected = getSelectedIndexes();
-
-    checkAll.checked = all.length > 0 && selected.length === all.length;
-
-    if (!selected.length) {
-      deleteBtn.style.display = 'none';
-      hideBtn.style.display = 'none';
-      unhideBtn.style.display = 'none';
-      return;
+      console.error('Chýba #carsTable tbody – nenašiel som tableBody.');
     }
 
-    deleteBtn.style.display = 'inline-flex';
+    filterBrand && filterBrand.addEventListener('change', renderTable);
+    filterYear && filterYear.addEventListener('change', renderTable);
+    filterPrice && filterPrice.addEventListener('change', renderTable);
 
-    const hasVisible = selected.some(i => !isHidden(cars[i]));
-    const hasHidden = selected.some(i => isHidden(cars[i]));
+    document.getElementById('reloadBtn').addEventListener('click', loadFromApi);
+    document.getElementById('exportBtn').addEventListener('click', exportJSON);
+    document.getElementById('resetBtn').addEventListener('click', () => setFormMode('create'));
 
-    hideBtn.style.display = hasVisible ? 'inline-flex' : 'none';
-    unhideBtn.style.display = hasHidden ? 'inline-flex' : 'none';
+    deleteBtn.addEventListener('click', onDeleteSelected);
+    hideBtn.addEventListener('click', () => onSetHiddenSelected(true));
+    unhideBtn.addEventListener('click', () => onSetHiddenSelected(false));
+
+    searchInput.addEventListener('input', renderTable);
+    zlava.addEventListener('change', toggleZlavaUI);
+    showHidden.addEventListener('change', renderTable);
+
+    checkAll.addEventListener('change', () => {
+      document.querySelectorAll('.row-check').forEach(cb => cb.checked = checkAll.checked);
+      updateBulkActionUI();
+    });
+
+    // náhľad titulky
+    titulkaInput?.addEventListener('change', () => {
+      const f = titulkaInput.files?.[0];
+      if (!f) return;
+      titulkaPreview.innerHTML = `<img src="${URL.createObjectURL(f)}" alt="titulka">`;
+    });
+
+    // náhľad galérie
+    galeriaInput?.addEventListener('change', () => {
+      galeriaPreview.innerHTML = '';
+      [...(galeriaInput.files || [])].forEach(f => {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(f);
+        img.style.maxWidth = '120px';
+        img.style.margin = '4px';
+        galeriaPreview.appendChild(img);
+      });
+    });
+
+    
+
+    // =============================
+    // HELPERS
+    // =============================
+
+    // PROGRESS UI
+const progressOverlay = document.getElementById('progressOverlay');
+const progressFill = document.getElementById('progressFill');
+const progressText = document.getElementById('progressText');
+const progressPercent = document.getElementById('progressPercent');
+
+let PROGRESS_TOTAL = 1;
+let PROGRESS_DONE = 0;
+
+
+function normalizeGearbox(raw) {
+  const s = String(raw || '').trim().toUpperCase();
+  // typicky chceme AT / MT; ale necháme aj iné hodnoty, len ich očistíme
+  return s.replace(/\s+/g, '');
+}
+
+function parseLegacyPrevodovka(raw) {
+  const txt = String(raw || '').trim();
+  if (!txt) return { typ: '', paket: '' };
+
+  const parts = txt
+    .split(/•|·|\|/g)
+    .map(p => p.trim())
+    .filter(Boolean);
+
+  if (!parts.length) return { typ: '', paket: '' };
+
+  if (parts.length === 1) {
+    const one = normalizeGearbox(parts[0]);
+    // heuristika: ak je to AT/MT/CVT/DCT/DSG tak to ber ako typ, inak ako paket
+    if (/^(AT|MT|CVT|DCT|DSG)$/.test(one)) return { typ: one, paket: '' };
+    return { typ: '', paket: parts[0] };
   }
 
-  // =============================
-  // DATA IO
-  // =============================
-  async function loadFromApi() {
-    try {
-      // Admin vždy načíta všetko (aj skryté)
-      const res = await fetch(apiUrl('/api/cars?include_hidden=1'), { cache: 'no-store' });
-      if (!res.ok) {
-        const t = await res.text().catch(() => '');
-        throw new Error(`GET /api/cars failed: ${res.status} ${t}`);
+  return { typ: normalizeGearbox(parts[0]), paket: parts.slice(1).join(' • ') };
+}
+
+function buildLegacyPrevodovka(typ, paket) {
+  const t = String(typ || '').trim();
+  const p = String(paket || '').trim();
+  if (t && p) return `${t} • ${p}`;
+  if (t) return t;
+  if (p) return p;
+  return '';
+}
+
+function displayPrevodovkaForSearch(car) {
+  const legacy = String(car?.prevodovka || '').trim();
+  if (legacy) return legacy;
+
+  const typ = normalizeGearbox(car?.typ_prevodovky || '');
+  const paket = String(car?.vybava_paket || '').trim();
+  return buildLegacyPrevodovka(typ, paket);
+}
+
+
+
+function showProgress(totalSteps = 1, text = 'Pracujem…') {
+  PROGRESS_TOTAL = Math.max(1, Number(totalSteps) || 1);
+  PROGRESS_DONE = 0;
+
+  if (progressOverlay) progressOverlay.hidden = false;
+  setProgress(0, text);
+}
+
+function setProgress(doneSteps, text) {
+  PROGRESS_DONE = Math.min(PROGRESS_TOTAL, Math.max(0, Number(doneSteps) || 0));
+  const pct = Math.round((PROGRESS_DONE / PROGRESS_TOTAL) * 100);
+
+  if (progressFill) progressFill.style.width = `${pct}%`;
+  if (progressText) progressText.textContent = text || 'Pracujem…';
+  if (progressPercent) progressPercent.textContent = `${pct}%`;
+}
+
+function stepProgress(text) {
+  setProgress(PROGRESS_DONE + 1, text);
+}
+
+function hideProgress() {
+  if (progressOverlay) progressOverlay.hidden = true;
+  PROGRESS_TOTAL = 1;
+  PROGRESS_DONE = 0;
+  if (progressFill) progressFill.style.width = `0%`;
+  if (progressText) progressText.textContent = '';
+  if (progressPercent) progressPercent.textContent = `0%`;
+}
+
+
+    function getEffectivePrice(car) {
+      const raw = (car.nova_cena || car.stara_cena || '').replace(/[^\d]/g, '');
+      return raw ? Number(raw) : null;
+    }
+
+    function isHidden(car) {
+      return !!(car && (car.skryte === true || car.hidden === true));
+    }
+
+    function toggleZlavaUI() {
+      if (zlava.checked) {
+        novaCenaWrap.style.display = 'block';
+      } else {
+        novaCenaWrap.style.display = 'none';
+        const novaCenaEl = form.elements['nova_cena'];
+        if (novaCenaEl) novaCenaEl.value = '';
       }
-      cars = await res.json();
-      renderTable();
-    } catch (e) {
-      console.error('Nepodarilo sa načítať /api/cars', e);
-      cars = [];
-      renderTable();
     }
+
+    function resetImagePreviews() {
+      if (titulkaPreview) titulkaPreview.innerHTML = '<small class="hint">Titulná fotka pre ponuku áut</small>';
+      if (galeriaPreview) galeriaPreview.innerHTML = '<small class="hint">Prvá fotka bude titulná</small>';
+      if (titulkaInput) titulkaInput.value = '';
+      if (galeriaInput) galeriaInput.value = '';
+    }
+
+    function setFormMode(mode, index = -1) {
+      if (mode === 'create') {
+        form.reset();
+        delete form.dataset.carId;
+
+        form.querySelectorAll('.vybava-grid input[type="checkbox"]').forEach(cb => cb.checked = false);
+
+        form.elements['metaliza'].checked = false;
+        editIndexInput.value = -1;
+        submitBtn.textContent = 'Odoslať';
+
+        deleteBtn.style.display = 'none';
+        hideBtn.style.display = 'none';
+        unhideBtn.style.display = 'none';
+        checkAll.checked = false;
+
+        zlava.checked = false;
+        skryte.checked = false;
+        toggleZlavaUI();
+
+        resetImagePreviews();
+      } else if (mode === 'edit') {
+        editIndexInput.value = index;
+        submitBtn.textContent = 'Uložiť zmeny';
+
+        deleteBtn.style.display = 'none';
+        hideBtn.style.display = 'none';
+        unhideBtn.style.display = 'none';
+
+        toggleZlavaUI();
+
+        // file inputy pri editácii sa nedajú predvyplniť – necháme prázdne
+        if (titulkaInput) titulkaInput.value = '';
+        if (galeriaInput) galeriaInput.value = '';
+      }
+    }
+
+    function getSelectedIndexes() {
+      return [...document.querySelectorAll('.row-check:checked')]
+        .map(ch => parseInt(ch.dataset.index, 10))
+        .filter(n => !Number.isNaN(n));
+    }
+
+    function updateBulkActionUI() {
+      const all = document.querySelectorAll('.row-check');
+      const selected = getSelectedIndexes();
+
+      checkAll.checked = all.length > 0 && selected.length === all.length;
+
+      if (!selected.length) {
+        deleteBtn.style.display = 'none';
+        hideBtn.style.display = 'none';
+        unhideBtn.style.display = 'none';
+        return;
+      }
+
+      deleteBtn.style.display = 'inline-flex';
+
+      const hasVisible = selected.some(i => !isHidden(cars[i]));
+      const hasHidden = selected.some(i => isHidden(cars[i]));
+
+      hideBtn.style.display = hasVisible ? 'inline-flex' : 'none';
+      unhideBtn.style.display = hasHidden ? 'inline-flex' : 'none';
+    }
+
+    // =============================
+    // DATA IO
+    // =============================
+    async function loadFromApi({ withProgress = true } = {}) {
+  if (withProgress) showProgress(1, 'Načítavam autá…');
+
+  try {
+    const res = await fetch(apiUrl('/api/cars?include_hidden=1'), { cache: 'no-store' });
+    if (!res.ok) {
+      const t = await res.text().catch(() => '');
+      throw new Error(`GET /api/cars failed: ${res.status} ${t}`);
+    }
+
+    cars = await res.json();
+
+    if (filterBrand) filterBrand.value = '';
+    if (filterYear) filterYear.value = '';
+    if (filterPrice) filterPrice.value = '';
+    searchInput.value = '';
+
+    renderTable();
+
+    if (withProgress) setProgress(1, 'Hotovo');
+  } catch (e) {
+    console.error('Nepodarilo sa načítať /api/cars', e);
+    cars = [];
+    renderTable();
+  } finally {
+    if (withProgress) hideProgress();
   }
+}
 
-  function exportJSON() {
-    const blob = new Blob([JSON.stringify(cars, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'auta.json';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
 
-  // =============================
-  // TABLE RENDER
-  // =============================
-  function renderTable() {
-    checkAll.checked = false;
-    deleteBtn.style.display = 'none';
-    hideBtn.style.display = 'none';
-    unhideBtn.style.display = 'none';
+    function exportJSON() {
+      const blob = new Blob([JSON.stringify(cars, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'auta.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
 
-    const q = searchInput.value.trim().toLowerCase();
-    tableBody.innerHTML = '';
+    // =============================
+    // TABLE RENDER
+    // =============================
+    function renderTable() {
+      checkAll.checked = false;
+      deleteBtn.style.display = 'none';
+      hideBtn.style.display = 'none';
+      unhideBtn.style.display = 'none';
 
-    cars
-      .map((c, i) => ({ ...c, _i: i }))
-      .filter(c => {
-        // filtrovanie skrytých v tabuľke (len v admin view)
-        if (!showHidden.checked && isHidden(c)) return false;
+      tableBody.innerHTML = '';
 
-        const hay = [
-          c.znacka, c.model, c.rok, c.palivo, c.prevodovka,
-          (c.tagy || []).join(' ')
-        ].join(' ').toLowerCase();
+      const q = searchInput.value.trim().toLowerCase();
 
-        return !q || hay.includes(q);
-      })
-      .forEach((c) => {
+      cars.forEach((c, i) => {
+        if (!showHidden.checked && isHidden(c)) return;
+
+        if (q) {
+          const hay = [
+            c.znacka,
+            c.model,
+            c.rok,
+            c.palivo,
+            displayPrevodovkaForSearch(c),
+            (c.tagy || []).join(' ')
+          ].join(' ').toLowerCase();
+
+          if (!hay.includes(q)) return;
+        }
+
+        if (filterBrand.value && c.znacka !== filterBrand.value) return;
+        if (filterYear.value && String(c.rok) !== filterYear.value) return;
+
+        if (filterPrice.value) {
+          const [min, max] = filterPrice.value.split('-').map(Number);
+          const price = getEffectivePrice(c);
+          if (price === null) return;
+          if (price < min || price > max) return;
+        }
+
         const tr = document.createElement('tr');
-
-        const cenaLabel = (c.nova_cena && String(c.nova_cena).trim() !== '')
-          ? `${c.stara_cena || ''} → ${c.nova_cena}`
-          : (c.stara_cena || '—');
-
         const hidden = isHidden(c);
         if (hidden) tr.style.opacity = '0.55';
+
+        const cenaLabel =
+          c.nova_cena && String(c.nova_cena).trim() !== ''
+            ? `${c.stara_cena || ''} → ${c.nova_cena}`
+            : (c.stara_cena || '—');
 
         tr.innerHTML = `
           <td>
             <label class="pp-check pp-check--sm">
-  <input type="checkbox" class="row-check" data-index="0">
-  <svg viewBox="0 0 18 18" aria-hidden="true">
-    <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 16,17 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
-    <polyline points="1 9 7 14 15 4"></polyline>
-  </svg>
-</label>
-
+              <input type="checkbox" class="row-check" data-index="${i}">
+              <svg viewBox="0 0 18 18" aria-hidden="true">
+                <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 17,16 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
+                <polyline points="1 9 7 14 15 4"></polyline>
+              </svg>
+            </label>
           </td>
-          <td>${c._i + 1}</td>
+          <td>${i + 1}</td>
           <td>${c.znacka || ''}</td>
           <td>${c.model || ''}</td>
           <td>${c.rok ?? ''}</td>
@@ -605,92 +850,159 @@
           <td>${hidden ? '<span class="pill-mini">SKRYTÉ</span>' : ''}</td>
           <td>${(c.tagy || []).join(', ')}</td>
           <td class="cell-actions">
-            <button class="btnx" type="button" data-edit="${c._i}">Upraviť</button>
-            ${hidden
-              ? `<button class="btnx" type="button" data-unhide="${c._i}">Zobraziť</button>`
-              : `<button class="btnx" type="button" data-hide="${c._i}">Skryť</button>`
+            <button class="btnx" type="button" data-edit="${i}">Upraviť</button>
+            ${
+              hidden
+                ? `<button class="btnx" type="button" data-unhide="${i}">Zobraziť</button>`
+                : `<button class="btnx" type="button" data-hide="${i}">Skryť</button>`
             }
-            <button class="btnx danger" type="button" data-del="${c._i}">Vymazať</button>
+            <button class="btnx danger" type="button" data-del="${i}">Vymazať</button>
           </td>
         `;
 
         tableBody.appendChild(tr);
         tr.querySelector('.row-check').addEventListener('change', updateBulkActionUI);
       });
+    }
+
+    // =============================
+    // CRUD
+    // =============================
+    function slugify(input) {
+      return String(input || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .replace(/-{2,}/g, '-');
+    }
+
+    function generateUniqueCarId(base, usedIds) {
+      const cleanBase = slugify(base) || 'auto';
+      let id = cleanBase;
+      let n = 1;
+      while (usedIds.has(id)) {
+        n += 1;
+        id = `${cleanBase}-${n}`;
+      }
+      return id;
+    }
+
+    form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const idx = parseInt(editIndexInput.value, 10);
+  const isEdit = Number.isInteger(idx) && idx >= 0;
+
+  const rokRaw = (form.elements['rok']?.value || '').trim();
+  const znackaVal = (form.elements['znacka']?.value || '').trim();
+  const modelVal = (form.elements['model']?.value || '').trim();
+
+  if (!znackaVal || !modelVal) {
+    alert('Vyplň značku a model.');
+    return;
+  }
+  if (!rokRaw) {
+    alert('Vyplň rok.');
+    return;
   }
 
-  // =============================
-  // CRUD
-  // =============================
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+  // Progress počítame až po validácii (aby sa overlay nezasekol na returne)
+  const willUploadTitle = !!(titulkaInput?.files && titulkaInput.files[0]);
+  const willUploadGallery = !!(galeriaInput?.files && galeriaInput.files.length > 0);
 
-    const idx = parseInt(editIndexInput.value, 10);
-    const isEdit = Number.isInteger(idx) && idx >= 0;
+  const uploadsCount =
+    (willUploadTitle ? 1 : 0) +
+    (willUploadGallery ? galeriaInput.files.length : 0);
 
-    const rokRaw = (form.elements['rok']?.value || '').trim();
-    const znackaVal = (form.elements['znacka']?.value || '').trim();
-    const modelVal = (form.elements['model']?.value || '').trim();
+  const totalSteps = uploadsCount + 1; // +1 = uloženie záznamu
+  showProgress(totalSteps, uploadsCount ? 'Nahrávam fotky…' : 'Ukladám…');
 
-    if (!znackaVal || !modelVal) {
-      alert('Vyplň značku a model.');
-      return;
-    }
-    if (!rokRaw) {
-      alert('Vyplň rok.');
-      return;
-    }
-
-    // 1) upload (ak je vybraný nový súbor)
-    let imageUrl = (form.elements['obrazok']?.value || '').trim();
-
-    if (fileEl.files && fileEl.files[0]) {
-      if (fileEl.files[0].size > 10 * 1024 * 1024) {
-        alert('Súbor je príliš veľký (max 10 MB).');
-        return;
-      }
-
-      const base64 = await fileToBase64(fileEl.files[0]);
-
-      const up = await fetch(apiUrl('/api/upload-image'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          filename: fileEl.files[0].name,
-          contentBase64: base64
-        })
-      });
-
-      if (!up.ok) {
-        const t = await up.text().catch(() => '');
-        console.error('Upload failed:', up.status, t);
-        alert('Nahratie obrázka zlyhalo (' + up.status + '). Pozri konzolu.');
-        return;
-      }
-
-      const upData = await up.json().catch(() => ({}));
-      imageUrl = upData.url || '';
-      form.elements['obrazok'].value = imageUrl;
-    }
-
-    // 2) dáta auta
+  try {
     const maZlavu = zlava.checked;
 
+    // ID: pri editácii nechaj existujúce, pri vytvorení vygeneruj
+    const currentId = (form.dataset.carId || '').toString().trim();
+    const usedIds = new Set(
+      (cars || [])
+        .map(c => (c && c.id ? String(c.id).trim() : ''))
+        .filter(Boolean)
+        .filter(id => id !== currentId)
+    );
+
+    const baseId = `${znackaVal}-${modelVal}-${rokRaw}`;
+    const carId = currentId || generateUniqueCarId(baseId, usedIds);
+
+    // ====== obrázky (titulka + galéria) ======
+    const existing = isEdit ? (cars[idx] || {}) : {};
+
+    // TITULKA: ak nevyberieš novú, zober existujúcu (alebo fallback starý obrazok)
+    let titulkaUrl = String(existing.titulka || existing.obrazok || '').trim();
+    if (titulkaInput.files && titulkaInput.files[0]) {
+      titulkaUrl = await uploadImage(titulkaInput.files[0]);
+      stepProgress('Nahraná titulná fotka');
+    }
+
+    // GALÉRIA: ak vyberieš nové fotky, nahradí sa galéria; ak nie, ponechá sa existujúca
+    let galeria =
+  Array.isArray(existing.galeria) ? [...existing.galeria] :
+  (Array.isArray(existing.obrazky) ? [...existing.obrazky] : []);
+    const hasNewGallery = galeriaInput.files && galeriaInput.files.length > 0;
+
+    if (hasNewGallery) {
+      galeria = [];
+      if (titulkaUrl) galeria.push(titulkaUrl); // titulka vždy prvá
+
+      for (const f of galeriaInput.files) {
+        const url = await uploadImage(f);
+        if (url) galeria.push(url);
+        stepProgress('Nahrávam fotky…');
+      }
+    } else {
+      // bez novej galérie len zabezpeč, že prvá fotka je titulka
+      if (titulkaUrl) {
+        if (galeria.length === 0) galeria = [titulkaUrl];
+        else galeria[0] = titulkaUrl;
+      }
+    }
+
+    const typPrevodovky = normalizeGearbox(form.elements['typ_prevodovky']?.value || '');
+const vybavaPaket = (form.elements['vybava_paket']?.value || '').trim();
+
+// staré pole (pre ponuku áut) nech existuje stále
+const prevodovkaLegacy = buildLegacyPrevodovka(typPrevodovky, vybavaPaket);
+
+// ✅ toto je extrémne dôležité: pri editácii zachováme existujúce polia (napr. galéria, id…)
+const base = isEdit ? (cars[idx] || {}) : {};
+
+
     const data = {
+      id: carId,
       znacka: znackaVal,
       model: modelVal,
       rok: Number(rokRaw),
       palivo: (form.elements['palivo']?.value || '').trim(),
-      prevodovka: (form.elements['prevodovka']?.value || '').trim(),
+      typ_prevodovky: typPrevodovky,
+  vybava_paket: vybavaPaket,
+    prevodovka: prevodovkaLegacy,
       stara_cena: (form.elements['stara_cena']?.value || '').trim(),
       nova_cena: maZlavu ? (form.elements['nova_cena']?.value || '').trim() : '',
-      obrazok: imageUrl,
+
+      // obrázky
+titulka: titulkaUrl,
+galeria: galeria,
+
+// ✅ kompatibilita pre auto.js (detail) + prípadné staršie skripty
+obrazky: galeria,   // detail stránky si to vie hneď zobrať
+obrazok: titulkaUrl, // karta v ponuke (starý script.js)
+
       tagy: (form.elements['tagy']?.value || '')
         .split(',')
         .map(t => t.trim())
         .filter(Boolean),
-      
-      // NOVÉ:
+
       skryte: !!skryte.checked,
       objem: form.elements['objem']?.value ? Number(form.elements['objem'].value) : null,
       vykon: form.elements['vykon']?.value ? Number(form.elements['vykon'].value) : null,
@@ -700,206 +1012,288 @@
       farba: (form.elements['farba']?.value || '').trim(),
       metaliza: !!form.elements['metaliza']?.checked,
       vybava: [...form.querySelectorAll('.vybava-grid input[type="checkbox"]:checked')]
-      .map(cb => cb.value),
-
-
+        .map(cb => cb.value),
     };
 
-    // 3) uloženie cez API
-    try {
-      let r;
-      if (isEdit) {
-        r = await fetch(apiUrl(`/api/cars?index=${idx}`), {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-      } else {
-        r = await fetch(apiUrl('/api/cars'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-      }
+    // posledný krok: ukladanie záznamu (nech nie je 100% pred requestom)
+    setProgress(PROGRESS_TOTAL - 1, 'Ukladám záznam…');
 
-      if (!r.ok) {
-        const t = await r.text().catch(() => '');
-        console.error('Save failed:', r.status, t);
-        alert('Uloženie zlyhalo (' + r.status + '). Pozri konzolu.');
-        return;
-      }
-
-      await loadFromApi();
-      setFormMode('create');
-
-    } catch (err) {
-      console.error(err);
-      alert('Uloženie zlyhalo (chyba siete alebo servera).');
+    let r;
+    if (isEdit) {
+      r = await fetch(apiUrl(`/api/cars?index=${idx}`), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+    } else {
+      r = await fetch(apiUrl('/api/cars'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
     }
+
+    if (!r.ok) {
+      const t = await r.text().catch(() => '');
+      console.error('Save failed:', r.status, t);
+      alert('Uloženie zlyhalo (' + r.status + '). Pozri konzolu.');
+      return;
+    }
+
+    stepProgress('Hotovo');
+
+    // load bez vlastného progressu, lebo progress už beží
+    await loadFromApi({ withProgress: false });
+    setFormMode('create');
+
+  } catch (err) {
+    console.error(err);
+    alert('Uloženie zlyhalo (chyba siete alebo servera).');
+  } finally {
+    hideProgress();
+  }
+});
+
+
+    function onEdit(index) {
+      const a = cars[index];
+      if (!a) return;
+
+      form.dataset.carId = (a.id || '').toString().trim();
+
+      form.elements['znacka'].value = a.znacka || '';
+      form.elements['model'].value = a.model || '';
+      form.elements['rok'].value = a.rok ?? '';
+      form.elements['palivo'].value = a.palivo || '';
+      const parsed = parseLegacyPrevodovka(a.prevodovka || '');
+form.elements['typ_prevodovky'].value = a.typ_prevodovky || parsed.typ || '';
+form.elements['vybava_paket'].value = a.vybava_paket || parsed.paket || '';
+
+      form.elements['stara_cena'].value = a.stara_cena || '';
+      form.elements['nova_cena'].value = a.nova_cena || '';
+      form.elements['tagy'].value = (a.tagy || []).join(', ');
+
+      form.elements['objem'].value = a.objem ?? '';
+      form.elements['vykon'].value = a.vykon ?? '';
+      form.elements['najazdene'].value = a.najazdene ?? '';
+      form.elements['karoseria'].value = a.karoseria || '';
+      form.elements['pohon'].value = a.pohon || '';
+      form.elements['farba'].value = a.farba || '';
+      form.elements['metaliza'].checked = a.metaliza === true;
+
+      // Výbava – reset
+      form.querySelectorAll('.vybava-grid input[type="checkbox"]')
+        .forEach(cb => cb.checked = false);
+
+      // Výbava – znovu zaškrtnúť
+      const vybavaSet = new Set(a.vybava || []);
+      form.querySelectorAll('.vybava-grid input[type="checkbox"]').forEach(cb => {
+        cb.checked = vybavaSet.has(cb.value);
+      });
+
+      zlava.checked = !!(a.nova_cena && String(a.nova_cena).trim() !== '');
+      skryte.checked = isHidden(a);
+      toggleZlavaUI();
+
+      // PREVIEW titulky
+      const t = (a.titulka || a.obrazok || '').trim();
+      titulkaPreview.innerHTML = t
+        ? `<img src="${t}" alt="titulka">`
+        : `<small class="hint">Titulná fotka nie je nastavená</small>`;
+
+      // PREVIEW galérie
+const gallery =
+  (Array.isArray(a.galeria) && a.galeria.length) ? a.galeria :
+  (Array.isArray(a.obrazky) && a.obrazky.length) ? a.obrazky : [];
+
+if (gallery.length) {
+  galeriaPreview.innerHTML = '';
+  gallery.forEach(src => {
+    const img = document.createElement('img');
+    img.src = src;
+    img.style.maxWidth = '120px';
+    img.style.margin = '4px';
+    galeriaPreview.appendChild(img);
   });
+} else {
+  galeriaPreview.innerHTML = '<small class="hint">Galéria je prázdna</small>';
+}
 
-  function onEdit(index) {
-    const a = cars[index];
-    if (!a) return;
+      setFormMode('edit', index);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-    form.elements['znacka'].value = a.znacka || '';
-    form.elements['model'].value = a.model || '';
-    form.elements['rok'].value = a.rok ?? '';
-    form.elements['palivo'].value = a.palivo || '';
-    form.elements['prevodovka'].value = a.prevodovka || '';
-    form.elements['stara_cena'].value = a.stara_cena || '';
-    form.elements['nova_cena'].value = a.nova_cena || '';
-    form.elements['obrazok'].value = a.obrazok || '';
-    form.elements['tagy'].value = (a.tagy || []).join(', ');
-    form.elements['objem'].value = a.objem ?? '';
-    form.elements['vykon'].value = a.vykon ?? '';
-    form.elements['najazdene'].value = a.najazdene ?? '';
-    form.elements['karoseria'].value = a.karoseria || '';
-    form.elements['pohon'].value = a.pohon || '';
-    form.elements['farba'].value = a.farba || '';
-    form.elements['metaliza'].checked = a.metaliza === true;
-    // Výbava – reset
-    form.querySelectorAll('.vybava-grid input[type="checkbox"]')
-      .forEach(cb => cb.checked = false);
+    async function onDelete(index) {
+  if (!confirm('Naozaj vymazať toto auto?')) return;
 
-    // Výbava – znovu zaškrtnúť
-    const vybavaSet = new Set(a.vybava || []);
+  showProgress(2, 'Mazanie auta…');
 
-    form.querySelectorAll('.vybava-grid input[type="checkbox"]').forEach(cb => {
-      cb.checked = vybavaSet.has(cb.value);
-    });
+  try {
+    const r = await fetch(apiUrl(`/api/cars?index=${index}`), { method: 'DELETE' });
+
+    if (!r.ok) {
+      const t = await r.text().catch(() => '');
+      console.error('Delete failed:', r.status, t);
+      alert('Vymazanie zlyhalo (' + r.status + '). Pozri konzolu.');
+      return;
+    }
+
+    stepProgress('Načítavam…');
+    await loadFromApi({ withProgress: false });
+
+    setFormMode('create');
+    setProgress(PROGRESS_TOTAL, 'Hotovo');
+  } catch (err) {
+    console.error(err);
+    alert('Vymazanie zlyhalo (chyba siete alebo servera).');
+  } finally {
+    hideProgress();
+  }
+}
 
 
+    async function onDeleteSelected() {
+  const selected = getSelectedIndexes();
 
-    zlava.checked = !!(a.nova_cena && String(a.nova_cena).trim() !== '');
-    skryte.checked = isHidden(a);
-
-    toggleZlavaUI();
-
-    fileEl.value = '';
-    renderPreview();
-    setFormMode('edit', index);
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (!selected.length) {
+    alert('Nevybral si žiadne autá.');
+    return;
   }
 
-  async function onDelete(index) {
-    if (!confirm('Naozaj vymazať toto auto?')) return;
+  if (!confirm(`Naozaj vymazať ${selected.length} áut?`)) return;
 
-    try {
-      const r = await fetch(apiUrl(`/api/cars?index=${index}`), { method: 'DELETE' });
+  const indexes = [...selected].sort((a, b) => b - a);
 
+  showProgress(indexes.length + 1, `Mažem ${indexes.length} áut…`);
+
+  try {
+    let done = 0;
+
+    for (const idx of indexes) {
+      const r = await fetch(apiUrl(`/api/cars?index=${idx}`), { method: 'DELETE' });
       if (!r.ok) {
         const t = await r.text().catch(() => '');
         console.error('Delete failed:', r.status, t);
         alert('Vymazanie zlyhalo (' + r.status + '). Pozri konzolu.');
         return;
       }
-
-      await loadFromApi();
-      setFormMode('create');
-
-    } catch (err) {
-      console.error(err);
-      alert('Vymazanie zlyhalo (chyba siete alebo servera).');
+      done++;
+      setProgress(done, `Vymazané ${done}/${indexes.length}…`);
     }
+
+    // „+1“ krok: refresh
+    setProgress(indexes.length, 'Obnovujem zoznam…');
+    await loadFromApi({ withProgress: false });
+    setFormMode('create');
+    setProgress(indexes.length + 1, 'Hotovo');
+
+  } catch (err) {
+    console.error(err);
+    alert('Vymazanie zlyhalo (chyba siete alebo servera).');
+  } finally {
+    hideProgress();
   }
+}
 
-  async function onDeleteSelected() {
-    const selected = getSelectedIndexes();
 
-    if (!selected.length) {
-      alert('Nevybral si žiadne autá.');
-      return;
-    }
 
-    if (!confirm(`Naozaj vymazať ${selected.length} áut?`)) return;
-
-    // zoradiť zostupne (aby sa neposúvali indexy)
-    const indexes = [...selected].sort((a, b) => b - a);
-
-    try {
-      for (const idx of indexes) {
-        const r = await fetch(apiUrl(`/api/cars?index=${idx}`), { method: 'DELETE' });
-        if (!r.ok) {
-          const t = await r.text().catch(() => '');
-          console.error('Delete failed:', r.status, t);
-          alert('Vymazanie zlyhalo (' + r.status + '). Pozri konzolu.');
-          return;
-        }
+    async function onSetHiddenSelected(hidden) {
+      const selected = getSelectedIndexes();
+      if (!selected.length) {
+        alert('Nevybral si žiadne autá.');
+        return;
       }
 
-      await loadFromApi();
-      setFormMode('create');
+      const txt = hidden ? `Naozaj skryť ${selected.length} áut?` : `Naozaj zobraziť ${selected.length} áut?`;
+      if (!confirm(txt)) return;
 
-    } catch (err) {
-      console.error(err);
-      alert('Vymazanie zlyhalo (chyba siete alebo servera).');
-    }
-  }
-
-  async function onSetHiddenSelected(hidden) {
-    const selected = getSelectedIndexes();
-    if (!selected.length) {
-      alert('Nevybral si žiadne autá.');
-      return;
+      await onSetHidden(selected, hidden);
     }
 
-    const txt = hidden ? `Naozaj skryť ${selected.length} áut?` : `Naozaj zobraziť ${selected.length} áut?`;
-    if (!confirm(txt)) return;
+    async function onSetHidden(indexes, hidden) {
+  showProgress(indexes.length + 1, hidden ? 'Skrývam autá…' : 'Zobrazujem autá…');
 
-    await onSetHidden(selected, hidden);
-  }
+  try {
+    for (const idx of indexes) {
+      const current = cars[idx];
+      if (!current) continue;
 
-  async function onSetHidden(indexes, hidden) {
-    try {
-      for (const idx of indexes) {
-        const current = cars[idx];
-        if (!current) continue;
+      const updated = { ...current, skryte: !!hidden };
 
-        const updated = { ...current, skryte: !!hidden };
+      const r = await fetch(apiUrl(`/api/cars?index=${idx}`), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      });
 
-        const r = await fetch(apiUrl(`/api/cars?index=${idx}`), {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updated)
-        });
-
-        if (!r.ok) {
-          const t = await r.text().catch(() => '');
-          console.error('Hide/Unhide failed:', r.status, t);
-          alert('Skrytie/Zobrazenie zlyhalo (' + r.status + '). Pozri konzolu.');
-          return;
-        }
+      if (!r.ok) {
+        const t = await r.text().catch(() => '');
+        console.error('Hide/Unhide failed:', r.status, t);
+        alert('Skrytie/Zobrazenie zlyhalo (' + r.status + '). Pozri konzolu.');
+        return;
       }
 
-      await loadFromApi();
-      setFormMode('create');
-
-    } catch (err) {
-      console.error(err);
-      alert('Skrytie/Zobrazenie zlyhalo (chyba siete alebo servera).');
+      stepProgress(hidden ? 'Skrývam…' : 'Zobrazujem…');
     }
+
+    await loadFromApi({ withProgress: false });
+    setFormMode('create');
+    setProgress(PROGRESS_TOTAL, 'Hotovo');
+  } catch (err) {
+    console.error(err);
+    alert('Skrytie/Zobrazenie zlyhalo (chyba siete alebo servera).');
+  } finally {
+    hideProgress();
   }
-
-  // =============================
-  // UTILS
-  // =============================
-  function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = () => reject(new Error('Nepodarilo sa načítať súbor.'));
-      reader.onload = () => {
-        const result = reader.result;
-        const base64 = String(result).split(',')[1];
-        resolve(base64);
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-</script>
+}
 
 
+    // =============================
+    // UTILS
+    // =============================
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('Nepodarilo sa načítať súbor.'));
+        reader.onload = () => {
+          const result = reader.result;
+          const base64 = String(result).split(',')[1];
+          resolve(base64);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
 
+    async function uploadImage(file) {
+      if (!file) return '';
+
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error('Súbor je príliš veľký (max 10 MB).');
+      }
+
+      const base64 = await fileToBase64(file);
+
+      const up = await fetch(apiUrl('/api/upload-image'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename: file.name,
+          contentBase64: base64
+        })
+      });
+
+      if (!up.ok) {
+        const t = await up.text().catch(() => '');
+        console.error('Upload failed:', up.status, t);
+        throw new Error('Nahratie obrázka zlyhalo (' + up.status + ').');
+      }
+
+      const upData = await up.json().catch(() => ({}));
+      return upData.url || '';
+    }
+
+    toggleZlavaUI();
+loadFromApi();
+  </script>
 </body>
 </html>

@@ -972,4 +972,191 @@ html[data-brand] #ponuka .filter-row .tag[data-filter="jeep"] {
   cursor: pointer;
 }
 
+/* =========================
+   MODELY ÁUT – modern minimalist strip
+   ========================= */
+
+:root{
+  --ms-accent: #1f43d0;
+  --ms-text: #0f172a;
+  --ms-muted: #64748b;
+  --ms-surface: #ffffff;
+  --ms-surface-2: #f8fafc;
+  --ms-border: rgba(15, 23, 42, 0.10);
+  --ms-shadow: 0 10px 30px rgba(15, 23, 42, 0.10);
+  --ms-shadow-hover: 0 14px 44px rgba(15, 23, 42, 0.14);
+  --ms-radius: 16px;
+}
+
+@media (prefers-color-scheme: dark){
+  :root{
+    --ms-text: #e5e7eb;
+    --ms-muted: #9ca3af;
+    --ms-surface: rgba(255,255,255,0.06);
+    --ms-surface-2: rgba(255,255,255,0.04);
+    --ms-border: rgba(255,255,255,0.12);
+    --ms-shadow: 0 12px 34px rgba(0,0,0,0.35);
+    --ms-shadow-hover: 0 16px 50px rgba(0,0,0,0.45);
+  }
+}
+
+.models-strip{
+  padding: 28px 0 14px;
+  text-align: center;
+}
+
+.models-strip__title{
+  margin: 0 0 14px;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: clamp(18px, 2.2vw, 32px);
+  color: var(--ms-text);
+}
+
+.models-strip__title strong,
+.models-strip__title b{
+  color: var(--ms-accent);
+}
+
+/* row */
+.models-strip__row{
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: clamp(12px, 1.6vw, 22px);
+  flex-wrap: wrap;
+  padding: 0 10px;
+}
+
+/* tile */
+.model-tile{
+  position: relative;
+  flex: 1 1 170px;
+  max-width: 220px;
+  text-decoration: none;
+  user-select: none;
+
+  background: var(--ms-surface);
+  border: 1px solid var(--ms-border);
+  border-radius: var(--ms-radius);
+  padding: 14px 14px 12px;
+
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background-color .18s ease;
+  box-shadow: 0 0 0 rgba(0,0,0,0);
+}
+
+.model-tile:focus{
+  outline: none;
+}
+.model-tile:focus-visible{
+  box-shadow: 0 0 0 4px rgba(31, 67, 208, 0.22), var(--ms-shadow);
+  border-color: rgba(31, 67, 208, 0.55);
+}
+
+/* image area */
+.model-tile__img{
+  height: 64px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 10px;
+}
+
+.model-tile__img img{
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+
+  /* minimalist: jemnejší tieň, bez “ťažkého” drop-shadow */
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,0.14));
+  transform: translateZ(0);
+  transition: transform .18s ease, filter .18s ease, opacity .18s ease;
+}
+
+/* name */
+.model-tile__name{
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: var(--ms-text);
+  line-height: 1.2;
+}
+
+/* hover */
+.model-tile:hover{
+  transform: translateY(-2px);
+  box-shadow: var(--ms-shadow-hover);
+  border-color: rgba(15, 23, 42, 0.16);
+  background: var(--ms-surface);
+}
+.model-tile:hover .model-tile__img img{
+  transform: translateY(-1px) scale(1.02);
+  filter: drop-shadow(0 14px 24px rgba(0,0,0,0.16));
+}
+
+/* active */
+.model-tile.is-active{
+  border-color: rgba(31, 67, 208, 0.45);
+  background: linear-gradient(0deg, rgba(31, 67, 208, 0.06), rgba(31, 67, 208, 0.06)), var(--ms-surface);
+  box-shadow: var(--ms-shadow);
+}
+.model-tile.is-active .model-tile__name{
+  color: var(--ms-accent);
+}
+
+/* little accent pill on active (subtle) */
+.model-tile.is-active::after{
+  content: "";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--ms-accent);
+  box-shadow: 0 0 0 4px rgba(31, 67, 208, 0.18);
+}
+
+/* motion safety */
+@media (prefers-reduced-motion: reduce){
+  .model-tile,
+  .model-tile__img img{
+    transition: none;
+  }
+}
+
+/* mobile: clean horizontal scroll + snap */
+@media (max-width: 640px){
+  .models-strip{ padding: 18px 0 10px; }
+
+  .models-strip__row{
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding: 0 12px 6px;
+    gap: 12px;
+
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .models-strip__row::-webkit-scrollbar{ height: 6px; }
+  .models-strip__row::-webkit-scrollbar-thumb{
+    background: rgba(100,116,139,0.35);
+    border-radius: 999px;
+  }
+
+  .model-tile{
+    flex: 0 0 160px;
+    max-width: 160px;
+    scroll-snap-align: start;
+  }
+
+  .model-tile__img{ height: 58px; }
+}
+
 

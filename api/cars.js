@@ -10,7 +10,10 @@
 // - GITHUB_BRANCH  (napr. "main")
 // - DATA_PATH      (napr. "data/auta.json")
 
+
+
 export default async function handler(req, res) {
+  const isAdmin = !!req.headers.cookie?.includes('admin=1');
   try {
     const { GITHUB_TOKEN, GITHUB_REPO, GITHUB_BRANCH, DATA_PATH } = process.env;
     if (!GITHUB_TOKEN || !GITHUB_REPO || !GITHUB_BRANCH || !DATA_PATH) {
@@ -53,12 +56,23 @@ export default async function handler(req, res) {
     }
 
     // ROUTING
+    // Verejný web potrebuje vedieť načítať ponuku áut. Preto:
+    // - GET bez parametra include_hidden je verejný a vracia len neskrýté autá.
+    // - GET s include_hidden=1 je len pre admin (vyžaduje cookie admin=1).
     if (req.method === 'GET') {
+      const includeHidden = (req.query.include_hidden || '').toString() === '1';
+
+      if (includeHidden && !isAdmin) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
       const { cars } = await getFile();
-      return res.status(200).json(cars);
+      const visible = includeHidden ? cars : cars.filter(c => c && c.skryte !== true);
+      return res.status(200).json(visible);
     }
 
     if (req.method === 'POST') {
+      if (!isAdmin) return res.status(401).json({ error: 'Unauthorized' });
       const car = req.body;
       const { cars, sha } = await getFile();
       cars.push(car);
@@ -67,6 +81,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'PUT') {
+      if (!isAdmin) return res.status(401).json({ error: 'Unauthorized' });
       const index = parseInt(req.query.index, 10);
       if (!Number.isInteger(index) || index < 0) return res.status(400).json({ error: 'Bad index' });
       const car = req.body;
@@ -78,6 +93,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'DELETE') {
+      if (!isAdmin) return res.status(401).json({ error: 'Unauthorized' });
       const index = parseInt(req.query.index, 10);
       if (!Number.isInteger(index) || index < 0) return res.status(400).json({ error: 'Bad index' });
       const { cars, sha } = await getFile();

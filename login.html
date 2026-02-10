@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PP AUTO – Admin Login</title>
+<script src="https://cdn.tailwindcss.com"></script>
+  <!-- EXISTUJÚCE ŠTÝLY -->
+  <link rel="stylesheet" href="/style.css">
+
+  <style>
+    .login-switch {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  pointer-events: none; /* ⛔ user nemôže kliknúť */
+  transform: scale(0.75);
+}
+
+    body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;    /* vertikálne centrovanie */
+  justify-content: center;/* horizontálne centrovanie */
+
+  background:
+    radial-gradient(1200px 600px at 70% -10%, rgba(59,130,246,.08), transparent 60%),
+    radial-gradient(900px 400px at 100% 20%, rgba(245,158,11,.08), transparent 60%),
+    radial-gradient(900px 400px at 0% 80%, rgba(34,197,94,.08), transparent 60%),
+    linear-gradient(180deg, var(--bg), var(--bg) 60%);
+}
+
+    /* ===== LOGIN WINDOW (macOS style) ===== */
+    .login-window {
+      width: 420px;
+      
+      background: linear-gradient(180deg, #0e141c, #0b0e13);
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      animation: pop .4s ease;
+    }
+
+    @keyframes pop {
+      from { transform: translateY(12px) scale(.98); opacity: 0; }
+      to   { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    /* horná lišta */
+    .tools {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      background: #0b0e13;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .circle {
+      display: flex;
+      gap: 6px;
+    }
+
+
+
+    .box {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .red    { background: #ff605c; }
+    .yellow { background: #ffbd44; }
+    .green  { background: #00ca4e; }
+
+    /* ===== CONTENT ===== */
+    .content {
+      padding: 26px;
+    }
+
+    .login-head {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .login-head h1 {
+      margin: 0 0 6px;
+      font-size: 26px;
+      letter-spacing: .3px;
+    }
+
+    .login-head p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .login-form {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .login-form input {
+      height: 46px;
+      padding: 0 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--bg-elev);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .login-form input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(59,130,246,.25);
+    }
+
+    .login-error {
+      display: none;
+      color: #ff6b6b;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .login-footer {
+      margin-top: 22px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ===== LOGIN BUTTON – MINIMAL SECURE ===== */
+.login-btn {
+  height: 46px;
+  border-radius: 12px;
+  border: 1px solid #1f2937;
+  cursor: pointer;
+
+  background: #0f172a;
+  color: #e5e7eb;
+
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.login-btn:hover {
+  background: #111827;
+  border-color: #3b82f6;
+}
+
+.login-btn:active {
+  transform: translateY(1px);
+}
+
+.login-btn:focus-visible {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.35);
+}
+
+.login-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+  </style>
+</head>
+
+<body>
+
+  <div class="login-window">
+
+    <!-- horná lišta -->
+    <div class="tools">
+      <div class="circle">
+        <span class="box red"></span>
+        <span class="box yellow"></span>
+        <span class="box green"></span>
+      </div>
+    </div>
+
+    <!-- obsah -->
+    <div class="content">
+
+      <div class="login-head">
+        <h1>Admin portál</h1>
+        <p>PP AUTO · interný prístup</p>
+      </div>
+
+      <form class="login-form" id="loginForm">
+        <input
+          type="password"
+          placeholder="Admin kľúč"
+          required
+          autofocus
+        />
+
+        <button class="login-btn" type="submit">
+  Prihlásiť sa
+</button>
+
+        <div class="login-error" id="error">
+          Neplatný prístupový kľúč
+        </div>
+      </form>
+
+<div class="login-switch">
+  <!-- From Uiverse.io by Javierrocadev -->
+  <label class="relative inline-flex items-center cursor-pointer">
+    <input id="secureSwitch" type="checkbox" value="" class="sr-only peer">
+    <div class="group peer ring-0 bg-rose-400 rounded-full outline-none duration-300
+                after:duration-300 w-24 h-12 shadow-md peer-checked:bg-emerald-500
+                peer-focus:outline-none
+                after:content-[''] after:rounded-full after:absolute after:bg-gray-50
+                after:outline-none after:h-10 after:w-10 after:top-1 after:left-1
+                after:flex after:justify-center after:items-center
+                peer-checked:after:translate-x-12 peer-hover:after:scale-95">
+
+      <svg class="absolute top-1 left-12 stroke-gray-900 w-10 h-10"
+           viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M30,46V38a20,20,0,0,1,40,0v8a8,8,0,0,1,8,8V74a8,8,0,0,1-8,8H30a8,8,0,0,1-8-8V54A8,8,0,0,1,30,46Zm32-8v8H38V38a12,12,0,0,1,24,0Z"
+              fill-rule="evenodd"/>
+      </svg>
+
+      <svg class="absolute top-1 left-1 stroke-gray-900 w-10 h-10"
+           viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path class="svg-fill-primary"
+              d="M50,18A19.9,19.9,0,0,0,30,38v8a8,8,0,0,0-8,8V74a8,8,0,0,0,8,8H70a8,8,0,0,0,8-8V54a8,8,0,0,0-8-8H38V38a12,12,0,0,1,23.6-3,4,4,0,1,0,7.8-2A20.1,20.1,0,0,0,50,18Z"/>
+      </svg>
+
+    </div>
+  </label>
+</div>
+
+
+
+      <div class="login-footer">
+        © PP AUTO
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    
+  const form = document.getElementById('loginForm');
+  const error = document.getElementById('error');
+  const secureSwitch = document.getElementById('secureSwitch');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    error.style.display = 'none';
+
+    const key = form.querySelector('input').value;
+
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key })
+    });
+
+    if (!res.ok) {
+      error.style.display = 'block';
+      return;
+    }
+
+    // ✅ login OK → spusti presne tú animáciu zo switchera
+    secureSwitch.checked = true;
+
+    // ⏱️ počkaj 1s, aby sa animácia stihla prehrať
+    setTimeout(() => {
+      location.href = '/admin.html';
+    }, 1000);
+  });
+
+  
+</script>
+
+
+</body>
+</html>

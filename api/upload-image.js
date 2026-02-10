@@ -3,7 +3,13 @@
 // Route obrázok uloží do GitHub repa (bez redeployu ho budeš používať cez raw.githubusercontent URL)
 // Vyžaduje tie isté ENV premenne ako /api/cars: GITHUB_TOKEN, GITHUB_REPO, GITHUB_BRANCH
 
+
+
 export default async function handler(req, res) {
+  if (!req.headers.cookie?.includes('admin=1')) {
+  return res.status(401).end();
+}
+  
   try {
     if (req.method !== 'POST') {
       res.setHeader('Allow', ['POST']);

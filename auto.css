@@ -1,0 +1,560 @@
+/* =========================================================
+   auto.css — Detail vozidla (moderný, profesionálny)
+   - neutrálnejší price blok (bez žltého “highlightu”)
+   - krajšie primary tlačidlá (bez krikľavej modrej)
+   - sticky panel s odsadením od navigácie
+   - zelené pulzujúce bodky pri nadpisoch sekcií
+   - bez emoji (žiadne ✓ v CSS)
+========================================================= */
+
+:root{
+  --car-accent: var(--accent);       /* brand accent (subaru/kgm/jeep) */
+  --car-green: var(--accent-2);      /* zelená (bodky + jemné akcenty) */
+  --sticky-top: 112px;              /* odsadenie sticky panelu od headeru */
+}
+
+html[data-brand="subaru"]{ --car-accent: var(--accent); }
+html[data-brand="kgm"]   { --car-accent: var(--accent-2); }
+html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
+
+/* --- page --- */
+.car-page{
+  padding: 26px 0 44px;
+  position: relative;
+}
+
+/* jemné pozadie (subtle), nie agresívne */
+.car-page::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(900px 420px at 18% 8%, rgba(255,255,255,.03), transparent 60%),
+    radial-gradient(900px 420px at 86% 16%, rgba(255,255,255,.02), transparent 60%),
+    radial-gradient(900px 420px at 30% 92%, rgba(255,255,255,.02), transparent 60%);
+  opacity:.75;
+}
+
+/* breadcrumb */
+.car-breadcrumb{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin: 14px 0 18px;
+  position: relative;
+  z-index: 1;
+}
+
+.car-breadcrumb .pill{
+  background: rgba(255,255,255,.02);
+  transition: transform .15s ease, border-color .2s ease, background .2s ease;
+}
+.car-breadcrumb .pill:hover{
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,.16);
+  background: rgba(255,255,255,.04);
+}
+
+/* loading */
+.car-loading{
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  z-index: 1;
+}
+.skeleton{
+  border-radius: 14px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.10), rgba(255,255,255,0.05));
+  background-size: 240% 100%;
+  animation: sk 1.05s ease-in-out infinite;
+}
+.sk-title{ height: 30px; width: min(520px, 70%); margin-bottom: 14px; }
+.sk-grid{ height: 520px; width: 100%; }
+@keyframes sk{
+  0%{ background-position: 0% 50%; }
+  100%{ background-position: 240% 50%; }
+}
+
+.car-detail{ display:block; position: relative; z-index: 1; }
+
+/* --- cards (premium) --- */
+.car-card{
+  background:
+    radial-gradient(1100px 650px at 70% -10%, rgba(255,255,255,.04), transparent 60%),
+    radial-gradient(900px 420px at 5% 110%, rgba(255,255,255,.03), transparent 60%),
+    var(--card);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 18px;
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  position: relative;
+}
+.car-card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.45;
+  background: linear-gradient(180deg, rgba(255,255,255,.06), transparent 28%);
+}
+
+/* --- CTA button styling scoped to detail page (no nav conflicts) --- */
+.car-page .car-cta .btn.car-btn{
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(255,255,255,.10);
+  color: #ffffff;
+  box-shadow: none;
+  transition: transform .16s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.car-page .car-cta .btn.car-btn:hover{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,.04);
+  border-color: rgba(255,255,255,.16);
+  box-shadow: 0 10px 24px rgba(0,0,0,.22);
+}
+
+.car-page .car-cta .btn.car-btn:active{
+  transform: translateY(0px);
+}
+
+/* Primary CTA len pre detail auta */
+.car-page .car-cta .btn.car-btn-primary{
+  background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.02));
+  border-color: rgba(34,197,94,.38);
+  box-shadow: 0 14px 30px rgba(0,0,0,.28);
+}
+
+.car-page .car-cta .btn.car-btn-primary:hover{
+  border-color: rgba(34,197,94,.55);
+  box-shadow:
+    0 0 0 4px rgba(34,197,94,.12),
+    0 16px 34px rgba(0,0,0,.35);
+}
+
+/* --- top layout --- */
+.car-top{
+  display:grid;
+  grid-template-columns: 1.45fr .55fr;
+  gap: 18px;
+  align-items: start;
+}
+
+/* sticky panel s odsadením od navigácie */
+.car-top > aside.car-card{
+  position: sticky;
+  top: var(--sticky-top);
+}
+
+/* ===== Gallery ===== */
+.car-card.gallery{ overflow:hidden; }
+
+.gallery-main{
+  position: relative;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  background:
+    radial-gradient(900px 500px at 20% 20%, rgba(255,255,255,.05), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+}
+
+.gallery-main .imgwrap{
+  aspect-ratio: 16 / 10;
+  display:grid;
+  place-items:center;
+  position: relative;
+}
+
+.gallery-main .imgwrap::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.08), transparent 30%),
+    linear-gradient(0deg, rgba(0,0,0,.35), transparent 45%);
+  opacity:.85;
+}
+
+.gallery-main img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display:block;
+  transform: scale(1.01);
+}
+
+/* gallery buttons */
+.gal-btn{
+  position:absolute;
+  top:50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(12, 15, 20, .55);
+  color: #fff;
+  cursor:pointer;
+  display:grid;
+  place-items:center;
+  font-size: 24px;
+  transition: transform .16s ease, background .2s ease, border-color .2s ease, opacity .2s ease;
+  opacity: .96;
+  backdrop-filter: blur(8px) saturate(160%);
+}
+.gal-btn:hover{
+  transform: translateY(-50%) scale(1.06);
+  background: rgba(12, 15, 20, .75);
+  border-color: rgba(255,255,255,.20);
+}
+.gal-btn:active{ transform: translateY(-50%) scale(0.98); }
+.gal-btn.prev{ left: 14px; }
+.gal-btn.next{ right: 14px; }
+
+.thumbs{
+  display:flex;
+  gap: 10px;
+  padding: 12px 12px 14px;
+  overflow-x:auto;
+  scrollbar-width: thin;
+  scroll-snap-type: x mandatory;
+  background: linear-gradient(180deg, rgba(255,255,255,.01), rgba(255,255,255,0));
+}
+
+.thumb{
+  flex: 0 0 112px;
+  height: 74px;
+  border-radius: 14px;
+  overflow:hidden;
+  border: 1px solid rgba(255,255,255,.08);
+  background: #0b0e13;
+  cursor:pointer;
+  opacity: .82;
+  transform: translateY(0);
+  transition: opacity .18s ease, transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+  scroll-snap-align: start;
+}
+.thumb:hover{
+  opacity: 1;
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,.16);
+}
+.thumb.is-active{
+  opacity: 1;
+  border-color: rgba(34,197,94,.55);
+  box-shadow: 0 0 0 4px rgba(34,197,94,.12);
+}
+.thumb img{
+  width:100%;
+  height:100%;
+  object-fit: cover;
+  display:block;
+}
+
+/* ===== Right panel ===== */
+.car-hero{ padding: 18px 18px 14px; }
+.car-hero h2{
+  margin: 0 0 8px;
+  font-size: clamp(22px, 2.2vw, 30px);
+  line-height: 1.15;
+  letter-spacing: .2px;
+}
+.car-hero p{ margin: 0; color: var(--muted); }
+
+.chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* Pricebox — neutrálnejší (bez žltého “highlightu”) */
+.car-pricebox{
+  margin: 0 18px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.09);
+  background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
+  padding: 16px 16px 14px;
+  position: relative;
+}
+.car-pricebox::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius: 16px;
+  background: radial-gradient(700px 280px at 20% 0%, rgba(255,255,255,.06), transparent 60%);
+  opacity:.9;
+}
+
+.price-big{
+  font-size: clamp(24px, 2.4vw, 32px);
+  font-weight: 900;
+  letter-spacing: .2px;
+  line-height: 1.05;
+  position: relative;
+}
+.price-old{
+  margin-top: 6px;
+  color: rgba(255,255,255,.55);
+  text-decoration: line-through;
+  font-size: 14px;
+  position: relative;
+}
+.price-note{
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  position: relative;
+}
+
+/* CTA */
+.car-cta{
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 18px 18px;
+}
+.car-cta .btn{
+  width: 100%;
+  justify-content:center;
+}
+
+/* ===== Sections ===== */
+.car-sections{
+  margin-top: 18px;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+/* Výbava cez celú šírku */
+.car-sections > section:nth-child(3){
+  grid-column: 1 / -1;
+}
+
+
+
+.section-title{ padding: 16px 18px 0; }
+.section-title h3{
+  margin: 0;
+  font-size: 16px;
+  letter-spacing: .2px;
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+
+
+.section-body{ padding: 12px 18px 18px; }
+
+/* KV */
+.kv{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+.kv .row{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 14px;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+}
+.kv .label{
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: .2px;
+}
+.kv .value{
+  font-size: 14px;
+  color: var(--text-strong);
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Výbava — bez emoji, iba čistý bod */
+.equip{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.equip .item{
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.07);
+  background:
+    radial-gradient(700px 240px at 30% 0%, rgba(255,255,255,.03), transparent 55%),
+    linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+  display:flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: var(--text-strong);
+  line-height: 1.35;
+}
+
+
+.empty-note{ color: var(--muted); margin: 0; }
+
+/* Not found */
+.not-found{ padding: 18px; }
+.not-found h2{ margin: 0 0 8px; }
+.not-found p{ margin: 0 0 14px; color: var(--muted); }
+
+/* ===== Responsive ===== */
+@media (max-width: 1100px){
+  .car-top{ grid-template-columns: 1.25fr .75fr; }
+}
+
+@media (max-width: 1000px){
+  .car-top{ grid-template-columns: 1fr; }
+  .car-top > aside.car-card{ position: relative; top: auto; }
+  .car-sections{ grid-template-columns: 1fr; }
+  .car-sections > section:nth-child(3){ grid-column: auto; }
+  .kv .value{ white-space: normal; text-align: left; }
+}
+
+@media (max-width: 680px){
+  :root{ --sticky-top: 96px; }
+  .thumb{ flex-basis: 96px; height: 66px; }
+  .equip{ grid-template-columns: 1fr; }
+  .car-cta{ padding: 0 14px 14px; }
+  .car-hero{ padding: 16px 14px 12px; }
+  .car-pricebox{ margin: 0 14px 12px; }
+  .section-title{ padding: 14px 14px 0; }
+  .section-body{ padding: 10px 14px 14px; }
+}
+
+/* =========================
+   FIX: stabilná výška galérie (bez skákania)
+   - galéria má vždy rovnakú výšku
+   - obrázky sa len menia vnútri rámu
+========================= */
+
+:root{
+  --gallery-h: clamp(320px, 42vw, 560px);
+}
+
+@media (max-width: 1000px){
+  :root{ --gallery-h: clamp(260px, 58vw, 480px); }
+}
+
+@media (max-width: 680px){
+  :root{ --gallery-h: clamp(220px, 70vw, 420px); }
+}
+
+/* rám galérie musí mať fixnú výšku */
+.car-page .gallery-main .imgwrap{
+  height: var(--gallery-h);
+  aspect-ratio: auto;     /* prebijeme prípadný aspect-ratio aby výška bola fixná */
+  overflow: hidden;       /* nič nebude meniť výšku/šírku */
+  background: #0b0e13;    /* neutrálne pozadie pod fotkou */
+  display: block;
+}
+
+/* obrázok sa vždy natiahne do rámu (nebude meniť layout) */
+.car-page .gallery-main img{
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: fit;       /* STATICKÝ rám, fotka sa oreže */
+  object-position: center;
+}
+
+/* Skryť horizontálny scrollbar pod thumbnails (thumbs ostanú scrollovateľné) */
+.car-page .thumbs{
+  scrollbar-width: none;          /* Firefox */
+  -ms-overflow-style: none;       /* IE/Edge legacy */
+  scrollbar-gutter: auto;         /* aby si nerezervovalo miesto na scrollbar */
+}
+
+.car-page .thumbs::-webkit-scrollbar{
+  height: 0;                      /* Chrome/Safari */
+  width: 0;
+  display: none;
+}
+
+.car-page .thumbs::-webkit-scrollbar-track{
+  background: transparent;
+}
+
+.car-page .thumbs::-webkit-scrollbar-thumb{
+  background: transparent;
+  border: none;
+}
+
+/* =========================
+   LIGHTBOX (plné rozlíšenie)
+========================= */
+.car-page .gallery-main img{
+  cursor: zoom-in;
+}
+
+.car-lightbox{
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  background: rgba(0,0,0,.78);
+  z-index: 10000;
+}
+
+.car-lightbox.open{
+  display: flex;
+}
+
+.car-lightbox__inner{
+  position: relative;
+  max-width: 96vw;
+  max-height: 92vh;
+}
+
+.car-lightbox__img{
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(1600px, 96vw);
+  max-height: 92vh;
+  border-radius: 18px;
+  background: #0b0e13;
+  box-shadow: 0 30px 90px rgba(0,0,0,.55);
+  cursor: zoom-out;
+}
+
+.car-lightbox__close{
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(12,15,20,.72);
+  color: #fff;
+  font-size: 26px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  backdrop-filter: blur(10px) saturate(160%);
+}
+
+.car-lightbox__close:hover{
+  background: rgba(12,15,20,.86);
+  border-color: rgba(255,255,255,.26);
+}
+
+@media (max-width: 680px){
+  .car-lightbox{ padding: 14px; }
+  .car-lightbox__close{ top: -10px; right: -10px; }
+}

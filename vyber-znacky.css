@@ -26,10 +26,21 @@ a{color:inherit}
 @keyframes spin{to{transform:rotate(1turn)}}
 
 /* Layout */
-.wrap{max-width:1200px;margin:0 auto;padding:32px 20px; position:relative}
-.top{display:grid; place-items:center; gap:8px; margin:6px 0 22px; text-align:center}
-.top h1{margin:6px 0 0; font-weight:700; letter-spacing:.2px}
-.top p{margin:0; color:var(--muted)}
+.wrap{max-width:1200px;margin:0 auto; position:relative}
+.top{
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  margin: -24px 0 22px; /* ⬅️ POSUN NAHOR */
+  text-align: center;
+}
+.top h1{
+  line-height: 1.1;
+}
+
+.top p{
+  margin-top: 0px;
+}
 
 .grid{ display:grid; gap:18px; grid-template-columns:repeat(3,1fr); align-items:stretch }
 @media (max-width:980px){ .grid{ grid-template-columns:1fr } }
@@ -55,16 +66,99 @@ a{color:inherit}
 .card:nth-child(3){ animation-delay:.19s }
 @keyframes pop{ from{ transform:translateY(12px) scale(.98); opacity:0 } to{ transform:translateY(0) scale(1); opacity:1 } }
 
-.media{ position:relative; aspect-ratio:16/9; overflow:hidden; background:#0e131a }
-.media img{ width:100%; height:100%; object-fit:cover; transform:scale(1.04); transition:transform .6s cubic-bezier(.2,.8,.2,1); will-change:transform }
-.card:hover .media img{ transform:scale(1.1) }
-.media .shine{
-  position:absolute; inset:-20% -40%; z-index:1;
-  background:radial-gradient(600px 300px at var(--mx,60%) var(--my,40%), rgba(255,255,255,.18), rgba(255,255,255,0) 60%);
-  mix-blend-mode:screen; pointer-events:none; transition:opacity .2s ease; opacity:.6;
+.media{
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #0e131a;
+
+  /* priestor okolo obrázka */
+  padding: 12px;
+
+  /* dôležité: už NErežeme obrázok */
+  overflow: hidden;
 }
 
-.body{ padding:14px 14px 16px; display:flex; flex-direction:column; gap:10px }
+.media img{
+  width: 100%;
+  height: 100%;
+
+  /* kľúčová vec */
+  object-fit: contain;
+
+  /* jemný default scale */
+  transform: scale(0.80);
+  transition: transform .6s cubic-bezier(.2,.8,.2,1);
+  will-change: transform;
+}
+
+/* hover zoom – bezpečný, nič sa neoreže */
+.card:hover .media img{
+  transform: scale(0.85);
+}
+
+.media .shine{
+  position: absolute;
+  inset: -20% -40%;
+  z-index: 1;
+
+  background: radial-gradient(
+    600px 300px at var(--mx,60%) var(--my,40%),
+    rgba(255,255,255,.18),
+    rgba(255,255,255,0) 60%
+  );
+
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transition: opacity .2s ease;
+  opacity: .6;
+}
+
+.card.kgm .media{
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #0e131a;
+
+  /* priestor okolo obrázka */
+  padding: 12px;
+
+  /* dôležité: už NErežeme obrázok */
+  overflow: hidden;
+}
+
+.card.kgm .media img{
+  width: 100%;
+  height: 100%;
+
+  /* kľúčová vec */
+  object-fit: contain;
+
+  /* jemný default scale */
+  transform: scale(1.2);
+  transition: transform .6s cubic-bezier(.2,.8,.2,1);
+  will-change: transform;
+}
+
+.card.kgm:hover .media img{
+  transform: scale(1.25);
+}
+
+
+.body{
+  padding:14px 14px 64px; /* dole priestor pre tlačidlo */
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.body .btn{
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 16px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .brandline{ display:flex; align-items:center; gap:10px }
 .brandline h3{ margin:0; font-size:20px; letter-spacing:.3px }
 .dot{ width:10px; height:10px; border-radius:999px; display:inline-block }

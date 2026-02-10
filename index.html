@@ -113,7 +113,52 @@
 <!-- INVENTORY -->
 <section id="ponuka">
   <div class="container">
+    <!-- MODELY ÁUT (zobrazí sa len pri Subaru) -->
+<div id="models-strip" class="models-strip" hidden>
+  <h2 class="models-strip__title">Modely áut</h2>
+
+  <div class="models-strip__row">
+    <a class="model-tile" href="#" data-model="forester">
+      <div class="model-tile__img">
+        <img src="img/forester.png" alt="Subaru Forester" loading="lazy" />
+      </div>
+      <div class="model-tile__name">FORESTER</div>
+    </a>
+
+    <a class="model-tile" href="#" data-model="outback">
+      <div class="model-tile__img">
+        <img src="img/outback.png" alt="Subaru Outback" loading="lazy" />
+      </div>
+      <div class="model-tile__name">OUTBACK</div>
+    </a>
+
+    <a class="model-tile" href="#" data-model="solterra">
+      <div class="model-tile__img">
+        <img src="img/models/solterra.png" alt="Subaru Solterra" loading="lazy" />
+      </div>
+      <div class="model-tile__name">SOLTERRA</div>
+    </a>
+
+    <a class="model-tile" href="#" data-model="crosstrek">
+      <div class="model-tile__img">
+        <img src="img/models/crosstrek.png" alt="Subaru Crosstrek" loading="lazy" />
+      </div>
+      <div class="model-tile__name">CROSSTREK</div>
+    </a>
+
+    <a class="model-tile" href="#" data-model="brz">
+      <div class="model-tile__img">
+        <img src="img/models/brz.png" alt="Subaru BRZ" loading="lazy" />
+      </div>
+      <div class="model-tile__name">BRZ</div>
+    </a>
+  </div>
+</div>
+
+
     <div class="section-head">
+    
+
       <h3>Aktuálna ponuka áut</h3>
       <div class="filter-row" role="tablist" aria-label="Filtrovanie ponuky">
         <button class="tag active" data-filter="all">Všetko</button>
@@ -124,6 +169,12 @@
         <button class="tag" data-filter="skladom">Skladom</button>
       </div>
     </div>
+
+<!-- MODELY ÁUT (zobrazí sa len keď je vybratá značka: Subaru/KGM/Jeep) -->
+<div id="models-strip" class="models-strip" hidden>
+  <h2 class="models-strip__title">Modely áut</h2>
+  <div class="models-strip__row" id="models-strip-row"></div>
+</div>
 
     <!-- sem sa automaticky vložia autá -->
     <div class="grid" id="inventory"></div>

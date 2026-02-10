@@ -52,7 +52,7 @@
 
   // Preload pre svižnejší hover
   if (navigator.connection?.effectiveType !== '2g') {
-    ['img/subarubrz2024.avif','img/grandcherokke2024red.avif','img/subaruoutback2025magnetitgrey.avif']
+    ['img/subarulogo.png','img/grandcherokke2024red.avif','img/subaruoutback2025magnetitgrey.avif']
       .forEach(src => { const i = new Image(); i.src = src; });
   }
 })();
