@@ -392,8 +392,78 @@
           </div>
         </div>
 
-        
-        
+        <!-- Pravý stĺpec -->
+<div class="contact-form">
+  <h4>Napíšte nám</h4>
+
+  <form id="contactForm">
+    <div class="form-grid">
+      <input name="meno" required placeholder="Meno">
+      <input name="email" required type="email" placeholder="E-mail">
+      <input name="telefon" placeholder="Telefón">
+
+      <!-- anti-spam honeypot (neukazovať) -->
+      <input name="website" tabindex="-1" autocomplete="off" style="display:none">
+
+      <textarea name="sprava" required rows="4" placeholder="Vaša správa"></textarea>
+
+      <button class="btn primary" id="contactSubmit" type="submit">Odoslať</button>
+      <small id="contactStatus" class="hint" aria-live="polite"></small>
+    </div>
+  </form>
+</div>
+
+<script>
+(() => {
+  const form = document.getElementById('contactForm');
+  if (!form) return;
+
+  const btn = document.getElementById('contactSubmit');
+  const status = document.getElementById('contactStatus');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const fd = new FormData(form);
+    const payload = Object.fromEntries(fd.entries());
+
+    // honeypot – ak bot vyplní skryté pole, ticho to “prijmeme”
+    if (payload.website) {
+      if (status) status.textContent = 'Ďakujeme! Správa bola odoslaná.';
+      form.reset();
+      return;
+    }
+
+    btn.disabled = true;
+    const oldText = btn.textContent;
+    btn.textContent = 'Odosielam…';
+    if (status) status.textContent = '';
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.ok) throw new Error(json.error || ('HTTP ' + res.status));
+
+      if (status) status.textContent = 'Ďakujeme! Správa bola odoslaná.';
+      form.reset();
+    } catch (err) {
+      console.error(err);
+      if (status) status.textContent = 'Nepodarilo sa odoslať. Skúste neskôr.';
+      else alert('Nepodarilo sa odoslať. Skúste neskôr.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = oldText;
+    }
+  });
+})();
+</script>
+
+
         </div>
       </div>
     </div>
