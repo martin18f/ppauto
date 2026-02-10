@@ -1088,5 +1088,19 @@
       "subaru"
     ],
     "skryte": false
+  },
+  {
+    "znacka": "Subaru",
+    "model": "Forester",
+    "rok": 2026,
+    "palivo": "Hybrid",
+    "prevodovka": "AT • Style",
+    "stara_cena": "",
+    "nova_cena": "",
+    "obrazok": "",
+    "tagy": [
+      "subaru"
+    ],
+    "skryte": false
   }
 ]
