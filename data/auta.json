@@ -528,5 +528,19 @@
       "subaru"
     ],
     "skryte": false
+  },
+  {
+    "znacka": "Subaru",
+    "model": "XV",
+    "rok": 2021,
+    "palivo": "Benzín",
+    "prevodovka": "AT • Style",
+    "stara_cena": "",
+    "nova_cena": "",
+    "obrazok": "",
+    "tagy": [
+      "subaru"
+    ],
+    "skryte": false
   }
 ]
