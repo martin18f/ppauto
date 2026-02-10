@@ -4,7 +4,7 @@
     "model": "Outback",
     "rok": 2025,
     "palivo": "Benzín",
-    "prevodovka": "AT • Premium",
+    "prevodovka": "AT • Premiu",
     "stara_cena": "52 640 €",
     "nova_cena": "",
     "obrazok": "img/subaruoutback2025magnetitgrey.avif",
@@ -19,9 +19,7 @@
     "pohon": "",
     "farba": "",
     "metaliza": false,
-    "vybava": [
-      "360° kamera"
-    ]
+    "vybava": []
   },
   {
     "znacka": "Jeep",
