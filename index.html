@@ -393,17 +393,49 @@
         </div>
 
         <!-- Pravý stĺpec -->
-        <div class="contact-form">
-          <h4>Napíšte nám</h4>
-          <form onsubmit="event.preventDefault(); alert('Ďakujeme! Vaša správa bola odoslaná. (demo)')">
-            <div class="form-grid">
-              <input required placeholder="Meno">
-              <input required type="email" placeholder="E-mail">
-              <input placeholder="Telefón">
-              <textarea required rows="4" placeholder="Vaša správa"></textarea>
-              <button class="btn primary" type="submit">Odoslať</button>
-            </div>
-          </form>
+        <form id="contactForm">
+  <div class="form-grid">
+    <input name="meno" required placeholder="Meno">
+    <input name="email" required type="email" placeholder="E-mail">
+    <input name="telefon" placeholder="Telefón">
+
+    <!-- anti-spam honeypot (neukazovať) -->
+    <input name="website" tabindex="-1" autocomplete="off" style="display:none">
+
+    <textarea name="sprava" required rows="4" placeholder="Vaša správa"></textarea>
+    <button class="btn primary" id="contactSubmit" type="submit">Odoslať</button>
+  </div>
+</form>
+
+<script>
+document.getElementById('contactForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const btn = document.getElementById('contactSubmit');
+  btn.disabled = true;
+
+  const fd = new FormData(e.target);
+  const payload = Object.fromEntries(fd.entries());
+
+  try {
+    const res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    alert('Ďakujeme! Správa bola odoslaná.');
+    e.target.reset();
+  } catch (err) {
+    console.error(err);
+    alert('Nepodarilo sa odoslať. Skúste neskôr.');
+  } finally {
+    btn.disabled = false;
+  }
+});
+</script>
         </div>
       </div>
     </div>

@@ -7,7 +7,7 @@ const BRAND_NAME = 'Jeep';
 const ADMIN_URL = 'https://ppauto.sk/admin.html';
 
 // Bezpečné prepínače
-const HEADLESS = false;   // pri debugovaní daj false
+const HEADLESS = true;   // pri debugovaní daj false
 const DRY_RUN = false;    // najprv true (len vypíše), potom false (bude ukladať)
 const MAX_CARS = 50;     // poistka
 

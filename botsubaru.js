@@ -12,7 +12,7 @@ const ADMIN_URL = 'https://ppauto.sk/admin.html';
 
 // Bezpečné prepínače
 const HEADLESS = true;   // pri debugovaní daj false
-const DRY_RUN = true;    // najprv true (len vypíše), potom false (bude ukladať)
+const DRY_RUN = false;    // najprv true (len vypíše), potom false (bude ukladať)
 const MAX_CARS = 80;     // poistka
 
 function norm(s) {
