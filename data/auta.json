@@ -38,7 +38,7 @@
     "znacka": "Jeep",
     "model": "Avenger",
     "rok": 2024,
-    "palivo": "Benzín / Hybrid",
+    "palivo": "Hybrid",
     "prevodovka": "AT • Adventure",
     "stara_cena": "26 740€",
     "nova_cena": "24400€",
@@ -47,18 +47,18 @@
       "jeep"
     ],
     "skryte": false,
-    "objem": null,
-    "vykon": null,
-    "najazdene": null,
-    "karoseria": "",
-    "pohon": "",
-    "farba": "",
+    "objem": 1199,
+    "vykon": 74,
+    "najazdene": 10,
+    "karoseria": "Hatchback",
+    "pohon": "Predný",
+    "farba": "Žltá",
     "metaliza": false,
     "vybava": [
-      "Klimatizácia dvojzónová",
-      "Elektrické okná 4x",
-      "360° kamera",
-      "ABS"
+      "ABS",
+      "Airbagy",
+      "Asistent jazdných pruhov",
+      "Lakťová opierka"
     ]
   },
   {
