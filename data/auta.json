@@ -612,5 +612,19 @@
       "subaru"
     ],
     "skryte": false
+  },
+  {
+    "znacka": "Subaru",
+    "model": "Legacy",
+    "rok": 2010,
+    "palivo": "Benzín",
+    "prevodovka": "AT",
+    "stara_cena": "",
+    "nova_cena": "",
+    "obrazok": "",
+    "tagy": [
+      "subaru"
+    ],
+    "skryte": false
   }
 ]
