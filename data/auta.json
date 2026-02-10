@@ -864,5 +864,19 @@
       "subaru"
     ],
     "skryte": false
+  },
+  {
+    "znacka": "Subaru",
+    "model": "Forester",
+    "rok": 2016,
+    "palivo": "Benzín",
+    "prevodovka": "AT • Comfort",
+    "stara_cena": "",
+    "nova_cena": "",
+    "obrazok": "",
+    "tagy": [
+      "subaru"
+    ],
+    "skryte": false
   }
 ]
