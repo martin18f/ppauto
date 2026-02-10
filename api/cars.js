@@ -54,17 +54,9 @@ export default async function handler(req, res) {
 
     // ROUTING
     if (req.method === 'GET') {
-  const { cars } = await getFile();
-
-  const includeHiddenRaw = String(req.query.include_hidden || '').toLowerCase();
-  const includeHidden = includeHiddenRaw === '1' || includeHiddenRaw === 'true' || includeHiddenRaw === 'yes';
-
-  const out = includeHidden
-    ? cars
-    : cars.filter(c => !(c?.skryte === true || c?.hidden === true));
-
-  return res.status(200).json(out);
-}
+      const { cars } = await getFile();
+      return res.status(200).json(cars);
+    }
 
     if (req.method === 'POST') {
       const car = req.body;
