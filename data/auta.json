@@ -1102,5 +1102,24 @@
       "subaru"
     ],
     "skryte": true
+  },
+  {
+    "znacka": "Jeep",
+    "model": "Wrangler",
+    "rok": 2025,
+    "palivo": "Benzín",
+    "prevodovka": "AT • Rubicon",
+    "stara_cena": "52 640 €",
+    "nova_cena": "",
+    "obrazok": "",
+    "tagy": [],
+    "skryte": false,
+    "objem": 2002,
+    "vykon": 52,
+    "najazdene": 10,
+    "karoseria": "SUV",
+    "pohon": "4x4",
+    "farba": "čierna",
+    "metaliza": true
   }
 ]
