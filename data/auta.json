@@ -34,11 +34,20 @@
     "palivo": "Benzín / Hybrid",
     "prevodovka": "AT • Adventure",
     "stara_cena": "26 740€",
-    "nova_cena": "24490€",
+    "nova_cena": "1€",
     "obrazok": "https://raw.githubusercontent.com/martin18f/ppauto/main/uploads/1760655225681-IoQ24unINctyfVwC4zrHOYBE2k.avif",
     "tagy": [
       "jeep"
-    ]
+    ],
+    "skryte": false,
+    "objem": null,
+    "vykon": null,
+    "najazdene": null,
+    "karoseria": "",
+    "pohon": "",
+    "farba": "",
+    "metaliza": false,
+    "vybava": []
   },
   {
     "znacka": "Jeep",
