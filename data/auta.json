@@ -318,5 +318,19 @@
       "subaru"
     ],
     "skryte": false
+  },
+  {
+    "znacka": "Subaru",
+    "model": "XV",
+    "rok": 2012,
+    "palivo": "Benzín",
+    "prevodovka": "MT • Comfort",
+    "stara_cena": "",
+    "nova_cena": "",
+    "obrazok": "",
+    "tagy": [
+      "subaru"
+    ],
+    "skryte": false
   }
 ]
