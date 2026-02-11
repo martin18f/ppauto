@@ -35,13 +35,23 @@
     ]
   },
   {
+    "id": "jeep-avenger-2024",
     "znacka": "Jeep",
     "model": "Avenger",
     "rok": 2024,
     "palivo": "Hybrid",
+    "typ_prevodovky": "AT",
+    "vybava_paket": "Adventure",
     "prevodovka": "AT • Adventure",
     "stara_cena": "26 740€",
-    "nova_cena": "24400€",
+    "nova_cena": "24 400€",
+    "titulka": "https://raw.githubusercontent.com/martin18f/ppauto/main/uploads/1760655225681-IoQ24unINctyfVwC4zrHOYBE2k.avif",
+    "galeria": [
+      "https://raw.githubusercontent.com/martin18f/ppauto/main/uploads/1760655225681-IoQ24unINctyfVwC4zrHOYBE2k.avif"
+    ],
+    "obrazky": [
+      "https://raw.githubusercontent.com/martin18f/ppauto/main/uploads/1760655225681-IoQ24unINctyfVwC4zrHOYBE2k.avif"
+    ],
     "obrazok": "https://raw.githubusercontent.com/martin18f/ppauto/main/uploads/1760655225681-IoQ24unINctyfVwC4zrHOYBE2k.avif",
     "tagy": [
       "jeep"
@@ -56,8 +66,8 @@
     "metaliza": false,
     "vybava": [
       "ABS",
-      "Airbagy",
       "Asistent jazdných pruhov",
+      "Airbagy",
       "Lakťová opierka"
     ]
   },
