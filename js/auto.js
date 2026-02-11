@@ -652,12 +652,11 @@ const prevodovkaText = gearboxFullLabel(typPrevodovky);
       car_url: carUrlForMail
     };
 
-    const tdBtn = document.getElementById('openTestDrive');
-    tdBtn?.addEventListener('click', () => openTestDriveModalForCar(ctx));
+    
 
 
 // ==============================
-// Testovacia jazda – na detaile auta
+// Testovacia jazda – na detaile auta (EmailJS SEND s templateParams)
 // ==============================
 const tdOpen = document.getElementById('openTestDrive');
 const tdSection = document.getElementById('testdrive');
@@ -667,8 +666,7 @@ const tdSlot = document.getElementById('carTdSlot');
 const tdTimeRow = document.getElementById('carTdTimeRow');
 const tdTime = document.getElementById('carTdTime');
 
-const tdMsg = document.getElementById('carTdMessage');
-const tdBtn = document.getElementById('carTdSubmit');
+const tdSubmitBtn = document.getElementById('carTdSubmit');
 const tdStatus = document.getElementById('carTdStatus');
 
 function getPriceText(c) {
@@ -680,7 +678,6 @@ function getPriceText(c) {
 }
 
 tdOpen?.addEventListener('click', (e) => {
-  // necháme anchor, ale spravíme pekný scroll + focus
   e.preventDefault();
   tdSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   setTimeout(() => document.getElementById('carTdName')?.focus(), 350);
@@ -696,6 +693,11 @@ tdSlot?.addEventListener('change', () => {
 tdForm?.addEventListener('submit', async (e) => {
   e.preventDefault();
 
+  if (!initEmailJsOnce()) {
+    if (tdStatus) tdStatus.textContent = 'Chýba EmailJS script v auto.html.';
+    return;
+  }
+
   const fd = new FormData(tdForm);
   const payload = Object.fromEntries(fd.entries());
 
@@ -707,73 +709,53 @@ tdForm?.addEventListener('submit', async (e) => {
     return;
   }
 
-  // poskladáme správu s presnou identitou auta
-  const lines = [];
-  lines.push('Žiadosť o TESTOVACIU JAZDU');
-  lines.push('--------------------------');
-  lines.push(`Vozidlo: ${title}`);
-  if (wantedId) lines.push(`ID (URL): ${wantedId}`);
-  if (vybavaPaket) lines.push(`Výbava: ${vybavaPaket}`);
-  if (car.palivo) lines.push(`Palivo: ${car.palivo}`);
-  if (prevodovkaText) lines.push(`Prevodovka: ${prevodovkaText}`);
-  if (car.pohon) lines.push(`Pohon: ${car.pohon}`);
-  if (car.farba) lines.push(`Farba: ${car.farba}`);
-  if (najazdene) lines.push(`Najazdené: ${najazdene}`);
-  if (objem) lines.push(`Objem: ${objem}`);
-  if (vykon) lines.push(`Výkon: ${vykon}`);
-  lines.push(`Cena: ${getPriceText(car)}`);
-  lines.push('');
-  if (payload.datum) lines.push(`Preferovaný dátum: ${payload.datum}`);
-  if (payload.cas_okno) lines.push(`Časť dňa: ${payload.cas_okno}`);
-  if (payload.cas) lines.push(`Konkrétny čas: ${payload.cas}`);
-  if (payload.poznamka) {
-    lines.push('');
-    lines.push('Poznámka:');
-    lines.push(String(payload.poznamka).trim());
-  }
-  lines.push('');
-  lines.push(`Odkaz: ${location.href}`);
+  const slotText = (payload.cas_okno && String(payload.cas_okno).trim()) ? String(payload.cas_okno).trim() : 'Nezáleží';
+  const timeText = slotText === 'Konkrétny čas'
+    ? ((payload.cas && String(payload.cas).trim()) ? String(payload.cas).trim() : '—')
+    : '—';
 
-  if (tdMsg) tdMsg.value = lines.join('\n');
+  const dateText = (payload.datum && String(payload.datum).trim())
+    ? formatDateSK(String(payload.datum).trim())
+    : '—';
+
+  const noteText = (payload.poznamka && String(payload.poznamka).trim())
+    ? String(payload.poznamka).trim()
+    : '—';
+
+  // !!! TOTO MUSI SEDIET na tvoje EmailJS template premenné ({{car_title}}, {{car_url}}, ...)
+  const templateParams = {
+    // Vozidlo
+    car_title: title || '—',
+    car_id: wantedId || '—',
+    car_vybava: (vybavaPaket || '').trim() || '—',
+    car_palivo: (car.palivo || '').trim() || '—',
+    car_prevodovka: (prevodovkaText || '').trim() || '—',
+    car_cena: getPriceText(car),
+    car_url: location.href, // plná URL => tlačidlo v emaili bude klikateľné
+
+    // Termín
+    datum_text: dateText,
+    slot_text: slotText,
+    time_text: timeText,
+
+    // Kontakt
+    meno: (payload.meno && String(payload.meno).trim()) ? String(payload.meno).trim() : '—',
+    email: (payload.email && String(payload.email).trim()) ? String(payload.email).trim() : '—',
+    telefon: (payload.telefon && String(payload.telefon).trim()) ? String(payload.telefon).trim() : '—',
+    poznamka: noteText
+  };
 
   // UI
-  if (tdBtn) tdBtn.disabled = true;
-  const oldText = tdBtn?.textContent || '';
-  if (tdBtn) tdBtn.textContent = 'Odosielam…';
+  if (tdSubmitBtn) tdSubmitBtn.disabled = true;
+  const oldText = tdSubmitBtn?.textContent || '';
+  if (tdSubmitBtn) tdSubmitBtn.textContent = 'Odosielam…';
   if (tdStatus) tdStatus.textContent = '';
 
-const setVal = (id, value) => {
-  const el = document.getElementById(id);
-  if (el) el.value = value ?? '';
-};
-
-setVal('carTdAutoNazov', title || '—');
-setVal('carTdAutoId', wantedId || '—');
-setVal('carTdAutoVybava', vybavaPaket || '—');
-setVal('carTdAutoPalivo', car.palivo || '—');
-setVal('carTdAutoPrevodovka', prevodovkaText || '—');
-setVal('carTdAutoCena', getPriceText(car));
-setVal('carTdAutoUrl', location.href);
-
-// ak je poznámka prázdna, pošli aspoň —
-if (!payload.poznamka || !String(payload.poznamka).trim()) {
-  const noteEl = document.getElementById('carTdNote');
-  if (noteEl) noteEl.value = '—';
-}
-
-
   try {
-    if (!window.emailjs || typeof window.emailjs.sendForm !== 'function') {
-      throw new Error('EmailJS nie je načítaný (chýba script v auto.html).');
-    }
-
-    const contactNumber = Math.floor(Math.random() * 100000);
-
-    await window.emailjs.sendForm(
-      'service_i68hphn',
-      'template_testdrive',
-      tdForm,
-      { contact_number: contactNumber }
+    await window.emailjs.send(
+      EMAILJS_SERVICE_ID,
+      EMAILJS_TEMPLATE_TESTDRIVE,
+      templateParams
     );
 
     if (tdStatus) tdStatus.textContent = 'Ďakujeme! Termín vám potvrdíme telefonicky alebo e-mailom.';
@@ -784,10 +766,11 @@ if (!payload.poznamka || !String(payload.poznamka).trim()) {
     console.error(err);
     if (tdStatus) tdStatus.textContent = 'Nepodarilo sa odoslať. Skúste neskôr alebo nám zavolajte.';
   } finally {
-    if (tdBtn) tdBtn.disabled = false;
-    if (tdBtn) tdBtn.textContent = oldText;
+    if (tdSubmitBtn) tdSubmitBtn.disabled = false;
+    if (tdSubmitBtn) tdSubmitBtn.textContent = oldText;
   }
 });
+
 
 
     // Gallery logic + Lightbox

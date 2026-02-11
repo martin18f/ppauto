@@ -5,107 +5,164 @@
 // - DELETE /api/cars?index=NUMBER   -> vymaže auto na indexe
 //
 // ENV premenné (nastav vo Vercel projekte):
-// - GITHUB_TOKEN   (Personal Access Token s právom repo)
-// - GITHUB_REPO    (napr. "tvoje-meno/tvoj-repo")
+// - GITHUB_TOKEN   (Personal Access Token s právom "Contents: Read & write" pre ppauto-data)
+// - GITHUB_REPO    (napr. "tvoje-meno/ppauto-data")
 // - GITHUB_BRANCH  (napr. "main")
 // - DATA_PATH      (napr. "data/auta.json")
 
-
+function encodeGithubPath(path) {
+  // Zachová lomky, enkóduje len jednotlivé segmenty
+  return String(path)
+    .split('/')
+    .filter(Boolean)
+    .map(encodeURIComponent)
+    .join('/');
+}
 
 export default async function handler(req, res) {
   const isAdmin = !!req.headers.cookie?.includes('admin=1');
+
   try {
     const { GITHUB_TOKEN, GITHUB_REPO, GITHUB_BRANCH, DATA_PATH } = process.env;
+
     if (!GITHUB_TOKEN || !GITHUB_REPO || !GITHUB_BRANCH || !DATA_PATH) {
-      return res.status(500).json({ error: 'Chýbajú env premenné (GITHUB_TOKEN, GITHUB_REPO, GITHUB_BRANCH, DATA_PATH)' });
+      return res.status(500).json({
+        error:
+          'Chýbajú env premenné (GITHUB_TOKEN, GITHUB_REPO, GITHUB_BRANCH, DATA_PATH)',
+      });
     }
 
     const headers = {
-      'Authorization': `Bearer ${GITHUB_TOKEN}`,
-      'Accept': 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json'
+      Authorization: `Bearer ${GITHUB_TOKEN}`,
+      Accept: 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json',
     };
 
-    // Pomocné: načítaj JSON a SHA z GitHubu
     async function getFile() {
-      const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${encodeURIComponent(DATA_PATH)}?ref=${encodeURIComponent(GITHUB_BRANCH)}`;
+      const safePath = encodeGithubPath(DATA_PATH);
+      const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${safePath}?ref=${encodeURIComponent(
+        GITHUB_BRANCH
+      )}`;
+
       const r = await fetch(url, { headers });
       if (!r.ok) throw new Error(`GET file failed: ${r.status} ${r.statusText}`);
+
       const data = await r.json();
+
+      // GitHub vráti content len pre súbor; ak by to bol priečinok, bude to pole
+      if (!data || Array.isArray(data) || !data.content) {
+        throw new Error('DATA_PATH neukazuje na súbor (auta.json)');
+      }
+
       const content = Buffer.from(data.content, 'base64').toString('utf8');
       const json = JSON.parse(content);
+
       if (!Array.isArray(json)) throw new Error('auta.json nie je pole []');
+
       return { cars: json, sha: data.sha };
     }
 
-    // Pomocné: commitni nový JSON
     async function putFile(cars, sha, message) {
-      const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${encodeURIComponent(DATA_PATH)}`;
+      const safePath = encodeGithubPath(DATA_PATH);
+      const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${safePath}`;
+
       const body = {
         message,
-        content: Buffer.from(JSON.stringify(cars, null, 2), 'utf8').toString('base64'),
+        content: Buffer.from(JSON.stringify(cars, null, 2), 'utf8').toString(
+          'base64'
+        ),
         branch: GITHUB_BRANCH,
-        sha
+        sha,
       };
-      const r = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) });
+
+      const r = await fetch(url, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(body),
+      });
+
       if (!r.ok) {
         const txt = await r.text();
         throw new Error(`PUT file failed: ${r.status} ${r.statusText} – ${txt}`);
       }
+
       return r.json();
     }
 
-    // ROUTING
     // Verejný web potrebuje vedieť načítať ponuku áut. Preto:
     // - GET bez parametra include_hidden je verejný a vracia len neskrýté autá.
     // - GET s include_hidden=1 je len pre admin (vyžaduje cookie admin=1).
     if (req.method === 'GET') {
-      const includeHidden = (req.query.include_hidden || '').toString() === '1';
+      const includeHidden = (req.query?.include_hidden || '').toString() === '1';
 
       if (includeHidden && !isAdmin) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
 
       const { cars } = await getFile();
-      const visible = includeHidden ? cars : cars.filter(c => c && c.skryte !== true);
+      const visible = includeHidden
+        ? cars
+        : cars.filter((c) => c && c.skryte !== true);
+
       return res.status(200).json(visible);
     }
 
     if (req.method === 'POST') {
       if (!isAdmin) return res.status(401).json({ error: 'Unauthorized' });
       const car = req.body;
+
       const { cars, sha } = await getFile();
       cars.push(car);
-      await putFile(cars, sha, `chore(admin): add car ${car?.znacka || ''} ${car?.model || ''}`);
+
+      await putFile(
+        cars,
+        sha,
+        `chore(admin): add car ${car?.znacka || ''} ${car?.model || ''}`.trim()
+      );
+
       return res.status(200).json({ ok: true });
     }
 
     if (req.method === 'PUT') {
       if (!isAdmin) return res.status(401).json({ error: 'Unauthorized' });
-      const index = parseInt(req.query.index, 10);
-      if (!Number.isInteger(index) || index < 0) return res.status(400).json({ error: 'Bad index' });
+
+      const index = parseInt(req.query?.index, 10);
+      if (!Number.isInteger(index) || index < 0)
+        return res.status(400).json({ error: 'Bad index' });
+
       const car = req.body;
+
       const { cars, sha } = await getFile();
-      if (index >= cars.length) return res.status(404).json({ error: 'Not found' });
+      if (index >= cars.length)
+        return res.status(404).json({ error: 'Not found' });
+
       cars[index] = car;
+
       await putFile(cars, sha, `chore(admin): update car #${index + 1}`);
+
       return res.status(200).json({ ok: true });
     }
 
     if (req.method === 'DELETE') {
       if (!isAdmin) return res.status(401).json({ error: 'Unauthorized' });
-      const index = parseInt(req.query.index, 10);
-      if (!Number.isInteger(index) || index < 0) return res.status(400).json({ error: 'Bad index' });
+
+      const index = parseInt(req.query?.index, 10);
+      if (!Number.isInteger(index) || index < 0)
+        return res.status(400).json({ error: 'Bad index' });
+
       const { cars, sha } = await getFile();
-      if (index >= cars.length) return res.status(404).json({ error: 'Not found' });
+      if (index >= cars.length)
+        return res.status(404).json({ error: 'Not found' });
+
       cars.splice(index, 1);
+
       await putFile(cars, sha, `chore(admin): delete car #${index + 1}`);
+
       return res.status(200).json({ ok: true });
     }
 
     res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
     return res.status(405).json({ error: 'Method Not Allowed' });
-
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: e.message || 'Internal error' });
