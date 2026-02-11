@@ -22,6 +22,27 @@
 </script>
 <link rel="stylesheet" href="css/style.css">  
   
+<script>
+(function () {
+  try {
+    const params = new URLSearchParams(location.search);
+    const hasBrandParam = params.has('brand');
+
+    const stored =
+      (localStorage.getItem('ppauto.brand') ||
+       sessionStorage.getItem('ppauto.brand') ||
+       '').toLowerCase().trim();
+
+    const hasStoredBrand = (stored === 'subaru' || stored === 'kgm' || stored === 'jeep');
+
+    // presmeruj iba keď user prišiel "čisto" a nemá ešte zvolenú značku
+    if (!hasBrandParam && !hasStoredBrand) {
+      location.replace('vyber-znacky.html');
+    }
+  } catch (e) {}
+})();
+</script>
+
 </head>
 <body>
   
