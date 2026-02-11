@@ -17,7 +17,8 @@
 
   function getBrandFromDOM() {
     const b = document.documentElement.getAttribute('data-brand');
-    return isKnownBrand(safeLower(b)) ? safeLower(b) : null;
+    const s = safeLower(b);
+    return isKnownBrand(s) ? s : null;
   }
 
   function getBrandFromStorage() {
@@ -41,14 +42,21 @@
   }
 
   function api(path) {
-    // ak už máš globálnu apiUrl() niekde inde, využijeme ju
     try {
       if (typeof window.apiUrl === 'function') return window.apiUrl(path);
     } catch (e) {}
     return path;
   }
 
-  document.addEventListener('DOMContentLoaded', async () => {
+  function whenReady(fn) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fn, { once: true });
+    } else {
+      fn();
+    }
+  }
+
+  whenReady(async function init() {
     const form = document.getElementById('testDriveForm');
     if (!form) return;
 
@@ -78,36 +86,58 @@
     const pSlot = document.getElementById('tdSumSlot');
     const pTime = document.getElementById('tdSumTime');
 
-    // EmailJS – bezpečne init (kľudne aj keď už je initnuté inde)
+    // Povinné minimálne elementy (inak skript nemá zmysel)
+    if (!modelSelect || !otherWrap || !otherInput || !slotSelect || !timeRow || !timeSelect || !message) {
+      console.warn('[testdrive] Chýbajú elementy formulára (ID). Skontroluj HTML.');
+      return;
+    }
+
+    // EmailJS – bezpečne init
     if (window.emailjs && typeof window.emailjs.init === 'function' && !window.__ppEmailJSInited) {
-      window.emailjs.init({ publicKey: '_7xrgG31AEooF0kcr' });
-      window.__ppEmailJSInited = true;
+      try {
+        window.emailjs.init({ publicKey: '_7xrgG31AEooF0kcr' });
+        window.__ppEmailJSInited = true;
+      } catch (e) {}
+    }
+
+    // (voliteľné) min dátum = dnes
+    if (dateInput) {
+      try {
+        const d = new Date();
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        dateInput.min = `${yyyy}-${mm}-${dd}`;
+      } catch (e) {}
     }
 
     // 1) Načítaj autá a sprav mapu brand -> modely
     let modelMap = new Map();
     try {
-      const r = await fetch(api('/api/cars'));
+      const r = await fetch(api('/api/cars'), { cache: 'no-store' });
       if (r.ok) {
         const cars = await r.json();
+        const list = Array.isArray(cars) ? cars : [];
         const tmp = new Map();
 
-        (cars || []).forEach((c) => {
+        list.forEach((c) => {
+          // ak máš "skryte", nechceme ponúkať skryté modely
+          if (c && c.skryte === true) return;
+
           const b = safeLower(c && c.znacka);
-          const m = String(c && c.model || '').trim();
+          const m = String((c && c.model) || '').trim();
           if (!isKnownBrand(b) || !m) return;
 
           if (!tmp.has(b)) tmp.set(b, new Set());
           tmp.get(b).add(m);
         });
 
-        // set -> array (sorted)
         tmp.forEach((set, b) => {
-          modelMap.set(b, Array.from(set).sort((a, d) => a.localeCompare(d, 'sk')));
+          modelMap.set(b, Array.from(set).sort((x, y) => x.localeCompare(y, 'sk')));
         });
       }
     } catch (e) {
-      // nič – fallback bude „Iný model“
+      // fallback bude „Iný model“
     }
 
     // state
@@ -147,6 +177,7 @@
         modelSelect.innerHTML = `<option value="">Najprv vyberte značku</option>`;
         modelSelect.disabled = true;
         otherWrap.hidden = true;
+        otherInput.value = '';
         return;
       }
 
@@ -175,18 +206,24 @@
 
     function setBrand(b) {
       state.brand = b;
-      brandInput.value = b ? brandLabel(b) : '';
+
+      if (brandInput) brandInput.value = b ? brandLabel(b) : '';
 
       // chip active
       if (brandRow) {
-        brandRow.querySelectorAll('[data-td-brand]').forEach((btn) => {
-          btn.classList.toggle('is-active', btn.getAttribute('data-td-brand') === b);
+        brandRow.querySelectorAll('[data-td-brand]').forEach((btnEl) => {
+          btnEl.classList.toggle('is-active', btnEl.getAttribute('data-td-brand') === b);
         });
       }
 
       // reset model
       state.model = '';
       populateModels(b);
+
+      // vyčisti “Iný”
+      otherWrap.hidden = true;
+      otherInput.value = '';
+
       setPreview();
     }
 
@@ -197,8 +234,8 @@
 
     // brand click
     if (brandRow) {
-      brandRow.querySelectorAll('[data-td-brand]').forEach((b) => {
-        b.addEventListener('click', () => setBrand(b.getAttribute('data-td-brand')));
+      brandRow.querySelectorAll('[data-td-brand]').forEach((btnEl) => {
+        btnEl.addEventListener('click', () => setBrand(btnEl.getAttribute('data-td-brand')));
       });
     }
 
@@ -212,6 +249,7 @@
         return;
       }
       otherWrap.hidden = true;
+      otherInput.value = '';
       setModel(v);
     });
 
@@ -220,10 +258,12 @@
     });
 
     // termín
-    dateInput.addEventListener('change', () => {
-      state.date = dateInput.value || '';
-      setPreview();
-    });
+    if (dateInput) {
+      dateInput.addEventListener('change', () => {
+        state.date = dateInput.value || '';
+        setPreview();
+      });
+    }
 
     slotSelect.addEventListener('change', () => {
       state.slot = slotSelect.value || '';
@@ -250,9 +290,27 @@
       setPreview();
     }
 
+    function resetUIAfterSend() {
+      // reset “other” a “time”
+      otherWrap.hidden = true;
+      otherInput.value = '';
+      timeRow.hidden = true;
+      timeSelect.value = '';
+
+      // reset state okrem brandu (brand riešime nižšie)
+      state.model = '';
+      state.date = '';
+      state.slot = '';
+      state.time = '';
+
+      setPreview();
+    }
+
     // submit – poskladáme správu do hidden `sprava` a pošleme cez EmailJS
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      if (status) status.textContent = '';
 
       // základná validácia výberu auta
       if (!state.brand) {
@@ -270,6 +328,7 @@
       if (payload.website) {
         if (status) status.textContent = 'Ďakujeme! Správa bola odoslaná.';
         form.reset();
+        resetUIAfterSend();
         return;
       }
 
@@ -282,7 +341,8 @@
       if (state.date) lines.push(`Preferovaný dátum: ${state.date}`);
       if (state.slot) lines.push(`Časť dňa: ${state.slot}`);
       if (state.time) lines.push(`Konkrétny čas: ${state.time}`);
-      const noteTxt = String(note.value || '').trim();
+
+      const noteTxt = String((note && note.value) || '').trim();
       if (noteTxt) {
         lines.push('');
         lines.push('Poznámka:');
@@ -294,10 +354,9 @@
       message.value = lines.join('\n');
 
       // UI
-      btn.disabled = true;
-      const oldText = btn.textContent;
-      btn.textContent = 'Odosielam…';
-      if (status) status.textContent = '';
+      if (btn) btn.disabled = true;
+      const oldText = btn ? btn.textContent : '';
+      if (btn) btn.textContent = 'Odosielam…';
 
       try {
         if (!window.emailjs || typeof window.emailjs.sendForm !== 'function') {
@@ -308,39 +367,29 @@
 
         await window.emailjs.sendForm(
           'service_i68hphn',
-          'template_ntrqrhh',
+          'template_testdrive',
           form,
           { contact_number: contactNumber }
         );
 
         if (status) status.textContent = 'Ďakujeme! Ozveme sa vám kvôli potvrdeniu termínu.';
         form.reset();
-
-        // reset state
-        state.model = '';
-        state.date = '';
-        state.slot = '';
-        state.time = '';
-        otherWrap.hidden = true;
-        timeRow.hidden = true;
+        resetUIAfterSend();
 
         // v brand režime nechávame značku, inak resetneme aj značku
         const keepBrand = !!getBrandFromDOM();
-        if (!keepBrand) {
-          setBrand(null);
-          brandInput.value = '';
+        if (keepBrand) {
+          // dôležité: obnoví chips + tdBrandInput (po form.reset())
+          setBrand(state.brand);
         } else {
-          // znovu naplň modely pre brand
-          populateModels(state.brand);
+          setBrand(null);
         }
-
-        setPreview();
       } catch (err) {
         console.error(err);
         if (status) status.textContent = 'Nepodarilo sa odoslať. Skúste neskôr.';
       } finally {
-        btn.disabled = false;
-        btn.textContent = oldText;
+        if (btn) btn.disabled = false;
+        if (btn) btn.textContent = oldText;
       }
     });
   });

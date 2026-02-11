@@ -16,6 +16,59 @@
       --maxw: 1200px;
     }
     *{box-sizing:border-box}
+    
+    /* =========================
+   GLOBAL CURSOR SPOTLIGHT (celá stránka)
+   ========================= */
+
+.global-cursorfx{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0; /* vrstva pod obsahom */
+}
+
+/* samotné svetlo (spotlight) */
+.global-cursorfx::before{
+  content:"";
+  position:absolute;
+  inset:0;                 /* ⬅️ už nie -25% */
+  opacity:.55;
+
+  background: radial-gradient(
+    700px 420px at var(--mx, 50vw) var(--my, 35vh), /* ⬅️ px / vw fallback */
+    rgba(255,255,255,0.12),
+    rgba(59,130,246,0.10),
+    transparent 60%
+  );
+
+  mix-blend-mode: screen;
+  filter: blur(40px) saturate(130%); /* blur môže ostať */
+}
+
+/* jemný "gloss" overlay ako máš na kartách */
+.global-cursorfx::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  opacity: .35;
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent 22%);
+  mix-blend-mode: overlay;
+}
+
+/* uisti sa, že obsah stránky je NAD týmto efektom */
+body > *{
+  position: relative;
+  z-index: 1;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .global-cursorfx{ display:none !important; }
+}
+
+    
+    
     html,body{background:var(--bg); color:var(--text); font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,"Helvetica Neue",Arial,"Noto Sans",sans-serif; line-height:1.55}
     a{color:var(--text); text-decoration:none}
     .container{max-width:var(--maxw); margin:0 auto; padding:0 20px}
@@ -55,8 +108,36 @@ html {
 
 
     .brand h1{font-size:16px; margin-left:50px; letter-spacing:.3px;white-space: nowrap;}
-    .nav-links{display:flex; gap:12px; align-items:center;flex-wrap: nowrap}
+    .nav-links{
+  display:flex;
+  flex: 1;                    /* zaberie priestor medzi logom a CTA */
+  align-items:center;
+  justify-content: space-evenly; /* ROZTIAHNE položky po šírke */
+  gap: 0;                     /* medzery rieši space-evenly */
+  padding: 0 14px;            /* jemný vnútorný okraj */
+  min-width: 0;
+  flex-wrap: nowrap;
+}
     
+.nav-links a{
+  padding: 12px 18px;         /* väčší “klik” priestor */
+  border-radius: 10px;
+  white-space: nowrap;        /* aby sa “Testovacia jazda” nelámala */
+}
+
+@media (max-width: 1100px){
+  .nav-links{
+    justify-content: center;
+    gap: 10px;          /* tu už radšej gap, nech sa zmestí */
+    padding: 0 8px;
+  }
+  .nav-links a{
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+}
+
+
     .nav-links a:hover{color: rgb(255, 255, 255)}
     .nav-cta{display:flex; gap:10px}
     .btn{
@@ -1029,7 +1110,6 @@ html[data-brand] #ponuka .filter-row .tag[data-filter="jeep"] {
   max-width: 220px;
   text-decoration: none;
   user-select: none;
-
   background: var(--ms-surface);
   border: 1px solid var(--ms-border);
   border-radius: var(--ms-radius);
@@ -1258,13 +1338,9 @@ html[data-brand] #jazda #tdBrandRow{ display: none !important; }
     border-radius: 999px;
   }
 
-  .model-tile{
-    flex: 0 0 160px;
-    max-width: 160px;
-    scroll-snap-align: start;
-  }
 
-  .model-tile__img{ height: 58px; }
+
+
 
 
 
@@ -1542,3 +1618,468 @@ html[data-brand="jeep"]{ --td-accent: var(--accent-3); }
 .testdrive .btn.td-btn-primary:active{
   transform: translateY(0);
 }
+
+/* =========================
+   TESTDRIVE button = car-btn-primary look
+   ========================= */
+
+.testdrive .btn.td-btn{
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(255,255,255,.10);
+  color: #ffffff;
+  box-shadow: none;
+  transition: transform .16s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.testdrive .btn.td-btn:hover{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,.04);
+  border-color: rgba(255,255,255,.16);
+  box-shadow: 0 10px 24px rgba(0,0,0,.22);
+}
+
+.testdrive .btn.td-btn:active{
+  transform: translateY(0px);
+}
+
+/* Primary (rovnaké ako .car-btn-primary) */
+.testdrive .btn.td-btn-primary{
+  background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.02));
+  border-color: rgba(34,197,94,.38);
+  box-shadow: 0 14px 30px rgba(0,0,0,.28);
+}
+
+.testdrive .btn.td-btn-primary:hover{
+  border-color: rgba(34,197,94,.55);
+  box-shadow:
+    0 0 0 4px rgba(34,197,94,.12),
+    0 16px 34px rgba(0,0,0,.35);
+}
+
+/* "Zmeniť značku" – na desktope je ako tlačidlo vpravo (CTA),
+   na mobile sa zobrazí ako položka v burger menu */
+.nav-links a.nav-brand{
+  display: none;           /* default: skryť v desktop nav */
+}
+
+.nav-cta a.brand-switch{
+  white-space: nowrap;
+}
+
+/* Mobile (≤ 680px): položka v burger menu sa zobrazí */
+@media (max-width: 680px){
+  .nav-links a.nav-brand{
+    display: block;
+  }
+}
+
+/* =========================
+   CAR CARD PRO (Ponuka áut)
+   ========================= */
+
+.car.car-pro{
+  --car-accent-rgb: 59,130,246; /* default */
+  background: linear-gradient(180deg, rgba(21,26,34,.92), rgba(21,26,34,1));
+  border: 1px solid rgba(35,42,53,.95);
+  border-radius: 18px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 18px 46px rgba(0,0,0,.38);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  cursor: pointer;
+}
+
+.car.car-pro:focus{
+  outline: none;
+}
+
+.car.car-pro:focus-visible{
+  box-shadow:
+    0 26px 70px rgba(0,0,0,.52),
+    0 0 0 2px rgba(var(--car-accent-rgb), .55);
+}
+
+.car.car-pro[data-make="jeep"]{ --car-accent-rgb: 59,130,246; }
+.car.car-pro[data-make="kgm"]{ --car-accent-rgb: 59,130,246; }
+.car.car-pro[data-make="subaru"]{ --car-accent-rgb: 59,130,246; }
+
+.car.car-pro:hover{
+  transform: translateY(-4px);
+  border-color: rgba(var(--car-accent-rgb), .45);
+  box-shadow:
+    0 26px 70px rgba(0,0,0,.52),
+    0 0 0 1px rgba(var(--car-accent-rgb), .18);
+}
+
+/* media */
+.car.car-pro .img{
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: linear-gradient(135deg,#18202d,#131a24);
+}
+
+.car.car-pro .img::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(0,0,0,.62) 100%);
+}
+
+.car.car-pro .img img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display:block;
+}
+
+.car.car-pro .img-placeholder{
+  width:100%;
+  height:100%;
+  display:grid;
+  place-items:center;
+  color: rgba(152,162,179,.9);
+  font-weight:700;
+  letter-spacing:.2px;
+}
+
+/* overlay badges */
+.car.car-pro .car-overlay{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+.car.car-pro .car-badges{
+  position:absolute;
+  top:12px;
+  left:12px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  max-width: calc(100% - 90px);
+  z-index:2;
+}
+
+.car.car-pro .badge{
+  background: rgba(11,14,19,.78) !important;  /* tmavšie ako predtým */
+  border-color: rgba(255,255,255,.16) !important;
+  color: #ffffff !important;                  /* najbielejší text */
+  text-shadow: 0 1px 0 rgba(0,0,0,.25);
+  font-weight: bold;
+}
+
+.car.car-pro .badge--accent{
+  background: rgba(11,14,19,.78) !important;  /* nech je stále tmavé */
+  border-color: rgba(var(--car-accent-rgb), .45) !important;
+  box-shadow: 0 0 0 1px rgba(var(--car-accent-rgb), .22) inset;
+  color: #ffffff !important;
+}
+
+.car.car-pro .badge--deal{
+  background: rgba(11,14,19,.78) !important;  /* tmavé pozadie aj pre ZĽAVA */
+  border-color: rgba(var(--car-accent-rgb), .55) !important;
+  box-shadow: 0 0 0 1px rgba(var(--car-accent-rgb), .22) inset;
+  color: #ffffff !important;
+}
+
+/* gearbox chip (top-right) */
+.car.car-pro .gear-chip{
+  position:absolute;
+  top:12px;
+  right:12px;
+  z-index:2;
+  font-size:12px;
+  font-weight:900;
+  padding:7px 10px;
+  border-radius:999px;
+  border:1px solid rgba(var(--car-accent-rgb), .42);
+  background: rgba(11,14,19,.55);
+  backdrop-filter: blur(8px) saturate(150%);
+  color: rgb(255, 255, 255);
+}
+
+/* body */
+.car.car-pro .body{
+  padding: 14px 14px 16px;
+  display:flex;
+  flex-direction:column;
+  gap: 16px;
+}
+
+.car.car-pro .car-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.car.car-pro .car-title{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  margin-bottom: 10px;
+}
+
+.car.car-pro .car-price{
+  text-align:right;
+  min-width: 160px;
+}
+
+.car.car-pro .price-new{
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: .2px;
+  color: var(--text-strong);
+}
+
+.car.car-pro .price-old{
+  margin-top: 3px;
+  font-size: 14px;      /* bolo menšie */
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+/* spec grid 2x2 */
+.car.car-pro .car-specgrid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+   gap: 14px 16px;
+}
+
+.car.car-pro .specitem{
+  border: 1px solid rgba(35,42,53,.85);
+  background: rgba(17,21,27,.55);
+  border-radius: 14px;
+  padding: 10px 10px;
+  overflow:hidden;
+}
+
+.car.car-pro .specitem .k{
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.car.car-pro .specitem .v{
+  margin-top: 3px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.car.car-pro .specitem--gear .sub{
+  margin-top: 3px;
+  font-size: 11px;
+  font-weight: 900;
+  color: rgba(var(--car-accent-rgb), .95);
+}
+
+/* actions */
+.car.car-pro .car-actions{
+  display:flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items:center;
+  margin-top: 2px;
+}
+
+.car.car-pro .car-link{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(35,42,53,.95);
+  background: rgba(17,21,27,.85);
+  font-weight: 900;
+  font-size: 13px;
+  transition: transform .12s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.car.car-pro .car-link:hover{
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,.18);
+}
+
+.car.car-pro .car-link.primary{
+  border-color: rgba(var(--car-accent-rgb), .42);
+  box-shadow: 0 0 0 1px rgba(var(--car-accent-rgb), .18) inset;
+}
+
+.car.car-pro .car-link.primary:hover{
+  border-color: rgba(var(--car-accent-rgb), .62);
+  box-shadow: 0 0 0 1px rgba(var(--car-accent-rgb), .28) inset;
+}
+
+/* mobile */
+@media (max-width: 680px){
+  .car.car-pro .car-head{ flex-direction: column; align-items: flex-start; }
+  .car.car-pro .car-price{ text-align:left; min-width: unset; }
+  .car.car-pro .car-actions{ justify-content:flex-start; }
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .car.car-pro{ transition:none !important; }
+  .car.car-pro *{ transition:none !important; }
+  .car.car-pro:hover{ transform:none !important; }
+}
+
+/* TITLE WRAP (aby ellipsis fungoval) */
+.car.car-pro .car-titlewrap{
+  min-width: 0;
+  flex: 1;
+}
+
+/* Názov auta 1 riadok */
+.car.car-pro .car-title{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* META riadok (náhrada badges) */
+.car.car-pro .car-meta{
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: .25px;
+  color: rgba(255,255,255,.92);
+}
+
+.car.car-pro .car-meta .meta-sep{
+  color: rgba(255,255,255,.35);
+}
+
+.car.car-pro .car-meta .meta-item{
+  color: rgba(255,255,255,.92);
+}
+
+/* zvýraznenie “Zľava” bez badge/pillu */
+.car.car-pro .car-meta .meta-item--deal{
+  color: #fff;
+  font-weight: 900;
+  position: relative;
+  padding-left: 10px;
+}
+
+.car.car-pro .car-meta .meta-item--deal::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:50%;
+  transform: translateY(-50%);
+  width:6px;
+  height:6px;
+  border-radius:999px;
+  background: rgba(var(--car-accent-rgb), .95);
+  box-shadow: 0 0 0 2px rgba(var(--car-accent-rgb), .18);
+}
+
+/* rok jemne “tech” podčiarknutý */
+.car.car-pro .car-meta .meta-item--year{
+  font-weight: 900;
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--car-accent-rgb), .65);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 2px;
+}
+
+/* preškrtnutú cenu zväčšiť (ak to ešte nemáš) */
+.car.car-pro .price-old{
+  margin-top: 3px;
+  font-size: 14px;
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+/* voliteľné: decentná accent linka v tele karty (nahrádza “badge vibe”) */
+.car.car-pro .body{
+  position: relative;
+}
+
+.car.car-pro .body::before{
+  content:"";
+  position:absolute;
+  left: 10px;
+  top: 14px;
+  bottom: 14px;
+  width: 2px;
+  border-radius: 99px;
+  background: linear-gradient(
+    180deg,
+    rgba(var(--car-accent-rgb), .0),
+    rgba(var(--car-accent-rgb), .85),
+    rgba(var(--car-accent-rgb), .0)
+  );
+  opacity: .9;
+  pointer-events:none;
+}
+
+/* 1) odstráň modrú (accent) čiaru vľavo */
+.car.car-pro .body::before{
+  content: none !important;
+  display: none !important;
+}
+
+/* (ak chceš stále jednotný SUBARU accent pre všetkých) */
+.car.car-pro{
+  --car-accent-rgb: 59,130,246 !important;
+}
+
+/* 2) názov: max 2 riadky (ak sa zmestí, ostane 1) */
+.car.car-pro .car-title{
+  white-space: normal !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  line-height: 1.25;
+  max-width: 100%;
+}
+
+/* aby title nezomieral kvôli cene */
+.car.car-pro .car-titlewrap{ min-width: 0; }
+.car.car-pro .car-price{
+  min-width: 132px;     /* viac miesta pre názov */
+  white-space: nowrap;
+}
+
+/* 3) META: zväčšiť rok aj zľavu */
+.car.car-pro .car-meta{
+  font-size: 12px;
+  color: rgba(255,255,255,.94);
+}
+
+.car.car-pro .car-meta .meta-item--year,
+.car.car-pro .car-meta .meta-item--deal{
+  font-size: 13px;
+  font-weight: 900;
+}
+
+/* detail hodnoty (2024 a 2 000 €) ešte väčší */
+.car.car-pro .car-meta .year-val,
+.car.car-pro .car-meta .deal-amount{
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: .2px;
+}
+
+/* 4) preškrtnutú cenu nechaj väčšiu (ak už máš, môže ostať) */
+.car.car-pro .price-old{
+  font-size: 14px;
+}
+

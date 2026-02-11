@@ -377,61 +377,247 @@ function resolveCarId(auto, baseCounts, usedIds) {
  */
 function vykresliKartu(auto) {
   const article = document.createElement('article');
-  article.className = 'car';
+  article.className = 'car car-pro';
   article.dataset.make = (auto.znacka || '').toLowerCase().trim();
   article.dataset.tags = (auto.tagy || []).join(' ').toLowerCase().trim();
-
   article.dataset.model = slugify(auto.model || '');
 
+  // --- helpers ---
+  const escHtml = (v) =>
+    String(v ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
+  const escAttr = (v) => escHtml(v).replace(/\s+/g, ' ').trim();
+
+  const normalizeGearbox = (raw) =>
+    String(raw || '').trim().toUpperCase().replace(/\s+/g, '');
+
+  const parseLegacyPrevodovka = (raw) => {
+    const txt = String(raw || '').trim();
+    if (!txt) return { typ: '', paket: '' };
+
+    const parts = txt
+      .split(/•|·|\|/g)
+      .map((p) => p.trim())
+      .filter(Boolean);
+
+    if (!parts.length) return { typ: '', paket: '' };
+
+    if (parts.length === 1) {
+      const one = normalizeGearbox(parts[0]);
+      if (/^(AT|MT|CVT|DCT|DSG)$/.test(one)) return { typ: one, paket: '' };
+      return { typ: '', paket: parts[0] };
+    }
+
+    return { typ: normalizeGearbox(parts[0]), paket: parts.slice(1).join(' • ') };
+  };
+
+  const formatObjem = (val) => {
+    if (val === null || val === undefined || val === '') return '';
+    if (typeof val === 'string' && /cm/i.test(val)) return val.trim();
+
+    const num = Number(val);
+    if (!Number.isFinite(num) || num <= 0) return '';
+
+    return `${new Intl.NumberFormat('sk-SK').format(num)} cm³`;
+  };
+
+  const parsePriceNumber = (s) => {
+    const str = String(s || '');
+    const digits = str.replace(/[^\d]/g, '');
+    const n = Number(digits);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const formatEur = (n) => `${new Intl.NumberFormat('sk-SK').format(n)} €`;
+
+  // --- ID + link na detail ---
   const carId = auto.__resolvedId || (auto.id || '').toString().trim();
   const detailHref = carId ? `auto.html?id=${encodeURIComponent(carId)}` : '#kontakt';
 
-  const coverImg = (Array.isArray(auto.obrazky) && auto.obrazky.length ? auto.obrazky[0] : auto.obrazok) || '';
+  // --- titulka / galéria fallback ---
+  const coverImg =
+    String(
+      auto.titulka ||
+        (Array.isArray(auto.galeria) && auto.galeria.length ? auto.galeria[0] : '') ||
+        (Array.isArray(auto.obrazky) && auto.obrazky.length ? auto.obrazky[0] : '') ||
+        auto.obrazok ||
+        ''
+    ).trim();
 
+  // --- cena ---
   const maZlavu = !!(auto.nova_cena && String(auto.nova_cena).trim() !== '');
-  let priceHTML = '';
+  const priceNew = maZlavu
+    ? String(auto.nova_cena || '').trim()
+    : (auto.stara_cena && String(auto.stara_cena).trim() !== '' ? String(auto.stara_cena).trim() : 'Cena na vyžiadanie');
+
+  const priceOld = maZlavu ? String(auto.stara_cena || '').trim() : '';
+
+  // --- prevodovka + paket (nové polia, fallback na legacy) ---
+  const legacy = String(auto.prevodovka || '').trim();
+  const parsed = parseLegacyPrevodovka(legacy);
+
+  const typ = normalizeGearbox(auto.typ_prevodovky || parsed.typ || '');
+  const vybavaPaket = String(auto.vybava_paket || parsed.paket || '').trim();
+
+  const prevodovkaText =
+    typ === 'AT' ? 'Automat' :
+    typ === 'MT' ? 'Manuál' :
+    (typ ? typ : '-');
+
+  // --- ostatné hodnoty ---
+  const palivo = String(auto.palivo || '-').trim() || '-';
+  const objem = formatObjem(auto.objem) || '-';
+
+  const znackaUpper = String(auto.znacka || '').toUpperCase().trim();
+  const rokText = String(auto.rok || '').trim();
+
+  // názov bez roka (povolíme max 2 riadky cez CSS)
+  const titleText = `${znackaUpper} ${auto.model || ''}`.replace(/\s+/g, ' ').trim();
+  const altText = `${rokText ? rokText + ' ' : ''}${titleText}`.trim();
+
+  // --- META riadok (rok + zľava + statusy) ---
+  const tags = Array.isArray(auto.tagy)
+    ? auto.tagy.map((t) => String(t).toLowerCase().trim()).filter(Boolean)
+    : [];
+
+  const metaItems = [];
+
+  if (rokText) {
+    metaItems.push({
+      cls: 'meta-item--year',
+      html: `Rok <span class="year-val">${escHtml(rokText)}</span>`
+    });
+  }
 
   if (maZlavu) {
-    priceHTML = `
-      <div class="price">
-        <span class="oldprice">${auto.stara_cena || ''}</span>
-      </div>
-      <div class="discountprice">${auto.nova_cena}</div>
-    `;
-  } else {
-    const aktualna =
-      auto.stara_cena && String(auto.stara_cena).trim() !== '' ? auto.stara_cena : 'Cena na vyžiadanie';
-    priceHTML = `
-      <div class="price">
-        <span class="singleprice">${aktualna}</span>
-      </div>
-    `;
+    const oldN = parsePriceNumber(priceOld);
+    const newN = parsePriceNumber(priceNew);
+
+    let dealAmount = '';
+    if (oldN > 0 && newN > 0 && oldN > newN) dealAmount = formatEur(oldN - newN);
+
+    metaItems.push({
+      cls: 'meta-item--deal',
+      html: dealAmount
+        ? `Zľava <span class="deal-amount">${escHtml(dealAmount)}</span>`
+        : `Zľava`
+    });
   }
+
+  const status = [];
+  if (tags.includes('novinky')) status.push('Novinka');
+  if (tags.includes('skladom')) status.push('Skladom');
+
+  const blacklist = new Set(['subaru', 'kgm', 'jeep', 'all', 'novinky', 'skladom']);
+  for (const t of tags) {
+    if (status.length >= 3) break;
+    if (blacklist.has(t)) continue;
+    status.push(t);
+  }
+
+  if (status.length) {
+    metaItems.push({ cls: 'meta-item--status', html: escHtml(status.join(' • ')) });
+  }
+
+  const metaHTML = metaItems.length
+    ? `<div class="car-meta">${
+        metaItems
+          .map((m, i) =>
+            `<span class="meta-item ${m.cls}">${m.html}</span>` +
+            (i < metaItems.length - 1 ? `<span class="meta-sep">•</span>` : '')
+          )
+          .join('')
+      }</div>`
+    : '';
+
+  const imgHTML = coverImg
+    ? `<img src="${escAttr(coverImg)}" loading="lazy" decoding="async" alt="${escAttr(altText)}">`
+    : `<div class="img-placeholder" aria-hidden="true">Bez fotky</div>`;
 
   article.innerHTML = `
     <div class="img">
-      <img src="${coverImg}" alt="${auto.rok || ''} ${auto.znacka || ''} ${auto.model || ''}">
+      ${imgHTML}
     </div>
-    <div class="body">
-      <h4>${auto.rok || ''} ${(auto.znacka || '').toUpperCase()} ${auto.model || ''}</h4>
 
-      <div class="specs">
-        <div class="spec">${auto.rok || '-'}</div>
-        <div class="spec">${auto.palivo || '-'}</div>
-        <div class="spec">${auto.prevodovka || '-'}</div>
+    <div class="body">
+      <div class="car-head">
+        <div class="car-titlewrap">
+          <h4 class="car-title">${escHtml(titleText)}</h4>
+          ${metaHTML}
+        </div>
+
+        <div class="car-price">
+          <div class="price-new">${escHtml(priceNew)}</div>
+          ${maZlavu && priceOld ? `<div class="price-old">${escHtml(priceOld)}</div>` : ``}
+        </div>
       </div>
 
-      <div class="price-row">
-        <div class="price-group">
-          ${priceHTML}
+      <div class="car-specgrid">
+        <div class="specitem">
+          <div class="k">Palivo</div>
+          <div class="v">${escHtml(palivo)}</div>
         </div>
-        <a class="pill" href="${detailHref}">Zistiť viac</a>
+
+        <div class="specitem">
+          <div class="k">Prevodovka</div>
+          <div class="v">${escHtml(prevodovkaText)}</div>
+        </div>
+
+        <div class="specitem">
+          <div class="k">Výbava</div>
+          <div class="v">${escHtml(vybavaPaket || '-')}</div>
+        </div>
+
+        <div class="specitem">
+          <div class="k">Objem</div>
+          <div class="v">${escHtml(objem)}</div>
+        </div>
+      </div>
+
+      <div class="car-actions">
+        <a class="car-link primary" href="${detailHref}">Zobraziť viac</a>
       </div>
     </div>
   `;
 
+        // Klik na celú kartu = otvor detail (okrem kliknutia na interaktívne prvky)
+  article.style.cursor = 'pointer';
+  article.setAttribute('role', 'link');
+  article.setAttribute('tabindex', '0');
+
+  const goDetail = () => {
+    if (!detailHref || detailHref === '#kontakt') return;
+    window.location.assign(detailHref);
+  };
+
+  article.addEventListener('click', (e) => {
+    // ak klikneš na link/tlačidlo v karte, nech to funguje normálne a nezdvojí sa navigácia
+    const interactive = e.target.closest('a, button, input, textarea, select, label');
+    if (interactive) return;
+    goDetail();
+  });
+
+  // prístupnosť: Enter / Space
+  article.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      goDetail();
+    }
+  });
+
+
+
   return article;
 }
+
+
+
+
 
 function initFiltery() {
   const buttons = document.querySelectorAll('.filter-row .tag');

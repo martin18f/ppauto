@@ -11,6 +11,186 @@
 
   if (!mount) return;
 
+    // ==============================
+  // TEST DRIVE (EmailJS)
+  // ==============================
+  const EMAILJS_PUBLIC_KEY = '_7xrgG31AEooF0kcr';
+  const EMAILJS_SERVICE_ID = 'service_i68hphn';
+  const EMAILJS_TEMPLATE_TESTDRIVE = 'template_testdrive'; // <- SEM daj template ID z EmailJS
+
+  let _emailReady = false;
+  let _tdModalReady = false;
+  let _tdCarCtx = null;
+
+  function initEmailJsOnce() {
+    if (_emailReady) return true;
+    if (!window.emailjs) {
+      console.warn('EmailJS nie je načítaný. Skontroluj script tag v auto.html.');
+      return false;
+    }
+    window.emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+    _emailReady = true;
+    return true;
+  }
+
+  function formatDateSK(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (!Number.isFinite(d.getTime())) return String(iso);
+    return d.toLocaleDateString('sk-SK');
+  }
+
+  function ensureTestDriveModal() {
+    if (_tdModalReady) return;
+
+    const el = document.createElement('div');
+    el.id = 'tdModal';
+    el.style.cssText = `
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+      background:rgba(0,0,0,.55); z-index:9999; padding:18px;
+    `;
+    el.innerHTML = `
+      <div style="width:720px; max-width:100%; background:#0b0f14; color:#fff; border:1px solid rgba(255,255,255,.12);
+                  border-radius:16px; overflow:hidden; box-shadow:0 30px 90px rgba(0,0,0,.65);">
+        <div style="padding:14px 16px; background:#111827; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+          <div style="font-family:Arial,Helvetica,sans-serif; font-weight:900; font-size:16px;">
+            Žiadosť o testovaciu jazdu
+          </div>
+          <button type="button" id="tdClose"
+            style="background:transparent;border:0;color:#fff;font-size:22px;cursor:pointer;line-height:1;">×</button>
+        </div>
+
+        <div style="padding:16px;">
+          <div id="tdCarLine" style="font-family:Arial,Helvetica,sans-serif; font-size:13px; opacity:.9; margin-bottom:12px;">
+            —
+          </div>
+
+          <form id="tdForm">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+              <input name="meno" required placeholder="Meno"
+                style="padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:#0f172a;color:#fff;outline:none;">
+              <input name="email" required type="email" placeholder="E-mail"
+                style="padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:#0f172a;color:#fff;outline:none;">
+              <input name="telefon" placeholder="Telefón"
+                style="padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:#0f172a;color:#fff;outline:none;">
+              <input name="datum_iso" type="date" required
+                style="padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:#0f172a;color:#fff;outline:none;">
+
+              <select name="slot_text"
+                style="padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:#0f172a;color:#fff;outline:none;">
+                <option value="Nezáleží">Časť dňa: Nezáleží</option>
+                <option value="Dopoludnia">Časť dňa: Dopoludnia</option>
+                <option value="Popoludní">Časť dňa: Popoludní</option>
+              </select>
+
+              <input name="time_text" type="time" placeholder="Konkrétny čas"
+                style="padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:#0f172a;color:#fff;outline:none;">
+            </div>
+
+            <!-- honeypot -->
+            <input name="website" tabindex="-1" autocomplete="off" style="display:none">
+
+            <textarea name="poznamka" rows="4" placeholder="Poznámka (voliteľné)"
+              style="margin-top:10px;width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:#0f172a;color:#fff;outline:none;resize:vertical;"></textarea>
+
+            <div style="display:flex; gap:10px; align-items:center; margin-top:12px;">
+              <button type="submit" id="tdSubmit"
+                style="background:#111827;color:#fff;border:0;border-radius:12px;padding:10px 14px;font-weight:900;cursor:pointer;">
+                Odoslať žiadosť
+              </button>
+              <div id="tdStatus" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;opacity:.9;"></div>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(el);
+
+    const close = () => { el.style.display = 'none'; document.body.classList.remove('no-scroll'); };
+    el.addEventListener('click', (e) => { if (e.target === el) close(); });
+    el.querySelector('#tdClose').addEventListener('click', close);
+
+    const form = el.querySelector('#tdForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!initEmailJsOnce()) return;
+
+      const status = el.querySelector('#tdStatus');
+      const btn = el.querySelector('#tdSubmit');
+
+      const fd = new FormData(form);
+      const data = Object.fromEntries(fd.entries());
+
+      if (data.website) { // bot
+        form.reset();
+        if (status) status.textContent = 'Ďakujeme! Žiadosť bola odoslaná.';
+        close();
+        return;
+      }
+
+      btn.disabled = true;
+      const old = btn.textContent;
+      btn.textContent = 'Odosielam…';
+      if (status) status.textContent = '';
+
+      try {
+        const ctx = _tdCarCtx || {};
+        const templateParams = {
+          // Vozidlo
+          car_title: ctx.car_title || '—',
+          car_id: ctx.car_id || '—',
+          car_vybava: ctx.car_vybava || '—',
+          car_palivo: ctx.car_palivo || '—',
+          car_prevodovka: ctx.car_prevodovka || '—',
+          car_cena: ctx.car_cena || '—',
+          car_url: ctx.car_url || '—',
+
+          // Termín (do šablóny posielame už “text”)
+          datum_text: formatDateSK(data.datum_iso),
+          slot_text: (data.slot_text || '—'),
+          time_text: (data.time_text || '—'),
+
+          // Kontakt
+          meno: data.meno || '—',
+          email: data.email || '—',
+          telefon: data.telefon || '—',
+          poznamka: (data.poznamka || '—')
+        };
+
+        await window.emailjs.send(
+          EMAILJS_SERVICE_ID,
+          EMAILJS_TEMPLATE_TESTDRIVE,
+          templateParams
+        );
+
+        if (status) status.textContent = 'Ďakujeme! Žiadosť bola odoslaná.';
+        form.reset();
+        close();
+      } catch (err) {
+        console.error(err);
+        if (status) status.textContent = 'Nepodarilo sa odoslať. Skúste neskôr.';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = old;
+      }
+    });
+
+    _tdModalReady = true;
+  }
+
+  function openTestDriveModalForCar(ctx) {
+    ensureTestDriveModal();
+    _tdCarCtx = ctx;
+
+    const modal = document.getElementById('tdModal');
+    const line = modal.querySelector('#tdCarLine');
+    if (line) line.textContent = ctx?.car_title ? ctx.car_title : '—';
+
+    modal.style.display = 'flex';
+    document.body.classList.add('no-scroll');
+  }
+
+
   function slugify(input) {
     return String(input || '')
       .normalize('NFD')
@@ -156,14 +336,12 @@ function parseLegacyPrevodovka(raw) {
 
   function renderNotFound(message) {
     mount.innerHTML = `
-      <div class="car-card not-found">
-        <h2>Auto sa nenašlo</h2>
-        <p>${message || 'Skontroluj odkaz alebo sa vráť späť na ponuku.'}</p>
-        <div class="car-cta">
-          <a class="btn primary" href="index.html#ponuka">Späť na ponuku</a>
-          <a class="btn" href="index.html#kontakt">Kontakt</a>
-        </div>
-      </div>
+      <div class="car-cta">
+  <a class="btn car-btn car-btn-primary" href="tel:+421903905280">Zavolať predaj</a>
+  <button class="btn car-btn" type="button" id="openTestDrive">Testovacia jazda</button>
+  <a class="btn car-btn" href="mailto:predaj@ppauto.sk">Napísať predaju</a>
+  <a class="btn car-btn" href="index.html#kontakt">Navigovať / Kontakt</a>
+</div>
     `;
   }
 
@@ -226,22 +404,7 @@ if (!images.length && cover) images = [cover];
 
     // Admin má v jednom texte "Prevodovka / Výbava" (napr. "AT • Premium").
 // V detaile to rozdelíme: prevodovka -> Technické údaje, vybavaBalik -> Základné údaje.
-const prevodovkaRaw = (car.prevodovka || '').trim();
 
-let prevodovkaOnly = prevodovkaRaw; // napr. "AT"
-
-
-if (prevodovkaRaw) {
-  const parts = prevodovkaRaw
-    .split(/•|·|\|/g)               // podporí "•" aj iné oddeľovače
-    .map(p => p.trim())
-    .filter(Boolean);
-
-  if (parts.length >= 2) {
-    prevodovkaOnly = parts[0];
-    vybavaBalik = parts.slice(1).join(' • ');
-  }
-}
 
 // --- Prevodovka + Výbava balík (oddelené polia + fallback zo starého "AT • Premium") ---
 const legacy = parseLegacyPrevodovka(car.prevodovka || '');
@@ -333,6 +496,7 @@ const prevodovkaText = gearboxFullLabel(typPrevodovky);
 
           <div class="car-cta">
   <a class="btn car-btn car-btn-primary" href="tel:+421903905280">Zavolať predaj</a>
+  <a class="btn car-btn" href="#testdrive" id="openTestDrive">Testovacia jazda</a>
   <a class="btn car-btn" href="mailto:predaj@ppauto.sk">Napísať predaju</a>
   <a class="btn car-btn" href="index.html#kontakt">Navigovať / Kontakt</a>
 </div>
@@ -362,8 +526,269 @@ const prevodovkaText = gearboxFullLabel(typPrevodovky);
               : `<p class="empty-note">Výbava zatiaľ nie je doplnená.</p>`}
           </div>
         </section>
+
+              <section class="car-card" id="testdrive">
+  <div class="section-title"><h3>Testovacia jazda</h3></div>
+  <div class="section-body">
+
+    <div class="car-td-picked">
+      <div class="car-td-title">${title}</div>
+      <div class="car-td-meta">
+        ${[vybavaPaket, car.palivo, prevodovkaText, car.pohon, car.farba, najazdene].filter(Boolean).join(' • ')}
+      </div>
+    </div>
+
+    <form id="carTestDriveForm" class="car-td-form">
+      <div class="car-td-grid">
+        <div class="car-td-field">
+          <label for="carTdDate">Preferovaný dátum</label>
+          <input id="carTdDate" name="datum" type="date" />
+        </div>
+
+        <div class="car-td-field">
+          <label for="carTdSlot">Časť dňa</label>
+          <select id="carTdSlot" name="cas_okno">
+            <option value="">Nezáleží</option>
+            <option value="Ráno (8:00–10:00)">Ráno (8:00–10:00)</option>
+            <option value="Dopoludnia (10:00–12:00)">Dopoludnia (10:00–12:00)</option>
+            <option value="Obed (12:00–14:00)">Obed (12:00–14:00)</option>
+            <option value="Popoludní (14:00–17:00)">Popoludní (14:00–17:00)</option>
+            <option value="Konkrétny čas">Konkrétny čas</option>
+          </select>
+        </div>
+
+        <div class="car-td-field" id="carTdTimeRow" hidden>
+          <label for="carTdTime">Konkrétny čas</label>
+          <select id="carTdTime" name="cas">
+            <option value="">Vyberte čas</option>
+            <option>08:00</option><option>08:30</option><option>09:00</option><option>09:30</option>
+            <option>10:00</option><option>10:30</option><option>11:00</option><option>11:30</option>
+            <option>12:00</option><option>12:30</option><option>13:00</option><option>13:30</option>
+            <option>14:00</option><option>14:30</option><option>15:00</option><option>15:30</option>
+            <option>16:00</option><option>16:30</option>
+          </select>
+        </div>
+
+        <div class="car-td-field">
+          <label for="carTdName">Meno</label>
+          <input id="carTdName" name="meno" required placeholder="Meno" />
+        </div>
+
+        <div class="car-td-field">
+          <label for="carTdEmail">E-mail</label>
+          <input id="carTdEmail" name="email" required type="email" placeholder="E-mail" />
+        </div>
+
+        <div class="car-td-field">
+          <label for="carTdPhone">Telefón</label>
+          <input id="carTdPhone" name="telefon" placeholder="Telefón" />
+        </div>
+
+        <div class="car-td-field car-td-span">
+          <label for="carTdNote">Poznámka (voliteľné)</label>
+          <textarea id="carTdNote" name="poznamka" rows="3" placeholder="Napíšte nám preferencie, otázky, …"></textarea>
+        </div>
+
+        <label class="car-td-consent car-td-span">
+          <input type="checkbox" required />
+          Súhlasím so spracovaním osobných údajov za účelom kontaktovania ohľadom testovacej jazdy.
+        </label>
+
+        <!-- anti-spam honeypot -->
+        <input name="website" tabindex="-1" autocomplete="off" style="display:none">
+
+        <!-- EmailJS template field -->
+        <textarea name="sprava" id="carTdMessage" style="display:none"></textarea>
+
+              <!-- AUTO info pre EmailJS template (pekne rozdelené sekcie) -->
+<input type="hidden" name="auto_nazov" id="carTdAutoNazov">
+<input type="hidden" name="auto_id" id="carTdAutoId">
+<input type="hidden" name="auto_vybava" id="carTdAutoVybava">
+<input type="hidden" name="auto_palivo" id="carTdAutoPalivo">
+<input type="hidden" name="auto_prevodovka" id="carTdAutoPrevodovka">
+<input type="hidden" name="auto_cena" id="carTdAutoCena">
+<input type="hidden" name="auto_url" id="carTdAutoUrl">
+
+
+        <!-- tlačidlo má rovnaký look ako car-btn-primary, lebo je v .car-cta -->
+        <div class="car-cta car-td-actions car-td-span">
+          <button class="btn car-btn car-btn-primary" id="carTdSubmit" type="submit">Odoslať žiadosť</button>
+          <small id="carTdStatus" class="hint" aria-live="polite"></small>
+        </div>
+      </div>
+    </form>
+
+  </div>
+</section>
+
+
       </div>
     `;
+
+    // ===== Test drive: priprav dáta o aute + bind na tlačidlo =====
+    initEmailJsOnce();
+
+    const carIdForMail = String(car.__resolvedId || car.id || wantedId || '').trim();
+    const carTitleForMail = `${car.rok || ''} ${(car.znacka || '').toUpperCase()} ${car.model || ''}`
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const carPriceForMail =
+      (car.nova_cena && String(car.nova_cena).trim()) ||
+      (car.stara_cena && String(car.stara_cena).trim()) ||
+      'Cena na vyžiadanie';
+
+    const carUrlForMail = carIdForMail
+      ? new URL(`auto.html?id=${encodeURIComponent(carIdForMail)}`, location.origin).href
+      : location.href;
+
+    const ctx = {
+      car_title: carTitleForMail || '—',
+      car_id: carIdForMail || '—',
+      car_vybava: (vybavaPaket || '').trim() || '—',
+      car_palivo: (car.palivo || '').trim() || '—',
+      car_prevodovka: (prevodovkaText || '').trim() || '—',
+      car_cena: carPriceForMail,
+      car_url: carUrlForMail
+    };
+
+    const tdBtn = document.getElementById('openTestDrive');
+    tdBtn?.addEventListener('click', () => openTestDriveModalForCar(ctx));
+
+
+// ==============================
+// Testovacia jazda – na detaile auta
+// ==============================
+const tdOpen = document.getElementById('openTestDrive');
+const tdSection = document.getElementById('testdrive');
+const tdForm = document.getElementById('carTestDriveForm');
+
+const tdSlot = document.getElementById('carTdSlot');
+const tdTimeRow = document.getElementById('carTdTimeRow');
+const tdTime = document.getElementById('carTdTime');
+
+const tdMsg = document.getElementById('carTdMessage');
+const tdBtn = document.getElementById('carTdSubmit');
+const tdStatus = document.getElementById('carTdStatus');
+
+function getPriceText(c) {
+  const n = (c?.nova_cena && String(c.nova_cena).trim() !== '') ? String(c.nova_cena).trim() : '';
+  const s = (c?.stara_cena && String(c.stara_cena).trim() !== '') ? String(c.stara_cena).trim() : '';
+  if (n) return n;
+  if (s) return s;
+  return 'Cena na vyžiadanie';
+}
+
+tdOpen?.addEventListener('click', (e) => {
+  // necháme anchor, ale spravíme pekný scroll + focus
+  e.preventDefault();
+  tdSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  setTimeout(() => document.getElementById('carTdName')?.focus(), 350);
+  history.replaceState(null, '', '#testdrive');
+});
+
+tdSlot?.addEventListener('change', () => {
+  const wantsExact = tdSlot.value === 'Konkrétny čas';
+  if (tdTimeRow) tdTimeRow.hidden = !wantsExact;
+  if (!wantsExact && tdTime) tdTime.value = '';
+});
+
+tdForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const fd = new FormData(tdForm);
+  const payload = Object.fromEntries(fd.entries());
+
+  // honeypot
+  if (payload.website) {
+    if (tdStatus) tdStatus.textContent = 'Ďakujeme! Žiadosť bola odoslaná.';
+    tdForm.reset();
+    if (tdTimeRow) tdTimeRow.hidden = true;
+    return;
+  }
+
+  // poskladáme správu s presnou identitou auta
+  const lines = [];
+  lines.push('Žiadosť o TESTOVACIU JAZDU');
+  lines.push('--------------------------');
+  lines.push(`Vozidlo: ${title}`);
+  if (wantedId) lines.push(`ID (URL): ${wantedId}`);
+  if (vybavaPaket) lines.push(`Výbava: ${vybavaPaket}`);
+  if (car.palivo) lines.push(`Palivo: ${car.palivo}`);
+  if (prevodovkaText) lines.push(`Prevodovka: ${prevodovkaText}`);
+  if (car.pohon) lines.push(`Pohon: ${car.pohon}`);
+  if (car.farba) lines.push(`Farba: ${car.farba}`);
+  if (najazdene) lines.push(`Najazdené: ${najazdene}`);
+  if (objem) lines.push(`Objem: ${objem}`);
+  if (vykon) lines.push(`Výkon: ${vykon}`);
+  lines.push(`Cena: ${getPriceText(car)}`);
+  lines.push('');
+  if (payload.datum) lines.push(`Preferovaný dátum: ${payload.datum}`);
+  if (payload.cas_okno) lines.push(`Časť dňa: ${payload.cas_okno}`);
+  if (payload.cas) lines.push(`Konkrétny čas: ${payload.cas}`);
+  if (payload.poznamka) {
+    lines.push('');
+    lines.push('Poznámka:');
+    lines.push(String(payload.poznamka).trim());
+  }
+  lines.push('');
+  lines.push(`Odkaz: ${location.href}`);
+
+  if (tdMsg) tdMsg.value = lines.join('\n');
+
+  // UI
+  if (tdBtn) tdBtn.disabled = true;
+  const oldText = tdBtn?.textContent || '';
+  if (tdBtn) tdBtn.textContent = 'Odosielam…';
+  if (tdStatus) tdStatus.textContent = '';
+
+const setVal = (id, value) => {
+  const el = document.getElementById(id);
+  if (el) el.value = value ?? '';
+};
+
+setVal('carTdAutoNazov', title || '—');
+setVal('carTdAutoId', wantedId || '—');
+setVal('carTdAutoVybava', vybavaPaket || '—');
+setVal('carTdAutoPalivo', car.palivo || '—');
+setVal('carTdAutoPrevodovka', prevodovkaText || '—');
+setVal('carTdAutoCena', getPriceText(car));
+setVal('carTdAutoUrl', location.href);
+
+// ak je poznámka prázdna, pošli aspoň —
+if (!payload.poznamka || !String(payload.poznamka).trim()) {
+  const noteEl = document.getElementById('carTdNote');
+  if (noteEl) noteEl.value = '—';
+}
+
+
+  try {
+    if (!window.emailjs || typeof window.emailjs.sendForm !== 'function') {
+      throw new Error('EmailJS nie je načítaný (chýba script v auto.html).');
+    }
+
+    const contactNumber = Math.floor(Math.random() * 100000);
+
+    await window.emailjs.sendForm(
+      'service_i68hphn',
+      'template_testdrive',
+      tdForm,
+      { contact_number: contactNumber }
+    );
+
+    if (tdStatus) tdStatus.textContent = 'Ďakujeme! Termín vám potvrdíme telefonicky alebo e-mailom.';
+    tdForm.reset();
+    if (tdTimeRow) tdTimeRow.hidden = true;
+
+  } catch (err) {
+    console.error(err);
+    if (tdStatus) tdStatus.textContent = 'Nepodarilo sa odoslať. Skúste neskôr alebo nám zavolajte.';
+  } finally {
+    if (tdBtn) tdBtn.disabled = false;
+    if (tdBtn) tdBtn.textContent = oldText;
+  }
+});
+
 
     // Gallery logic + Lightbox
 let idx = 0;

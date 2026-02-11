@@ -45,7 +45,8 @@
 
 </head>
 <body>
-  
+  <div class="global-cursorfx" aria-hidden="true"></div>
+
   <header>
     <div class="container nav">
       <div class="brand">
@@ -57,17 +58,19 @@
       <nav class="nav-links">
         <a href="#ponuka">Ponuka áut</a>
         <a href="#servis">Servis</a>
-        <a href="#znacky">Značky</a>
-        <a href="#jazda">Testovacia jazda</a>
+        <a href="#znacky">Značky</a>  
         <a href="#tim">Tím</a>
         <a href="#kontakt">Kontakt</a>
         
       </nav>
       <div class="nav-cta">
-        <a class="btn" href="mailto:predaj@ppauto.sk">Napísať predaju</a>
-        <a class="btn primary" href="#kontakt">Zavolať / Navigovať</a>
-        <button class="btn mobile-toggle" aria-label="Otvoriť menu" onclick="toggleMenu()">☰</button>
-      </div>
+  
+
+  <a class="btn brand-switch" href="vyber-znacky.html" aria-label="Zmeniť značku">Zmeniť značku</a>
+
+  
+  <button class="btn mobile-toggle" aria-label="Otvoriť menu" onclick="toggleMenu()">☰</button>
+</div>
     </div>
   </header>
 
@@ -103,7 +106,7 @@
               <p>Transparentné mesačné splátky na mieru vašemu rozpočtu.</p>
             </div>
             <div class="quick-card">
-              <
+              
               <h4>Rezervujte si termín</h4>
               <p>Zažite Subaru, KGM alebo Jeep naživo na cestách.</p>
             </div>
@@ -148,11 +151,7 @@
       </div>
     </div>
 
-<!-- MODELY ÁUT (zobrazí sa len keď je vybratá značka: Subaru/KGM/Jeep) -->
-<div id="models-strip" class="models-strip" hidden>
-  <h2 class="models-strip__title">Modely áut</h2>
-  <div class="models-strip__row" id="models-strip-row"></div>
-</div>
+
 
     <!-- sem sa automaticky vložia autá -->
     <div class="grid" id="inventory"></div>
@@ -303,10 +302,10 @@
           </div>
 
           <!-- Lightbox -->
-          <div class="promo-lightbox" data-lightbox>
-            <span class="close" data-close>&times;</span>
-            <img class="promo-lightbox-content" data-lightbox-img alt="Zväčšený banner">
-          </div>
+          <div class="promo-lightbox" id="promo-lightbox" data-lightbox>
+  <span class="close" data-close>&times;</span>
+  <img class="promo-lightbox-content" id="promo-lightbox-img" data-lightbox-img alt="Zväčšený banner">
+</div>
         </div>
 
         
@@ -381,143 +380,7 @@
       </div>
     </section>
 
-<section id="jazda" class="testdrive">
-  <div class="container">
-    <div class="section-head">
-      <h3>Testovacia jazda</h3>
-      
-    </div>
 
-    <div class="td-grid">
-      <!-- FORM -->
-      <div class="td-card">
-        <form id="testDriveForm" class="td-form">
-          <!-- 1) AUTO -->
-          <div class="td-step">
-            <h4 class="td-step-title">1) Vyberte auto</h4>
-
-            <div class="td-brand" id="tdBrandRow" aria-label="Výber značky">
-              <button type="button" class="tag td-chip" data-td-brand="subaru">Subaru</button>
-              <button type="button" class="tag td-chip" data-td-brand="kgm">KGM</button>
-              <button type="button" class="tag td-chip" data-td-brand="jeep">Jeep</button>
-            </div>
-
-            <!-- značka ide do hidden inputu (kvôli EmailJS) -->
-            <input type="hidden" name="znacka" id="tdBrandInput" required>
-
-            <div class="td-field">
-              <label class="td-label" for="tdModel">Model</label>
-              <select id="tdModel" name="model" required>
-                <option value="">Najprv vyberte značku</option>
-              </select>
-            </div>
-
-            <div class="td-field" id="tdOtherWrap" hidden>
-              <label class="td-label" for="tdModelOther">Iný model</label>
-              <input id="tdModelOther" type="text" placeholder="Napíšte model (napr. Outback)" />
-              <small class="hint">Ak model nevidíte v zozname, napíšte ho sem.</small>
-            </div>
-          </div>
-
-          <!-- 2) TERMÍN -->
-          <div class="td-step">
-            <h4 class="td-step-title">2) Termín</h4>
-
-            <div class="td-row">
-              <div class="td-field">
-                <label class="td-label" for="tdDate">Preferovaný dátum</label>
-                <input id="tdDate" name="datum" type="date" />
-              </div>
-
-              <div class="td-field">
-                <label class="td-label" for="tdSlot">Časť dňa</label>
-                <select id="tdSlot" name="cas_okno">
-                  <option value="">Nezáleží</option>
-                  <option value="Ráno (8:00–10:00)">Ráno (8:00–10:00)</option>
-                  <option value="Dopoludnia (10:00–12:00)">Dopoludnia (10:00–12:00)</option>
-                  <option value="Obed (12:00–14:00)">Obed (12:00–14:00)</option>
-                  <option value="Popoludní (14:00–17:00)">Popoludní (14:00–17:00)</option>
-                  <option value="Konkrétny čas">Konkrétny čas</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="td-row" id="tdTimeRow" hidden>
-              <div class="td-field">
-                <label class="td-label" for="tdTime">Konkrétny čas</label>
-                <select id="tdTime" name="cas">
-                  <option value="">Vyberte čas</option>
-                  <option>08:00</option><option>08:30</option><option>09:00</option><option>09:30</option>
-                  <option>10:00</option><option>10:30</option><option>11:00</option><option>11:30</option>
-                  <option>12:00</option><option>12:30</option><option>13:00</option><option>13:30</option>
-                  <option>14:00</option><option>14:30</option><option>15:00</option><option>15:30</option>
-                  <option>16:00</option><option>16:30</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- 3) KONTAKT -->
-          <div class="td-step">
-            <h4 class="td-step-title">3) Kontaktné údaje</h4>
-
-            <div class="td-row">
-              <div class="td-field">
-                <label class="td-label" for="tdMeno">Meno</label>
-                <input id="tdMeno" name="meno" required placeholder="Meno" />
-              </div>
-              <div class="td-field">
-                <label class="td-label" for="tdTelefon">Telefón</label>
-                <input id="tdTelefon" name="telefon" placeholder="Telefón" />
-              </div>
-            </div>
-
-            <div class="td-field">
-              <label class="td-label" for="tdEmail">E-mail</label>
-              <input id="tdEmail" name="email" required type="email" placeholder="E-mail" />
-            </div>
-
-            <div class="td-field">
-              <label class="td-label" for="tdNote">Poznámka (voliteľné)</label>
-              <textarea id="tdNote" name="poznamka" rows="3" placeholder="Napíšte nám preferencie, otázky, …"></textarea>
-            </div>
-
-            <!-- anti-spam honeypot -->
-            <input name="website" tabindex="-1" autocomplete="off" style="display:none">
-
-            <!-- EmailJS template field: sprava (skryté, doplní JS) -->
-            <textarea name="sprava" id="tdMessage" style="display:none"></textarea>
-
-            <button class="btn td-btn-primary" id="tdSubmit" type="submit">
-  Rezervovať testovaciu jazdu
-</button>
-
-            <small id="tdStatus" class="hint" aria-live="polite"></small>
-          </div>
-        </form>
-      </div>
-
-      <!-- PREVIEW -->
-      <aside class="td-card td-preview">
-        <div class="td-preview-top">
-          
-          <h4 id="tdPreviewTitle">Vyberte značku a model</h4>
-          <p class="muted">Termín je orientačný – potvrdíme vám ho po odoslaní.</p>
-        </div>
-
-        <ul class="td-summary">
-          <li><span>Značka</span><strong id="tdSumBrand">—</strong></li>
-          <li><span>Model</span><strong id="tdSumModel">—</strong></li>
-          <li><span>Dátum</span><strong id="tdSumDate">—</strong></li>
-          <li><span>Časť dňa</span><strong id="tdSumSlot">—</strong></li>
-          <li><span>Čas</span><strong id="tdSumTime">—</strong></li>
-        </ul>
-
-        
-      </aside>
-    </div>
-  </div>
-</section>
 
     <!-- TESTIMONIALS -->
     <section>
@@ -717,43 +580,43 @@
   const status = document.getElementById('contactStatus');
 
   form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const fd = new FormData(form);
-    const payload = Object.fromEntries(fd.entries());
+  const fd = new FormData(form);
+  const payload = Object.fromEntries(fd.entries());
 
-    if (payload.website) {
-      if (status) status.textContent = 'Ďakujeme! Správa bola odoslaná.';
-      form.reset();
-      return;
-    }
+  // honeypot
+  if (payload.website) {
+    if (status) status.textContent = 'Ďakujeme! Správa bola odoslaná.';
+    form.reset();
+    return;
+  }
 
-    btn.disabled = true;
-    const oldText = btn.textContent;
-    btn.textContent = 'Odosielam…';
-    if (status) status.textContent = '';
+  btn.disabled = true;
+  const oldText = btn.textContent;
+  btn.textContent = 'Odosielam…';
+  if (status) status.textContent = '';
 
-    try {
-      const contactNumber = Math.floor(Math.random() * 100000);
+  try {
+    const contactNumber = Math.floor(Math.random() * 100000);
 
-      await emailjs.sendForm(
-        'service_i68hphn',
-        'template_ntrqrhh',
-        form,
-        { contact_number: contactNumber }
-      );
+    await emailjs.sendForm(
+      'service_i68hphn',
+      'template_contact', // sem daj reálne Template ID z EmailJS
+      form,
+      { contact_number: contactNumber }
+    );
 
-      if (status) status.textContent = 'Ďakujeme! Správa bola odoslaná.';
-      form.reset();
-
-    } catch (err) {
-      console.error(err);
-      if (status) status.textContent = 'Nepodarilo sa odoslať. Skúste neskôr.';
-    } finally {
-      btn.disabled = false;
-      btn.textContent = oldText;
-    }
-  });
+    if (status) status.textContent = 'Ďakujeme! Správa bola odoslaná.';
+    form.reset();
+  } catch (err) {
+    console.error(err);
+    if (status) status.textContent = 'Nepodarilo sa odoslať. Skúste neskôr.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = oldText;
+  }
+});
 })();
 
 </script>
@@ -1053,5 +916,30 @@ document.addEventListener("DOMContentLoaded", () => {
 <script src="js/script.js" defer></script>
 
 <script src="js/testdrive.js"></script>
+
+<script>
+(() => {
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduceMotion) return;
+
+  const fx = document.querySelector(".global-cursorfx");
+  if (!fx) return;
+
+  function setPos(e){
+    fx.style.setProperty("--mx", e.clientX + "px");
+    fx.style.setProperty("--my", e.clientY + "px");
+  }
+
+  window.addEventListener("mousemove", setPos, { passive: true });
+
+  window.addEventListener("mouseleave", () => {
+    fx.style.setProperty("--mx", "50vw");
+    fx.style.setProperty("--my", "35vh");
+  }, { passive: true });
+})();
+</script>
+
+
+
 </body>
 </html>
