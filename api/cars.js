@@ -1,17 +1,6 @@
-// Vercel Serverless Function: /api/cars
-// - GET    /api/cars                -> vráti pole áut z GitHubu
-// - POST   /api/cars                -> pridá auto { ...car }
-// - PUT    /api/cars?index=NUMBER   -> upraví auto na indexe
-// - DELETE /api/cars?index=NUMBER   -> vymaže auto na indexe
-//
-// ENV (Vercel):
-// - GITHUB_TOKEN
-// - GITHUB_REPO    napr. "tvoje-meno/ppauto-data"
-// - GITHUB_BRANCH  napr. "main"
-// - DATA_PATH      napr. "data/auta.json"
-
+// /api/cars
 function encodeGithubPath(path) {
-  // Zachová lomky, enkóduje iba segmenty
+  // Zachová lomky, enkóduje len segmenty
   return String(path)
     .split("/")
     .filter(Boolean)
@@ -45,7 +34,12 @@ export default async function handler(req, res) {
       )}`;
 
       const r = await fetch(url, { headers });
-      if (!r.ok) throw new Error(`GET file failed: ${r.status} ${r.statusText}`);
+
+      if (!r.ok) {
+        throw new Error(
+          `GET file failed: ${r.status} ${r.statusText} | url=${url}`
+        );
+      }
 
       const data = await r.json();
 
@@ -55,7 +49,6 @@ export default async function handler(req, res) {
 
       const content = Buffer.from(data.content, "base64").toString("utf8");
       const json = JSON.parse(content);
-
       if (!Array.isArray(json)) throw new Error("auta.json nie je pole []");
 
       return { cars: json, sha: data.sha };
@@ -82,15 +75,42 @@ export default async function handler(req, res) {
 
       if (!r.ok) {
         const txt = await r.text();
-        throw new Error(`PUT file failed: ${r.status} ${r.statusText} – ${txt}`);
+        throw new Error(
+          `PUT file failed: ${r.status} ${r.statusText} – ${txt} | url=${url}`
+        );
       }
 
       return r.json();
     }
 
+    // DEBUG režim – otvor si /api/cars?debug=1 na produkcii a uvidíš presne,
+    // aký repo/branch/path používa produkcia (bez tokenu).
+    if (req.method === "GET" && (req.query?.debug || "") === "1") {
+      const safePath = encodeGithubPath(DATA_PATH);
+      const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${safePath}?ref=${encodeURIComponent(
+        GITHUB_BRANCH
+      )}`;
+      const r = await fetch(url, { headers });
+      const text = await r.text();
+      return res.status(200).json({
+        env: {
+          GITHUB_REPO,
+          GITHUB_BRANCH,
+          DATA_PATH,
+          hasToken: !!GITHUB_TOKEN,
+        },
+        github: {
+          url,
+          status: r.status,
+          statusText: r.statusText,
+          bodyPreview: text.slice(0, 300),
+        },
+      });
+    }
+
+    // GET (public) / GET include_hidden=1 (admin only)
     if (req.method === "GET") {
       const includeHidden = (req.query?.include_hidden || "").toString() === "1";
-
       if (includeHidden && !isAdmin) {
         return res.status(401).json({ error: "Unauthorized" });
       }
@@ -105,8 +125,8 @@ export default async function handler(req, res) {
 
     if (req.method === "POST") {
       if (!isAdmin) return res.status(401).json({ error: "Unauthorized" });
-
       const car = req.body;
+
       const { cars, sha } = await getFile();
       cars.push(car);
 
@@ -147,7 +167,6 @@ export default async function handler(req, res) {
       }
 
       const { cars, sha } = await getFile();
-
       if (index >= cars.length) return res.status(404).json({ error: "Not found" });
 
       cars.splice(index, 1);

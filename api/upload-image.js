@@ -1,7 +1,4 @@
 // /api/upload-image
-// POST JSON: { filename: "subaru.avif", contentBase64: "..." }  (čisté base64 bez prefixu)
-// ENV: GITHUB_TOKEN, GITHUB_REPO, GITHUB_BRANCH
-
 function encodeGithubPath(path) {
   return String(path)
     .split("/")
@@ -57,7 +54,7 @@ export default async function handler(req, res) {
       const t = await r.text();
       return res.status(r.status).json({
         error: `GitHub upload failed: ${r.status} ${r.statusText}`,
-        details: t,
+        details: t.slice(0, 500),
       });
     }
 
