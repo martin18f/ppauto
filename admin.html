@@ -11,7 +11,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin panel – PP AUTO</title>
-  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="css/admin.css">
 
   <style>
     body { padding: 32px; background: var(--bg); color: var(--text); }
@@ -277,75 +277,96 @@
 
       <div>
         <div class="actions">
-          <button class="btnx primary" id="submitBtn" type="submit">Odoslať</button>
-          <button class="btnx" type="button" id="resetBtn">Vyčistiť formulár</button>
-          <button class="btnx danger" type="button" id="deleteBtn" style="display:none">Vymazať vybrané</button>
-          <button class="btnx" type="button" id="hideBtn" style="display:none">Skryť vybrané</button>
-          <button class="btnx" type="button" id="unhideBtn" style="display:none">Zobraziť vybrané</button>
-        </div>
+  <button class="btnx primary" id="submitBtn" type="submit">Odoslať</button>
+  <button class="btnx" type="button" id="resetBtn">Vyčistiť formulár</button>
+  <button class="btnx danger" type="button" id="deleteBtn" style="display:none">Vymazať vybrané</button>
+  <button class="btnx" type="button" id="hideBtn" style="display:none">Skryť vybrané</button>
+  <button class="btnx" type="button" id="unhideBtn" style="display:none">Zobraziť vybrané</button>
+</div>
 
-        <label>Výbava</label>
+<label>Výbava</label>
 
-        <div class="vybava-grid">
-          <label><input type="checkbox" value="Klimatizácia dvojzónová"> Klimatizácia dvojzónová</label>
-          <label><input type="checkbox" value="Elektrické okná 4x"> Elektrické okná 4x</label>
-          <label><input type="checkbox" value="360° kamera"> 360° kamera</label>
-          <label><input type="checkbox" value="ABS"> ABS</label>
-          <label><input type="checkbox" value="Adaptívny tempomat"> Adaptívny tempomat</label>
+<label class="pp-check pp-check--sm" style="margin-bottom:8px">
+  <input type="checkbox" id="vybavaSelectAll">
+  <svg viewBox="0 0 18 18" aria-hidden="true">
+    <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 16,17 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
+    <polyline points="1 9 7 14 15 4"></polyline>
+  </svg>
+  <span class="pp-check__text">Označiť všetky</span>
+</label>
 
-          <label><input type="checkbox" value="Airbagy"> Airbagy</label>
-          <label><input type="checkbox" value="Airbagy - počet"> Airbagy - počet</label>
-          <label><input type="checkbox" value="Android Auto"> Android Auto</label>
-          <label><input type="checkbox" value="Apple CarPlay"> Apple CarPlay</label>
-          <label><input type="checkbox" value="Asistent jazdných pruhov"> Asistent jazdných pruhov</label>
 
-          <label><input type="checkbox" value="Asistent rozjazdu do kopca"> Asistent rozjazdu do kopca</label>
-          <label><input type="checkbox" value="ASR"> ASR</label>
-          <label><input type="checkbox" value="Autorádio"> Autorádio</label>
-          <label><input type="checkbox" value="Bezdrôtové nabíjanie pre smartphony"> Bezdrôtové nabíjanie pre smartphony</label>
-          <label><input type="checkbox" value="Bezklúčové otváranie dverí"> Bezklúčové otváranie dverí</label>
+<div class="vybava-grid">
 
-          <label><input type="checkbox" value="Bezklúčové štartovanie"> Bezklúčové štartovanie</label>
-          <label><input type="checkbox" value="Bluetooth handsfree"> Bluetooth handsfree</label>
-          <label><input type="checkbox" value="Brzdový asistent"> Brzdový asistent</label>
-          <label><input type="checkbox" value="Centrálne zamykanie"> Centrálne zamykanie</label>
-          <label><input type="checkbox" value="Dažďový senzor"> Dažďový senzor</label>
+  <!-- BEZPEČNOSŤ & ASISTENTI -->
+  <div class="vybava-section">Bezpečnosť a asistenti</div>
+  <label><input type="checkbox" value="ABS"> ABS</label>
+  <label><input type="checkbox" value="ESP"> ESP</label>
 
-          <label><input type="checkbox" value="Deaktivácia airbagov"> Deaktivácia airbagov</label>
-          <label><input type="checkbox" value="Diaľkové ovládanie zamykania"> Diaľkové ovládanie zamykania</label>
-          <label><input type="checkbox" value="Dotykový displej"> Dotykový displej</label>
-          <label><input type="checkbox" value="EBD"> EBD</label>
-          <label><input type="checkbox" value="EBV"> EBV</label>
+  <label><input type="checkbox" value="ASR"> ASR (trakcia)</label>
+  <label><input type="checkbox" value="Brzdový asistent"> Brzdový asistent</label>
 
-          <label><input type="checkbox" value="Elektrické okná"> Elektrické okná</label>
-          <label><input type="checkbox" value="Elektrické sedadlá"> Elektrické sedadlá</label>
-          <label><input type="checkbox" value="Elektrické zrkadlá"> Elektrické zrkadlá</label>
-          <label><input type="checkbox" value="ESP"> ESP</label>
-          <label><input type="checkbox" value="Hliníkové disky"> Hliníkové disky</label>
+  <label><input type="checkbox" value="Asistent rozjazdu do kopca"> Asistent rozjazdu do kopca</label>
+  <label><input type="checkbox" value="Adaptívny tempomat"> Adaptívny tempomat</label>
 
-          <label><input type="checkbox" value="Hmlovky"> Hmlovky</label>
-          <label><input type="checkbox" value="Imobilizér"> Imobilizér</label>
-          <label><input type="checkbox" value="Isofix"> Isofix</label>
-          <label><input type="checkbox" value="Klimatizácia"> Klimatizácia</label>
-          <label><input type="checkbox" value="Kontrola mŕtveho uhla"> Kontrola mŕtveho uhla</label>
+  <label><input type="checkbox" value="Asistent jazdných pruhov"> Asistent jazdných pruhov</label>
+  <label><input type="checkbox" value="Kontrola mŕtveho uhla"> Mŕtvy uhol</label>
 
-          <label><input type="checkbox" value="Lakťová opierka"> Lakťová opierka</label>
-          <label><input type="checkbox" value="LED svetlomety"> LED svetlomety</label>
-          <label><input type="checkbox" value="LED svietenie"> LED svietenie</label>
-          <label><input type="checkbox" value="Multifunkčný volant"> Multifunkčný volant</label>
-          <label><input type="checkbox" value="Natáčacie svetlomety"> Natáčacie svetlomety</label>
+  <label><input type="checkbox" value="Systém kontroly tlaku v pneumatikách"> TPMS</label>
+  <label><input type="checkbox" value="Isofix"> Isofix</label>
 
-          <label><input type="checkbox" value="Ostrekovače svetlometov"> Ostrekovače svetlometov</label>
-          <label><input type="checkbox" value="Palubný počítač"> Palubný počítač</label>
-          <label><input type="checkbox" value="Parkovacia kamera"> Parkovacia kamera</label>
-          <label><input type="checkbox" value="Parkovacie senzory"> Parkovacie senzory</label>
-          <label><input type="checkbox" value="Strešný nosič"> Strešný nosič</label>
+  <label><input type="checkbox" value="Airbagy"> Airbagy</label>
 
-          <label><input type="checkbox" value="Svetelný senzor"> Svetelný senzor</label>
-          <label><input type="checkbox" value="Systém kontroly tlaku v pneumatikách (TPMS)"> Systém kontroly tlaku v pneumatikách (TPMS)</label>
-          <label><input type="checkbox" value="Tempomat"> Tempomat</label>
-          <label><input type="checkbox" value="Vyhrievané sedadlá"> Vyhrievané sedadlá</label>
-        </div>
+  <!-- KOMFORT -->
+  <div class="vybava-section">Komfort</div>
+  <label><input type="checkbox" value="Klimatizácia"> Klimatizácia</label>
+  <label><input type="checkbox" value="Klimatizácia dvojzónová"> Dvojzónová klíma</label>
+
+  <label><input type="checkbox" value="Vyhrievané sedadlá"> Vyhrievané sedadlá</label>
+  <label><input type="checkbox" value="Elektrické sedadlá"> Elektrické sedadlá</label>
+
+  <label><input type="checkbox" value="Lakťová opierka"> Lakťová opierka</label>
+  <label><input type="checkbox" value="Elektrické okná 4x"> Elektrické okná</label>
+
+  <label><input type="checkbox" value="Bezklúčové otváranie"> Bezklúčové odomykanie</label>
+  <label><input type="checkbox" value="Bezklúčové štartovanie"> Bezklúčový štart</label>
+
+  <label><input type="checkbox" value="Dažďový senzor"> Dažďový senzor</label>
+  <label><input type="checkbox" value="Svetelný senzor"> Svetelný senzor</label>
+
+  <!-- MULTIMÉDIÁ -->
+  <div class="vybava-section">Multimédiá a konektivita</div>
+  <label><input type="checkbox" value="Autorádio"> Autorádio</label>
+  <label><input type="checkbox" value="Dotykový displej"> Dotykový displej</label>
+
+  <label><input type="checkbox" value="Bluetooth"> Bluetooth</label>
+  <label><input type="checkbox" value="Apple CarPlay"> Apple CarPlay</label>
+
+  <label><input type="checkbox" value="Android Auto"> Android Auto</label>
+  <label><input type="checkbox" value="Bezdrôtové nabíjanie"> Bezdrôtové nabíjanie</label>
+
+  <label><input type="checkbox" value="Palubný počítač"> Palubný počítač</label>
+
+  <!-- EXTERIÉR -->
+  <div class="vybava-section">Exteriér</div>
+  <label><input type="checkbox" value="LED svetlomety"> LED svetlomety</label>
+  <label><input type="checkbox" value="Hmlovky"> Hmlovky</label>
+
+  <label><input type="checkbox" value="Natáčacie svetlomety"> Natáčacie svetlá</label>
+  <label><input type="checkbox" value="Hliníkové disky"> Hliníkové disky</label>
+
+  <label><input type="checkbox" value="Strešný nosič"> Strešný nosič</label>
+  <label><input type="checkbox" value="Ostrekovače svetlometov"> Ostrekovače svetiel</label>
+
+  <!-- PARKOVANIE -->
+  <div class="vybava-section">Parkovanie</div>
+  <label><input type="checkbox" value="Parkovacie senzory"> Parkovacie senzory</label>
+  <label><input type="checkbox" value="Parkovacia kamera"> Parkovacia kamera</label>
+
+  <label><input type="checkbox" value="360° kamera"> 360° kamera</label>
+
+</div>
+
       </div>
 
       <!-- skryté: index upravovaného záznamu -->
@@ -561,6 +582,27 @@
     // =============================
 
     // PROGRESS UI
+
+const vybavaSelectAll = document.getElementById('vybavaSelectAll');
+const vybavaCheckboxes = () =>
+  [...document.querySelectorAll('.vybava-grid input[type="checkbox"]')];
+
+// klik na „Označiť všetky“
+vybavaSelectAll.addEventListener('change', () => {
+  vybavaCheckboxes().forEach(cb => {
+    cb.checked = vybavaSelectAll.checked;
+  });
+});
+
+// manuálne klikanie na jednotlivé položky
+document.querySelector('.vybava-grid').addEventListener('change', () => {
+  const all = vybavaCheckboxes();
+  const checked = all.filter(cb => cb.checked);
+
+  vybavaSelectAll.checked = all.length > 0 && checked.length === all.length;
+});
+
+
 const progressOverlay = document.getElementById('progressOverlay');
 const progressFill = document.getElementById('progressFill');
 const progressText = document.getElementById('progressText');
@@ -684,6 +726,7 @@ function hideProgress() {
         form.elements['metaliza'].checked = false;
         editIndexInput.value = -1;
         submitBtn.textContent = 'Odoslať';
+        vybavaSelectAll.checked = false;
 
         deleteBtn.style.display = 'none';
         hideBtn.style.display = 'none';
@@ -1090,6 +1133,11 @@ form.elements['vybava_paket'].value = a.vybava_paket || parsed.paket || '';
       form.querySelectorAll('.vybava-grid input[type="checkbox"]').forEach(cb => {
         cb.checked = vybavaSet.has(cb.value);
       });
+
+      const all = vybavaCheckboxes();
+vybavaSelectAll.checked =
+  all.length > 0 && all.every(cb => cb.checked);
+
 
       zlava.checked = !!(a.nova_cena && String(a.nova_cena).trim() !== '');
       skryte.checked = isHidden(a);

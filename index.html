@@ -20,7 +20,7 @@
     } catch (e) {}
   })();
 </script>
-  <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/style.css">  
   
 </head>
 <body>
@@ -55,10 +55,6 @@
       <div class="container hero-wrap">
         <div class="hero-card">
           <div class="badge-row">
-            <span class="badge">Autorizovaný predaj & servis</span>
-            <span class="badge">Subaru</span>
-            <span class="badge">KGM - SsangYong Motor</span>
-            <span class="badge">Jeep</span>
           </div>
           <h2>Nové aj skladové vozidlá.<br>Férové podmienky.<br> Servis, ktorému veríte.</h2>
           <p>Od roku 2011 prinášame v Poprade profesionálne služby pri predaji a servise vozidiel. Pomôžeme s&nbsp;výberom, financovaním aj poistením a postaráme sa o&nbsp;vaše auto počas celej životnosti.</p>
@@ -70,22 +66,22 @@
 
           <div class="quick-grid">
             <div class="quick-card">
-              <div class="pill">⚡ Skladom</div>
+              
               <h4>Expresný odber</h4>
               <p>Vybrané modely ihneď k odberu – pripravíme na prihlásenie.</p>
             </div>
             <div class="quick-card">
-              <div class="pill">🧰 Servis</div>
+              
               <h4>Originálne diely</h4>
               <p>Diagnostika, záruka, pozáručný servis a sezónne prehliadky.</p>
             </div>
             <div class="quick-card">
-              <div class="pill">💶 Financovanie</div>
+              
               <h4>Leasing & poistenie</h4>
               <p>Transparentné mesačné splátky na mieru vašemu rozpočtu.</p>
             </div>
             <div class="quick-card">
-              <div class="pill">🧭 Test jazda</div>
+              
               <h4>Rezervujte si termín</h4>
               <p>Zažite Subaru, KGM alebo Jeep naživo na cestách.</p>
             </div>
@@ -94,10 +90,6 @@
 
         <div class="hero-media">
           <img src="img/firmazpredu.jpeg" alt="companyphoto">
-          <div class="ribbon">
-            <span class="chip">Po–Pi: 8:00–17:00</span>
-            <span class="chip">Poprad • Partizánska 5660/107</span>
-          </div>
         </div>
       </div>
     </section>
@@ -113,48 +105,12 @@
 <!-- INVENTORY -->
 <section id="ponuka">
   <div class="container">
-    <!-- MODELY ÁUT (zobrazí sa len pri Subaru) -->
+    
+<!-- MODELY ÁUT (zobrazí sa len keď je vybratá značka: Subaru/KGM/Jeep) -->
 <div id="models-strip" class="models-strip" hidden>
   <h2 class="models-strip__title">Modely áut</h2>
-
-  <div class="models-strip__row">
-    <a class="model-tile" href="#" data-model="forester">
-      <div class="model-tile__img">
-        <img src="img/forester.png" alt="Subaru Forester" loading="lazy" />
-      </div>
-      <div class="model-tile__name">FORESTER</div>
-    </a>
-
-    <a class="model-tile" href="#" data-model="outback">
-      <div class="model-tile__img">
-        <img src="img/outback.png" alt="Subaru Outback" loading="lazy" />
-      </div>
-      <div class="model-tile__name">OUTBACK</div>
-    </a>
-
-    <a class="model-tile" href="#" data-model="solterra">
-      <div class="model-tile__img">
-        <img src="img/models/solterra.png" alt="Subaru Solterra" loading="lazy" />
-      </div>
-      <div class="model-tile__name">SOLTERRA</div>
-    </a>
-
-    <a class="model-tile" href="#" data-model="crosstrek">
-      <div class="model-tile__img">
-        <img src="img/models/crosstrek.png" alt="Subaru Crosstrek" loading="lazy" />
-      </div>
-      <div class="model-tile__name">CROSSTREK</div>
-    </a>
-
-    <a class="model-tile" href="#" data-model="brz">
-      <div class="model-tile__img">
-        <img src="img/models/brz.png" alt="Subaru BRZ" loading="lazy" />
-      </div>
-      <div class="model-tile__name">BRZ</div>
-    </a>
-  </div>
+  <div class="models-strip__row" id="models-strip-row"></div>
 </div>
-
 
     <div class="section-head">
     
@@ -182,88 +138,194 @@
 </section>
 
     <!-- SERVICE -->
-    <section id="servis">
-      <div class="container service">
-        <div class="card">
-          <h3>Autorizovaný servis</h3>
-          <p class="meta">Originálne diely • Záručné a&nbsp;pozáručné opravy • Sezónne prehliadky • Pneuservis</p>
-          <h4>Objednajte sa</h4>
-          <ul class="list">
-            <li>E-mail: <a href="mailto:servis.ppauto@ppauto.sk">servis.ppauto@ppauto.sk</a></li>
-            <li>Príjmací technik: <a href="tel:+421911440052">+421 911 440 052</a> • <a href="mailto:technik@ppauto.sk">technik@ppauto.sk</a></li>
-            <li>Otváracie hodiny: Po–Pia 8:00–17:00</li>
-          </ul>
-          <div style="margin-top:20px; position:relative;">
-  
-            
-            <!-- Malý slider s akciami -->
-<!-- Malý slider s akciami -->
-<div class="promo-slider">
-  <button class="promo-btn prev" aria-label="Predchádzajúci">
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="15 18 9 12 15 6"></polyline>
-    </svg>
-  </button>
-  
-  <div class="promo-track">
-    <img src="img/jeepvymenaoleja.avif" alt="Akcia 1">
-    <img src="img/jeepbateria.avif" alt="Akcia 2">
-    <img src="img/jeepakcia.webp" alt="Akcia 3">
-    <img src="img/subarusafe8.avif" alt="Akcia 4">
-  </div>
-  
-  <button class="promo-btn next" aria-label="Ďalší">
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="9 18 15 12 9 6"></polyline>
-    </svg>
-  </button>
-</div>
+    <!-- =========================
+     AUTORIZOVANÝ SERVIS (v2)
+========================= -->
+<section id="servis" class="service-landing">
+  <div class="container">
 
+    <!-- HERO -->
+    <div class="service-hero">
+      <div class="service-hero__content">
+        
+        <h3>Servis PP AUTO, ktorému veríte</h3>
+        <p class="service-sub">
+          Profesionálna starostlivosť pre Subaru, KGM a Jeep. Originálne diely, moderná diagnostika,
+          zázemie a procesy, ktoré chránia hodnotu vášho auta.
+        </p>
 
+        <div class="service-pills">
+          <span class="pill">Originálne diely</span>
+          <span class="pill">Diagnostika</span>
+          <span class="pill">Záručný &amp; pozáručný servis</span>
+          <span class="pill">Pneuservis</span>
+          <span class="pill">STK/EK príprava</span>
+        </div>
+      </div>
 
-<!-- Lightbox pre zväčšenie bannera -->
-<div id="promo-lightbox" class="promo-lightbox">
-  <span class="close">&times;</span>
-  <img class="promo-lightbox-content" id="promo-lightbox-img" alt="">
-</div>
+      
+    </div>
 
-<a class="btn primary promo-btn-cta" href="mailto:servis.ppauto@ppauto.sk">Objednať servis</a>
+    <!-- MAIN LAYOUT -->
+    <div class="service-layout">
 
+      <!-- LEFT: služby + proces + promo + FAQ -->
+      <div class="service-left">
+
+        <!-- SLUŽBY -->
+        <div class="service-block">
+          <div class="service-block__head">
+            <h4>Služby servisu</h4>
+            <p>Najčastejšie servisné úkony, ktoré riešime každý deň.</p>
+          </div>
+
+          <div class="service-grid">
+            <div class="service-card">
+              <h5>Záručný &amp; pozáručný servis</h5>
+              <p>Servis podľa postupov výrobcu, prehliadky a opravy.</p>
+            </div>
+            <div class="service-card">
+              <h5>Diagnostika &amp; elektronika</h5>
+              <p>Riadiace jednotky, snímače, diagnostické testy a merania.</p>
+            </div>
+            <div class="service-card">
+              <h5>Pneuservis &amp; sezónne prehliadky</h5>
+              <p>Prezutie, vyváženie, kontrola bŕzd, kvapalín a podvozku.</p>
+            </div>
+            <div class="service-card">
+              <h5>STK / EK príprava</h5>
+              <p>Kontrola vozidla + odstránenie závad pred kontrolou.</p>
+            </div>
+            <div class="service-card">
+              <h5>Brzdy, podvozok, olejový servis</h5>
+              <p>Výmena bŕzd, tlmičov, čapov, oleja, filtrov a ďalších dielov.</p>
+            </div>
+            <div class="service-card">
+              <h5>Klimatizácia</h5>
+              <p>Servis klímy, dezinfekcia, kontrola tesnosti a doplnenie.</p>
+            </div>
           </div>
         </div>
-        <div class="card">
-  <h4>Prečo servis u nás</h4>
-  <ul class="list no-bullets">
-    <li>
-      <strong>🔧 Diagnostika a postupy výrobcu</strong><br>
-      Používame originálne postupy a najmodernejšiu diagnostiku priamo od značiek <b>Subaru, KGM a Jeep</b>. 
-      Vďaka tomu presne vieme, čo vaše vozidlo potrebuje a zabezpečíme, aby fungovalo tak spoľahlivo, 
-      ako v deň, keď opustilo výrobnú linku.
-    </li>
-    <li>
-      <strong>💻 Aktualizácie softvéru a servisné kampane</strong><br>
-      S nami máte istotu, že vaše vozidlo bude mať vždy najnovší softvér a všetky servisné kampane od výrobcu 
-      budú vykonané. To znamená vyššiu bezpečnosť, úsporu paliva a maximálny výkon.
-    </li>
-    <li>
-      <strong>📖 Servisná história = vyššia hodnota pri predaji</strong><br>
-      Auto so servisnou históriou priamo v autorizovanom servise si drží 
-      <b>oveľa vyššiu zostatkovú hodnotu</b>. Ak sa rozhodnete svoje vozidlo neskôr predať, servisná knižka 
-      od nás je dôkazom kvality a dôveryhodnosti, ktorý presvedčí každého kupujúceho.
-    </li>
-    <li>
-      <strong>🚗 Náhradné vozidlo pre vašu pohodu</strong><br>
-      Chápeme, že auto potrebujete každý deň. Preto vám v prípade potreby poskytneme 
-      <b>náhradné vozidlo</b> (podľa dostupnosti), aby ste nemuseli meniť svoje plány a mohli fungovať bez obmedzení.
-    </li>
-  </ul>
-</div>
+
+        <!-- PROCES -->
+        <div class="service-block">
+          <div class="service-block__head">
+            <h4>Ako prebieha servis</h4>
+            
+          </div>
+
+          <ol class="service-steps">
+            <li>
+              <div class="step-n">1</div>
+              <div class="step-t">
+                <strong>Kontakt a termín</strong>
+                <span>Zavoláte / napíšete – dohodneme termín a popis problému.</span>
+              </div>
+            </li>
+            <li>
+              <div class="step-n">2</div>
+              <div class="step-t">
+                <strong>Príjem vozidla</strong>
+                <span>Kontrola stavu, spísanie požiadaviek a odporúčaní.</span>
+              </div>
+            </li>
+            <li>
+              <div class="step-n">3</div>
+              <div class="step-t">
+                <strong>Diagnostika &amp; návrh riešenia</strong>
+                <span>Ak treba, diagnostika a konzultácia ďalších krokov.</span>
+              </div>
+            </li>
+            <li>
+              <div class="step-n">4</div>
+              <div class="step-t">
+                <strong>Realizácia + odovzdanie</strong>
+                <span>Oprava / servis, kontrola a odovzdanie vozidla.</span>
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <!-- PROMO / AKCIE – FOTOGALÉRIA (slider + lightbox) -->
+        <div class="service-block">
+          <div class="service-block__head">
+            <h4>Akcie a servisné balíky</h4>
+            <p>Aktuálne ponuky – kliknite na obrázok pre zväčšenie.</p>
+          </div>
+
+          <div class="promo-slider service-promo" data-promo>
+            <button class="promo-btn prev" aria-label="Predchádzajúci banner" type="button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+
+            <div class="promo-track">
+
+              <img class="promo-img" data-brand="jeep" src="img/akcie/jeepakcia.webp" alt="Jeep – servisná akcia 1">
+              <img class="promo-img" data-brand="jeep" src="img/akcie/jeepakcia1.avif" alt="Jeep – servisná akcia 2">
+              <img class="promo-img" data-brand="jeep" src="img/akcie/jeepbateria.avif" alt="Jeep – servisná akcia 3">
+              <img class="promo-img" data-brand="jeep" src="img/akcie/jeepvymenaoleja.avif" alt="Jeep – servisná akcia 4">
+              <img class="promo-img" data-brand="subaru" src="img/akcie/subarusafe8.avif" alt="Subaru – servisná akcia 5">
 
 
+            </div>
 
+            <button class="promo-btn next" aria-label="Nasledujúci banner" type="button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Lightbox -->
+          <div class="promo-lightbox" data-lightbox>
+            <span class="close" data-close>&times;</span>
+            <img class="promo-lightbox-content" data-lightbox-img alt="Zväčšený banner">
+          </div>
+        </div>
+
+        
 
       </div>
-    </section>
+
+      <!-- RIGHT: objednanie + kontakt -->
+      <aside class="service-right">
+
+        <div class="service-cta">
+          <h4>Objednať servis</h4>
+          <p>Zavolajte alebo napíšte – termín dohodneme rýchlo.</p>
+
+          <div class="service-actions">
+            <a class="btn primary" href="tel:+421911440052">Zavolať technikovi</a>
+            <a class="btn" href="mailto:servis.ppauto@ppauto.sk">Napísať e-mail</a>
+          </div>
+
+          <div class="service-info">
+            <div class="info-row">
+              <strong>Servis e-mail</strong>
+              <span><a href="mailto:servis.ppauto@ppauto.sk">servis.ppauto@ppauto.sk</a></span>
+            </div>
+            <div class="info-row">
+              <strong>Príjmací technik</strong>
+              <span><a href="tel:+421911440052">+421 911 440 052</a> · <a href="mailto:technik@ppauto.sk">technik@ppauto.sk</a></span>
+            </div>
+            <div class="info-row">
+              <strong>Otváracie hodiny</strong>
+              <span>Po–Pia · 8:00–17:00</span>
+            </div>
+          </div>
+        </div>
+
+        
+
+      </aside>
+    </div>
+  </div>
+</section>
+
 
 
 
@@ -684,41 +746,9 @@ setInterval(updateStatus, 1000);
 updateStatus();
 </script>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const buttons = document.querySelectorAll(".filter-row .tag");
-  const cars = document.querySelectorAll("#inventory .car");
 
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      buttons.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
 
-      const f = btn.dataset.filter;
-      cars.forEach(card => {
-        const tags = (card.dataset.tags || "").split(/\s+/);
-        const show = (f === "all") || (card.dataset.make === f) || tags.includes(f);
-        card.classList.toggle("is-hidden", !show);
-      });
-    });
-  });
-});
-</script>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const container = document.querySelector("#inventory");
-  const cars = Array.from(container.querySelectorAll(".car"));
-
-  cars.sort((a, b) => {
-    const yearA = parseInt(a.querySelector(".spec").innerText);
-    const yearB = parseInt(b.querySelector(".spec").innerText);
-    return yearB - yearA; // zoradenie od najnovšieho po najstaršie
-  });
-
-  cars.forEach(car => container.appendChild(car));
-});
-</script>
 
 
 <script>
@@ -771,7 +801,93 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 </script>
 
-<script src="script.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const filterRow = document.querySelector("#ponuka .filter-row");
+  const buttons = Array.from(document.querySelectorAll("#ponuka .filter-row .tag[data-filter]"));
+  const cars = Array.from(document.querySelectorAll("#inventory .car"));
+
+  const servis = document.querySelector("#servis");
+  const promoImgs = servis ? Array.from(servis.querySelectorAll(".promo-img")) : [];
+
+  function normalizeBrand(v){
+    v = (v || "").toLowerCase().trim();
+    if (v === "subaru" || v === "kgm" || v === "jeep" || v === "all") return v;
+    return v; // novinky/skladom necháme tak
+  }
+
+  function carHasBrand(card, brand){
+    const make = (card.dataset.make || "").toLowerCase().trim();
+    const tags = (card.dataset.tags || "").toLowerCase().split(/\s+/).filter(Boolean);
+
+    // BRAND: radšej cez tags (je to stabilnejšie), potom make
+    if (brand === "subaru" || brand === "kgm" || brand === "jeep") {
+      return tags.includes(brand) || make === brand;
+    }
+    return false;
+  }
+
+  function applyCarsFilter(f){
+    cars.forEach(card => {
+      const tags = (card.dataset.tags || "").toLowerCase().split(/\s+/).filter(Boolean);
+      const make = (card.dataset.make || "").toLowerCase().trim();
+
+      const show =
+        (f === "all") ||
+        (f === make) ||
+        tags.includes(f) ||
+        (f === "subaru" && carHasBrand(card, "subaru")) ||
+        (f === "kgm" && carHasBrand(card, "kgm")) ||
+        (f === "jeep" && carHasBrand(card, "jeep"));
+
+      card.classList.toggle("is-hidden", !show);
+    });
+  }
+
+  function applyPromoFilter(f){
+    if (!promoImgs.length) return;
+
+    // len brand filtre ovplyvňujú promo (subaru/kgm/jeep/all)
+    if (!(f === "all" || f === "subaru" || f === "kgm" || f === "jeep")) return;
+
+    promoImgs.forEach(img => {
+      const b = (img.getAttribute("data-brand") || "all").toLowerCase().trim();
+      const show = (f === "all") || (b === "all") || (b === f);
+      img.classList.toggle("promo-hidden", !show);
+    });
+
+    // reset slider transform (aby ti nezostalo posunuté na skrytý obrázok)
+    const track = servis.querySelector(".promo-track");
+    if (track) track.style.transform = "translateX(0px)";
+  }
+
+  function setActiveButton(f){
+    buttons.forEach(b => b.classList.toggle("active", b.dataset.filter === f));
+  }
+
+  function applyFilter(raw){
+    const f = normalizeBrand(raw);
+    setActiveButton(raw);          // nechávame presne to, čo je v data-filter
+    applyCarsFilter(f);
+    applyPromoFilter(f);
+  }
+
+  if (filterRow){
+    filterRow.addEventListener("click", (e) => {
+      const btn = e.target.closest(".tag[data-filter]");
+      if (!btn) return;
+      applyFilter(btn.dataset.filter);
+    });
+  }
+
+  // init = aktuálne aktívne tlačidlo, inak all
+  const active = buttons.find(b => b.classList.contains("active"))?.dataset.filter || "all";
+  applyFilter(active);
+});
+</script>
+
+
+<script src="js/script.js" defer></script>
 
 
 </body>

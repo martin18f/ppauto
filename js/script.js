@@ -16,25 +16,25 @@ let MODELS_BRAND = null;     // pre ktorý brand je práve vykreslený pás mode
 
 const MODEL_STRIP_CONFIG = {
   subaru: [
-    { key: 'forester',   name: 'FORESTER',   img: 'img/models/subaru/forester.png',   alt: 'Subaru Forester' },
-    { key: 'outback',    name: 'OUTBACK',    img: 'img/models/subaru/outback.png',    alt: 'Subaru Outback' },
-    { key: 'solterra',   name: 'SOLTERRA',   img: 'img/models/subaru/solterra.png',   alt: 'Subaru Solterra' },
-    { key: 'crosstrek',  name: 'CROSSTREK',  img: 'img/models/subaru/crosstrek.png',  alt: 'Subaru Crosstrek' },
-    { key: 'brz',        name: 'BRZ',        img: 'img/models/subaru/brz.png',        alt: 'Subaru BRZ' },
+    { key: 'forester',   name: 'FORESTER',   img: 'img/forester.png',   alt: 'Subaru Forester' },
+    { key: 'outback',    name: 'OUTBACK',    img: 'img/outback.png',    alt: 'Subaru Outback' },
+    { key: 'solterra',   name: 'SOLTERRA',   img: 'img/solterra.png',   alt: 'Subaru Solterra' },
+    { key: 'crosstrek',  name: 'CROSSTREK',  img: 'img/crosstrek.png',  alt: 'Subaru Crosstrek' },
+    { key: 'brz',        name: 'BRZ',        img: 'img/brz.png',        alt: 'Subaru BRZ' },
   ],
   kgm: [
-    { key: 'torres',     name: 'TORRES',     img: 'img/models/kgm/torres.png',        alt: 'KGM Torres' },
-    { key: 'korando',    name: 'KORANDO',    img: 'img/models/kgm/korando.png',       alt: 'KGM Korando' },
-    { key: 'tivoli',     name: 'TIVOLI',     img: 'img/models/kgm/tivoli.png',        alt: 'KGM Tivoli' },
-    { key: 'rexton',     name: 'REXTON',     img: 'img/models/kgm/rexton.png',        alt: 'KGM Rexton' },
-    { key: 'musso',      name: 'MUSSO',      img: 'img/models/kgm/musso.png',         alt: 'KGM Musso' },
+    { key: 'torres',     name: 'TORRES',     img: 'img/torres.png',        alt: 'KGM Torres' },
+    { key: 'korando',    name: 'KORANDO',    img: 'img/korando.png',       alt: 'KGM Korando' },
+    { key: 'tivoli',     name: 'TIVOLI',     img: 'img/tivoli.png',        alt: 'KGM Tivoli' },
+    { key: 'rexton',     name: 'REXTON',     img: 'img/rexton.png',        alt: 'KGM Rexton' },
+    { key: 'musso',      name: 'MUSSO',      img: 'img/musso.png',         alt: 'KGM Musso' },
   ],
   jeep: [
-    { key: 'avenger',         name: 'AVENGER',        img: 'img/models/jeep/avenger.png',        alt: 'Jeep Avenger' },
-    { key: 'renegade',        name: 'RENEGADE',       img: 'img/models/jeep/renegade.png',       alt: 'Jeep Renegade' },
-    { key: 'compass',         name: 'COMPASS',        img: 'img/models/jeep/compass.png',        alt: 'Jeep Compass' },
-    { key: 'wrangler',        name: 'WRANGLER',       img: 'img/models/jeep/wrangler.png',       alt: 'Jeep Wrangler' },
-    { key: 'grand-cherokee',  name: 'GRAND CHEROKEE', img: 'img/models/jeep/grand-cherokee.png', alt: 'Jeep Grand Cherokee' },
+    { key: 'avenger',         name: 'AVENGER',        img: 'img/avenger.png',        alt: 'Jeep Avenger' },
+    { key: 'renegade',        name: 'RENEGADE',       img: 'img/renegade.png',       alt: 'Jeep Renegade' },
+    { key: 'compass',         name: 'COMPASS',        img: 'img/compass.png',        alt: 'Jeep Compass' },
+    { key: 'wrangler',        name: 'WRANGLER',       img: 'img/wrangler.png',       alt: 'Jeep Wrangler' },
+    { key: 'grand-cherokee',  name: 'GRAND CHEROKEE', img: 'img/grand-cherokee.png', alt: 'Jeep Grand Cherokee' },
   ],
 };
 
@@ -181,7 +181,24 @@ function pruneTabsForBrand() {
 
 
 
+function applyPromoBrandFilter(brandView) {
+  const imgs = document.querySelectorAll('#servis .promo-img');
+  if (!imgs.length) return;
 
+  const bv = (brandView || '').toLowerCase().trim();
+
+  imgs.forEach(img => {
+    const b = (img.getAttribute('data-brand') || 'all').toLowerCase().trim();
+    const show = !bv || bv === 'all' || b === 'all' || b === bv;
+    img.classList.toggle('promo-hidden', !show);
+  });
+
+  const track = document.querySelector('#servis .promo-track');
+  if (track) track.style.transform = 'translateX(0px)';
+
+  const servis = document.querySelector('#servis');
+  if (servis) servis.classList.add('promo-ready');
+}
 
 
 
@@ -203,7 +220,7 @@ const isBrandFilter = BRAND_FILTERS.has(f);
 
 // kliknutá značka má prednosť (inak brand režim z BRAND_CTX)
 const brandView = isBrandFilter ? f : (BRAND_CTX || null);
-
+applyPromoBrandFilter(brandView);
 // drž CSS/HTML brand v synchronizácii (ak máš štýly podľa data-brand)
 if (brandView) document.documentElement.setAttribute('data-brand', brandView);
 else document.documentElement.removeAttribute('data-brand');
@@ -233,7 +250,7 @@ else document.documentElement.removeAttribute('data-brand');
 
     card.classList.toggle('is-hidden', !(brandOK && catOK && modelOK));
   });
-
+  syncModelsStrip(brandView);
   updateModelActiveUI();
   applyBrandSections();
 }
@@ -490,12 +507,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function getBrandView(filterValue) {
-  const f = (filterValue || ACTIVE_FILTER || 'all').toLowerCase().trim();
+  const f = (filterValue || ACTIVE_FILTER || 'all').toLowerCase();
 
-  // keď user klikne na značku, tá má prednosť
+  // keď user klikne na značku v lište, tá má prednosť
   if (BRAND_FILTERS.has(f)) return f;
 
-  // inak (Novinky/Skladom/Všetko) sa riadime brand režimom
+  // inak (Všetko/Novinky/Skladom) sa riadime brand režimom zo storage
   return BRAND_CTX;
 }
 
@@ -506,6 +523,7 @@ function renderModelsStrip(brand) {
 
   const list = MODEL_STRIP_CONFIG[brand] || [];
 
+  // nič pre brand → schovaj
   if (!brand || !list.length) {
     strip.hidden = true;
     row.innerHTML = '';
@@ -513,6 +531,7 @@ function renderModelsStrip(brand) {
     return;
   }
 
+  // zmena brandu → zruš model filter
   if (MODELS_BRAND && MODELS_BRAND !== brand) {
     ACTIVE_MODEL = null;
   }
@@ -543,19 +562,13 @@ function updateModelActiveUI() {
 }
 
 function syncModelsStrip(value) {
-  // value môže byť: "subaru" | "kgm" | "jeep" | "all" | "novinky" | ...
-  let brand = null;
-
+  // value môže byť značka alebo niečo ako all/novinky/skladom
   const v = (value || '').toLowerCase();
-  if (v === 'subaru' || v === 'kgm' || v === 'jeep') {
-    brand = v;
-  } else {
-    // keď nie je priamo značka, použijeme aktuálny brand režim
-    brand = BRAND_CTX || null;
-  }
+  const brand = BRAND_FILTERS.has(v) ? v : (BRAND_CTX || null);
 
   renderModelsStrip(brand);
 
+  // ak už nie sme v brand view, zruš model filter
   if (!brand && ACTIVE_MODEL) {
     ACTIVE_MODEL = null;
     updateModelActiveUI();
@@ -578,9 +591,75 @@ function initModelsStrip() {
     const model = (tile.dataset.model || '').toLowerCase().trim();
     if (!model) return;
 
+    // toggle: klik na rovnaký model = vypne filter
     ACTIVE_MODEL = (ACTIVE_MODEL === model) ? null : model;
 
     updateModelActiveUI();
     applyFilters(ACTIVE_FILTER);
   });
 }
+
+// =========================
+// SERVICE: Promo slider + Lightbox + FAQ
+// =========================
+(function () {
+  // PROMO SLIDER + LIGHTBOX
+  const promoRoot = document.querySelector('#servis [data-promo]');
+  if (promoRoot) {
+    const track = promoRoot.querySelector('.promo-track');
+    const prev = promoRoot.querySelector('.promo-btn.prev');
+    const next = promoRoot.querySelector('.promo-btn.next');
+
+    const lightbox = document.querySelector('#servis [data-lightbox]');
+    const lightboxImg = document.querySelector('#servis [data-lightbox-img]');
+    const lightboxClose = document.querySelector('#servis [data-close]');
+
+    const scrollByCard = (dir) => {
+      const firstImg = track?.querySelector('img');
+      const cardW = firstImg ? (firstImg.getBoundingClientRect().width + 12) : 320;
+      track.scrollBy({ left: dir * cardW, behavior: 'smooth' });
+    };
+
+    if (prev) prev.addEventListener('click', () => scrollByCard(-1));
+    if (next) next.addEventListener('click', () => scrollByCard(1));
+
+    // click image -> lightbox
+    track?.addEventListener('click', (e) => {
+      const img = e.target.closest('img');
+      if (!img || !lightbox || !lightboxImg) return;
+      lightboxImg.src = img.src;
+      lightbox.style.display = 'flex';
+    });
+
+    // close lightbox
+    const closeLb = () => {
+      if (!lightbox) return;
+      lightbox.style.display = 'none';
+      if (lightboxImg) lightboxImg.src = '';
+    };
+    lightboxClose?.addEventListener('click', closeLb);
+    lightbox?.addEventListener('click', (e) => {
+      if (e.target === lightbox) closeLb();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLb();
+    });
+  }
+
+  // FAQ
+  const faqRoot = document.querySelector('#servis [data-faq]');
+  if (faqRoot) {
+    faqRoot.addEventListener('click', (e) => {
+      const item = e.target.closest('.faq-item');
+      if (!item) return;
+
+      // optional: iba jeden otvorený naraz
+      [...faqRoot.querySelectorAll('.faq-item')].forEach((x) => {
+        if (x !== item) x.classList.remove('is-open');
+      });
+
+      item.classList.toggle('is-open');
+    });
+  }
+})();
+

@@ -66,14 +66,22 @@ html {
       font-weight:600
     }
 
-    .btn-contact {display:inline-flex; align-items:center; justify-content:center; gap:8px;
-      padding:10px 14px; border-radius:12px; border:1px solid var(--line); background:var(--bg-elev);
-      transition:transform .12s ease, background .2s ease, border-color .2s ease;
-      font-weight:600;margin-top: -10px;
-    }
+    .btn-contact{
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform .12s ease, background .2s ease, border-color .2s ease;
+}
+.btn-contact:hover{
+  transform: translateY(-1px);
+  border-color: var(--accent);
+  color: #fff;
+}
 
-    .btn-contact:hover {transform: scale(1.01);
-    }
 
     .btn:hover{transform:translateY(-1px); border-color:#2a3443}
     .btn.primary{background:#0044d6; border-color:transparent; color:#ffffff;transition: transform 0.3s ease, filter 0.3s ease;}
@@ -160,7 +168,7 @@ html {
     .quick-card p{margin:0; font-size:13px; color:var(--muted)}
     /* INVENTORY */
     section{padding:40px 0}
-    .section-head{display:flex; justify-content:space-between; align-items:end; gap:16px; margin-bottom:16px}
+    .section-head{display:flex; justify-content:space-between; align-items:end; gap:16px; margin-bottom:30px}
     .section-head h3{margin:0; font-size:26px}
     .filter-row{display:flex; gap:8px; flex-wrap:wrap}
     .tag {
@@ -219,10 +227,8 @@ html {
     .card h4{margin:6px 0 8px}
     .list{margin:0; padding-left:18px; color:var(--muted)}
     /* BRANDS */
-    .brands{display:grid; grid-template-columns: repeat(3, 1fr); gap:12px}
-    .brand-tile{border:1px solid var(--line); background:linear-gradient(135deg,#0f141d,#0d131b); border-radius:16px; padding:18px}
-    .brand-tile h4{margin:4px 0 6px}
-    .brand-tile p{margin:0; color:var(--muted); font-size:14px}
+    
+ 
     /* TESTIMONIALS */
     .testi{display:grid; grid-template-columns: repeat(3, 1fr); gap:12px}
     .quote{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px}
@@ -237,10 +243,7 @@ html {
     .contact{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px}
     .contact .row{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
     .meta{font-size:14px; color:var(--muted); margin-top:6px}
-    /* FOOTER */
-    footer{border-top:1px solid var(--line); padding:26px 0 40px; color:#9aa7bb}
-    .foot{display:grid; grid-template-columns: 1.2fr .8fr; gap:16px}
-    .foot small{display:block; margin-top:6px}
+
     /* RESPONSIVE */
     @media (max-width: 1000px){
       .hero-wrap{grid-template-columns:1fr}
@@ -270,14 +273,9 @@ section {
 
 
 
-#mapa .section-head h3 {
-  margin-top: 0;      /* odstráni hornú medzeru */
-  margin-bottom: 8px; /* zmenší spodnú medzeru pod textom */
-}
-
-#mapa .section-head h3 {
-  margin-top: -40px; /* posunie o 10px vyššie */
-  margin-bottom: 0px;
+#mapa .section-head h3{
+  margin-top: -40px;
+  margin-bottom: 0;
 }
 
 .no-bullets {
@@ -289,15 +287,7 @@ section {
   margin-bottom: 35px; /* väčší rozostup medzi odsekmi */
 }
 
-/* Promo slider */
-.promo-slider {
-  position: relative;
-  overflow: hidden;
-  margin-top: 20px;
-  border-radius: 10px;
-  background: var(--card);
-  
-}
+
 
 .promo-track {
   display: flex;
@@ -314,12 +304,14 @@ section {
   flex-shrink: 0;
 }
 
-/* šípky */
 .promo-slider {
   position: relative;   /* základ, aby sa šípky mohli pozicovať voči slideru */
-  max-width: 600px;     /* prípadne tvoja šírka */
-  margin: 0 auto;       /* centrovanie slidera */
+  max-width: 760px;     /* prípadne tvoja šírka */
+  overflow: hidden;  
+
 }
+
+
 
 .promo-btn {
   position: absolute;
@@ -973,21 +965,20 @@ html[data-brand] #ponuka .filter-row .tag[data-filter="jeep"] {
 }
 
 /* =========================
-   MODELY ÁUT – modern minimalist strip
+   MODELY ÁUT – modern minimalist strip (BASE)
    ========================= */
 
 :root{
   --ms-accent: #1f43d0;
-  --ms-text: #0f172a;
+  --ms-text: #ffffff;
   --ms-muted: #64748b;
-  --ms-surface: #ffffff;
-  --ms-surface-2: #f8fafc;
   --ms-border: rgba(15, 23, 42, 0.10);
   --ms-shadow: 0 10px 30px rgba(15, 23, 42, 0.10);
   --ms-shadow-hover: 0 14px 44px rgba(15, 23, 42, 0.14);
   --ms-radius: 16px;
 }
 
+/* dark mode – nechávame */
 @media (prefers-color-scheme: dark){
   :root{
     --ms-text: #e5e7eb;
@@ -1001,7 +992,7 @@ html[data-brand] #ponuka .filter-row .tag[data-filter="jeep"] {
 }
 
 .models-strip{
-  padding: 28px 0 14px;
+  padding: 18px 0 70px;
   text-align: center;
 }
 
@@ -1031,6 +1022,8 @@ html[data-brand] #ponuka .filter-row .tag[data-filter="jeep"] {
 
 /* tile */
 .model-tile{
+  display: flex;
+  flex-direction: column;
   position: relative;
   flex: 1 1 170px;
   max-width: 220px;
@@ -1056,33 +1049,36 @@ html[data-brand] #ponuka .filter-row .tag[data-filter="jeep"] {
 
 /* image area */
 .model-tile__img{
-  height: 64px;
-  display: grid;
-  place-items: center;
-  margin-bottom: 10px;
+  height: 110px; 
+  padding: 10px;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .model-tile__img img{
   max-width: 100%;
   max-height: 100%;
+  scale: 1.4;
   width: auto;
   height: auto;
   object-fit: contain;
-
-  /* minimalist: jemnejší tieň, bez “ťažkého” drop-shadow */
   filter: drop-shadow(0 10px 18px rgba(0,0,0,0.14));
-  transform: translateZ(0);
   transition: transform .18s ease, filter .18s ease, opacity .18s ease;
 }
 
+
 /* name */
 .model-tile__name{
-  margin: 0;
+  margin-top: 30px;      /* ⬅️ KĽÚČOVÉ */
+  padding-top: 8px;
+  text-align: center;
+
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   font-size: 12px;
-  color: var(--ms-text);
   line-height: 1.2;
 }
 
@@ -1098,28 +1094,13 @@ html[data-brand] #ponuka .filter-row .tag[data-filter="jeep"] {
   filter: drop-shadow(0 14px 24px rgba(0,0,0,0.16));
 }
 
-/* active */
-.model-tile.is-active{
-  border-color: rgba(31, 67, 208, 0.45);
-  background: linear-gradient(0deg, rgba(31, 67, 208, 0.06), rgba(31, 67, 208, 0.06)), var(--ms-surface);
-  box-shadow: var(--ms-shadow);
-}
-.model-tile.is-active .model-tile__name{
-  color: var(--ms-accent);
-}
 
-/* little accent pill on active (subtle) */
-.model-tile.is-active::after{
-  content: "";
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: var(--ms-accent);
-  box-shadow: 0 0 0 4px rgba(31, 67, 208, 0.18);
-}
+
+
+
+
+
+
 
 /* motion safety */
 @media (prefers-reduced-motion: reduce){
@@ -1159,4 +1140,248 @@ html[data-brand] #ponuka .filter-row .tag[data-filter="jeep"] {
   .model-tile__img{ height: 58px; }
 }
 
+
+/* =========================
+   AUTORIZOVANÝ SERVIS (v2)
+========================= */
+.service-landing{ position:relative; }
+.service-hero{
+  display:grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap: 18px;
+  background:
+    radial-gradient(900px 520px at 20% -10%, rgba(255,255,255,.06), transparent 60%),
+    radial-gradient(900px 520px at 90% 0%, rgba(255,255,255,.04), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0)),
+    var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 22px;
+}
+.service-kicker{
+  display:inline-flex;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.02);
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.service-hero h3{ margin:0 0 8px; font-size: 28px; }
+.service-sub{ margin:0 0 14px; color: var(--muted); max-width: 720px; }
+
+.service-pills{ display:flex; flex-wrap:wrap; gap:8px; }
+
+.service-hero__meta{
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  padding: 14px;
+  display:grid;
+  gap: 10px;
+  align-content:start;
+}
+.service-mini{
+  display:flex;
+  gap: 10px;
+  align-items:flex-start;
+  padding: 10px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.06);
+  background: rgba(0,0,0,.10);
+}
+.service-dot{
+  width: 10px; height: 10px;
+  margin-top: 3px;
+  border-radius: 999px;
+  background: var(--accent-2);
+  box-shadow: 0 0 0 4px rgba(34,197,94,.12);
+}
+.service-mini__title{ font-weight: 700; font-size: 13px; }
+.service-mini__text{ color: var(--muted); font-size: 13px; }
+.service-mini__text a{ color: var(--text); text-decoration:none; }
+.service-mini__text a:hover{ text-decoration: underline; }
+
+.service-layout{
+  display:grid;
+  grid-template-columns: 1fr .42fr;
+  gap: 18px;
+  align-items:start;
+}
+
+.service-block{
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 18px;
+}
+.service-block__head{ margin-bottom: 14px; }
+.service-block__head h4{ margin:0 0 6px; font-size: 20px; }
+.service-block__head p{ margin:0; color: var(--muted); }
+
+.service-grid{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.service-card{
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
+  padding: 14px;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.service-card:hover{
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,.16);
+  box-shadow: 0 18px 40px rgba(0,0,0,.35);
+}
+.service-card h5{ margin:0 0 6px; font-size: 14px; }
+.service-card p{ margin:0; color: var(--muted); font-size: 13px; }
+
+/* Steps */
+.service-steps{
+  list-style:none;
+  padding:0;
+  margin: 0;
+  display:grid;
+  gap: 10px;
+}
+.service-steps li{
+  display:flex;
+  gap: 12px;
+  align-items:flex-start;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(255,255,255,.02);
+}
+.step-n{
+  width: 30px; height: 30px;
+  border-radius: 10px;
+  display:grid; place-items:center;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  font-weight: 800;
+}
+.step-t strong{ display:block; font-size: 13px; }
+.step-t span{ display:block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+/* SERVIS PROMO: fixná výška boxu, aby sa nezmenšoval */
+#servis .service-promo.promo-slider{
+  min-height: 260px;           /* uprav si podľa vzhľadu */
+  display: flex;
+  align-items: center;
+}
+
+/* track nech drží výšku */
+#servis .service-promo .promo-track{
+  min-height: 240px;           /* o kúsok menej než slider */
+  align-items: center;
+}
+
+/* obrázky v servise – jednotná výška */
+#servis .service-promo.promo-slider img{
+  height: 240px;               /* musí ladiť s track */
+  width: auto;
+  object-fit: cover;
+}
+
+/* Promo obrázky sú skryté, kým JS nedá sekcii triedu .promo-ready */
+#servis .promo-img{ visibility: hidden; }
+#servis.promo-ready .promo-img{ visibility: visible; }
+
+/* Promo slider – len v servise (neovplyvní iné použitia) */
+.service-promo.promo-slider{
+  border-radius: 16px;
+  background: rgba(255,255,255,.02);
+  padding: 12px 8px;
+}
+.service-promo .promo-track{
+  gap: 12px;
+  align-items:center;
+}
+.service-promo.promo-slider img{
+  width: auto;
+  height: 350px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.08);
+  transition: transform .18s ease, border-color .18s ease;
+}
+.service-promo.promo-slider img:hover{
+  transform: translateY(-2px);
+  border-color: rgba(34,197,94,.40);
+}
+
+/* Lightbox – použije tvoje existujúce triedy */
+.service-landing .promo-lightbox .close{
+  position:absolute;
+  top: 16px;
+  right: 24px;
+  font-size: 36px;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Right / CTA */
+.service-right{ position: sticky; top: 112px; }
+.service-cta{
+  background:
+    radial-gradient(600px 360px at 20% 0%, rgba(34,197,94,.10), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0)),
+    var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: var(--shadow-soft);
+}
+.service-cta h4{ margin:0 0 6px; font-size: 20px; }
+.service-cta p{ margin:0 0 14px; color: var(--muted); }
+
+.service-actions{ display:flex; flex-wrap:wrap; gap:10px; }
+
+.service-info{
+  margin-top: 14px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  padding-top: 12px;
+  display:grid;
+  gap: 10px;
+}
+.info-row strong{ display:block; font-size: 12px; color: var(--muted); }
+.info-row span{ display:block; font-size: 13px; color: var(--text); }
+.info-row a{ color: var(--text); }
+.info-row a:hover{ text-decoration: underline; }
+
+.service-note{
+  margin-top: 14px;
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 18px;
+  padding: 16px;
+}
+.service-note h5{ margin:0 0 6px; font-size: 14px; }
+.service-note p{ margin:0; color: var(--muted); font-size: 13px; }
+
+/* Responsive */
+@media (max-width: 1100px){
+  .service-hero{ grid-template-columns: 1fr; }
+  .service-layout{ grid-template-columns: 1fr; }
+  .service-right{ position: static; top:auto; }
+}
+@media (max-width: 980px){
+  .service-grid{ grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px){
+  .service-hero h3{ font-size: 24px; }
+  .service-grid{ grid-template-columns: 1fr; }
+  .service-promo.promo-slider img{ width: 260px; height: 200px; }
+}
+
+.promo-hidden{ display:none !important; }
 
