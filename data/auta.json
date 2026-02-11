@@ -1118,5 +1118,31 @@
       "subaru"
     ],
     "skryte": true
+  },
+  {
+    "id": "jeep-renegade-3",
+    "znacka": "Jeep",
+    "model": "Renegade",
+    "rok": -3,
+    "palivo": "",
+    "typ_prevodovky": "",
+    "vybava_paket": "",
+    "prevodovka": "",
+    "stara_cena": "999999€",
+    "nova_cena": "8665€",
+    "titulka": "",
+    "galeria": [],
+    "obrazky": [],
+    "obrazok": "",
+    "tagy": [],
+    "skryte": false,
+    "objem": null,
+    "vykon": null,
+    "najazdene": null,
+    "karoseria": "",
+    "pohon": "",
+    "farba": "",
+    "metaliza": false,
+    "vybava": []
   }
 ]
