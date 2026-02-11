@@ -189,15 +189,17 @@ function applyPromoBrandFilter(brandView) {
 
   imgs.forEach(img => {
     const b = (img.getAttribute('data-brand') || 'all').toLowerCase().trim();
+
+    // bez brandu = zobraziť všetko
     const show = !bv || bv === 'all' || b === 'all' || b === bv;
+
     img.classList.toggle('promo-hidden', !show);
   });
 
+  // reset slideru, aby nezostal posunutý na skrytý banner
   const track = document.querySelector('#servis .promo-track');
   if (track) track.style.transform = 'translateX(0px)';
-
-  const servis = document.querySelector('#servis');
-  if (servis) servis.classList.add('promo-ready');
+  
 }
 
 
@@ -216,44 +218,47 @@ function applyFilters(filter) {
 
   ACTIVE_FILTER = f;
 
-const isBrandFilter = BRAND_FILTERS.has(f);
+  const isBrandFilter = BRAND_FILTERS.has(f);
 
-// kliknutá značka má prednosť (inak brand režim z BRAND_CTX)
-const brandView = isBrandFilter ? f : (BRAND_CTX || null);
-applyPromoBrandFilter(brandView);
-// drž CSS/HTML brand v synchronizácii (ak máš štýly podľa data-brand)
-if (brandView) document.documentElement.setAttribute('data-brand', brandView);
-else document.documentElement.removeAttribute('data-brand');
-
-  // ukáž/prekresli pás modelov podľa aktuálnej značky
-  syncModelsStrip(brandView);
+  // 🔹 DÔLEŽITÉ:
+  // brandView určuje LEN globálny brand (z vyber-znacky)
+  const brandView = BRAND_CTX; 
 
   cards.forEach(card => {
-    const make = (card.dataset.make || '').toLowerCase().trim();
-    const tags = (card.dataset.tags || '').toLowerCase().split(/\s+/).filter(Boolean);
+    const make  = (card.dataset.make || '').toLowerCase().trim();
+    const tags  = (card.dataset.tags || '').toLowerCase().split(/\s+/);
     const model = (card.dataset.model || '').toLowerCase().trim();
 
-    // značka: buď z BRAND_CTX alebo z kliknutej značky v lište
-    const brandOK = !brandView || (make === brandView || tags.includes(brandView));
+    // 1️⃣ globálny brand režim
+    const brandOK = !brandView || make === brandView;
 
-    // kategória: len keď filter NIE JE značka
+    // 2️⃣ filter v ponuke (Subaru/KGM/Jeep)
+    const filterOK = !isBrandFilter || make === f;
+
+    // 3️⃣ kategórie (novinky/skladom)
     let catOK = true;
     if (!isBrandFilter && f !== 'all') {
       catOK = tags.includes(f);
     }
 
-    // model: len keď sme vo "view" konkrétnej značky
+    // 4️⃣ model filter (iba ak sme v brand režime)
     let modelOK = true;
     if (brandView && ACTIVE_MODEL) {
-    modelOK = (model === ACTIVE_MODEL) || model.startsWith(ACTIVE_MODEL + '-');
+      modelOK = model === ACTIVE_MODEL || model.startsWith(ACTIVE_MODEL + '-');
     }
 
-    card.classList.toggle('is-hidden', !(brandOK && catOK && modelOK));
+    card.classList.toggle(
+      'is-hidden',
+      !(brandOK && filterOK && catOK && modelOK)
+    );
   });
+
+  // 🔹 modelový pás sa zobrazuje LEN pri globálnom brand režime
   syncModelsStrip(brandView);
   updateModelActiveUI();
   applyBrandSections();
 }
+
 
 
 
@@ -662,4 +667,5 @@ function initModelsStrip() {
     });
   }
 })();
+
 
