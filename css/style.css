@@ -1237,18 +1237,9 @@ html[data-brand] #jazda #tdBrandRow{ display: none !important; }
 
 
 
-/* motion safety */
-@media (prefers-reduced-motion: reduce) {
-  .model-tile,
-  .model-tile__img img {
-    transition: none;
-  }
-}
 
 
-/* mobile: clean horizontal scroll + snap */
-@media (max-width: 640px){
-  .models-strip{ padding: 18px 0 10px; }
+
 
   .models-strip__row{
     flex-wrap: nowrap;
@@ -1274,7 +1265,7 @@ html[data-brand] #jazda #tdBrandRow{ display: none !important; }
   }
 
   .model-tile__img{ height: 58px; }
-}
+
 
 
 /* =========================
