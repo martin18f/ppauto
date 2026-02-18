@@ -7,41 +7,35 @@
   <title>PP AUTO s.r.o. – Subaru • KGM • Jeep | Poprad</title>
   <meta name="description" content="Autorizovaný predaj a servis Subaru, KGM a Jeep v Poprade. Skladové vozidlá, testovacie jazdy, financovanie, servis a náhradné diely." />
   <script>
-  (function () {
-    try {
-      var b =
-        (localStorage.getItem('ppauto.brand') ||
-          sessionStorage.getItem('ppauto.brand') ||
-          '').toLowerCase().trim();
-
-      if (b === 'subaru' || b === 'kgm' || b === 'jeep') {
-        document.documentElement.setAttribute('data-brand', b);
-      }
-    } catch (e) {}
-  })();
-</script>
-<link rel="stylesheet" href="css/style.css">  
-  
-<script>
 (function () {
   try {
+    // legacy cleanup – nič si nepamätáme
+    try { localStorage.removeItem('ppauto.brand'); } catch (e) {}
+    try { sessionStorage.removeItem('ppauto.brand'); } catch (e) {}
+
     const params = new URLSearchParams(location.search);
-    const hasBrandParam = params.has('brand');
+    const brand = (params.get('brand') || '').toLowerCase().trim();
 
-    const stored =
-      (localStorage.getItem('ppauto.brand') ||
-       sessionStorage.getItem('ppauto.brand') ||
-       '').toLowerCase().trim();
+    const isAllowed = (b) =>
+      b === 'subaru' || b === 'kgm' || b === 'jeep' || b === 'all';
 
-    const hasStoredBrand = (stored === 'subaru' || stored === 'kgm' || stored === 'jeep');
-
-    // presmeruj iba keď user prišiel "čisto" a nemá ešte zvolenú značku
-    if (!hasBrandParam && !hasStoredBrand) {
+    // Bez platného ?brand=... sa vždy ide na výber značky
+    if (!isAllowed(brand)) {
       location.replace('vyber-znacky.html');
+      return;
     }
-  } catch (e) {}
+
+    // Len nastav tému (bez ukladania do storage)
+    if (brand === 'all') document.documentElement.removeAttribute('data-brand');
+    else document.documentElement.setAttribute('data-brand', brand);
+  } catch (e) {
+    location.replace('vyber-znacky.html');
+  }
 })();
 </script>
+
+<link rel="stylesheet" href="css/style.css">
+
 
 </head>
 <body>
@@ -75,6 +69,9 @@
   </header>
 
   <main>
+
+
+    
     <!-- HERO -->
     <section class="hero">
       <div class="container hero-wrap">
@@ -122,6 +119,117 @@
 
 
 
+<!-- =========================
+     PROMO SLIDER (medzi HERO a PONUKA)
+     ========================= -->
+<section class="promo2" aria-label="Aktuálne ponuky">
+  <div class="container">
+    <div class="promo2-head">
+      <div>
+        <h3 class="promo2-title">Aktuálne ponuky</h3>
+      </div>
+
+      <div class="promo2-controls" aria-label="Ovládanie slidera">
+        <button class="promo2-btn" type="button" data-promo2="prev" aria-label="Predchádzajúci">‹</button>
+        <button class="promo2-btn" type="button" data-promo2="next" aria-label="Ďalší">›</button>
+      </div>
+    </div>
+
+    <div class="promo2-shell">
+      <div class="promo2-viewport" id="promo2Viewport">
+        <div class="promo2-track" id="promo2Track">
+          <!-- SUBARU -->
+          <article class="promo2-slide" data-brand="subaru">
+            <a class="promo2-card" href="#ponuka">
+              <img class="promo2-img" src="img/promofotky/crosstrek.png" alt="Subaru – skladom" loading="lazy">
+              <div class="promo2-overlay"></div>
+              <div class="promo2-meta">
+                
+                <div class="promo2-name">Získajte TERAZ skvelý mestský crossover už od 31 390 € s DPH!</div>
+                <div class="promo2-cta">Pozrieť ponuku</div>
+              </div>
+            </a>
+          </article>
+
+          <article class="promo2-slide" data-brand="subaru">
+            <a class="promo2-card" href="#ponuka">
+              <img class="promo2-img" src="img/promofotky/forester.png" alt="Subaru – novinky" loading="lazy">
+              <div class="promo2-overlay"></div>
+              <div class="promo2-meta">
+                <div class="promo2-name">Predstavujeme úplne nový Forester – vášho spoľahlivého spoločníka na rodinné dobrodružstvá.</div>
+                <div class="promo2-cta">Pozrieť ponuku</div>
+              </div>
+            </a>
+          </article>
+
+          <!-- KGM -->
+          <article class="promo2-slide" data-brand="kgm">
+            <a class="promo2-card" href="#ponuka">
+              <img class="promo2-img" src="img/promofotky/korando.webp" alt="KGM – skladom" loading="lazy">
+              <div class="promo2-overlay"></div>
+              <div class="promo2-meta">
+                
+                <div class="promo2-name">Korando - SUV bez kompromisov</div>
+                <div class="promo2-cta">Pozrieť ponuku</div>
+              </div>
+            </a>
+          </article>
+
+          <article class="promo2-slide" data-brand="kgm">
+            <a class="promo2-card" href="#ponuka">
+              <img class="promo2-img" src="img/promofotky/tivoli.webp" alt="KGM – novinky" loading="lazy">
+              <div class="promo2-overlay"></div>
+              <div class="promo2-meta">
+                
+                <div class="promo2-name">Tivoli so zvýhodnením 800 €</div>
+                <div class="promo2-cta">Pozrieť ponuku</div>
+              </div>
+            </a>
+          </article>
+
+          <article class="promo2-slide" data-brand="kgm">
+            <a class="promo2-card" href="#ponuka">
+              <img class="promo2-img" src="img/promofotky/fullhybrid.webp" alt="KGM – novinky" loading="lazy">
+              <div class="promo2-overlay"></div>
+              <div class="promo2-meta">
+                
+                <div class="promo2-name">KGM vstupuje do sveta full hybridov s modelmi Torres a Actyon</div>
+                <div class="promo2-cta">Pozrieť ponuku</div>
+              </div>
+            </a>
+          </article>
+
+          <!-- JEEP -->
+          <article class="promo2-slide" data-brand="jeep">
+            <a class="promo2-card" href="#ponuka">
+              <img class="promo2-img" src="img/promo/jeep-1.jpg" alt="Jeep – skladom" loading="lazy">
+              <div class="promo2-overlay"></div>
+              <div class="promo2-meta">
+                <div class="promo2-kicker">Jeep</div>
+                <div class="promo2-name">Skladom – ihneď k odberu</div>
+                <div class="promo2-cta">Pozrieť ponuku</div>
+              </div>
+            </a>
+          </article>
+
+          <article class="promo2-slide" data-brand="jeep">
+            <a class="promo2-card" href="#ponuka">
+              <img class="promo2-img" src="img/promo/jeep-2.jpg" alt="Jeep – off-road DNA" loading="lazy">
+              <div class="promo2-overlay"></div>
+              <div class="promo2-meta">
+                <div class="promo2-kicker">Jeep</div>
+                <div class="promo2-name">Off-road DNA</div>
+                <div class="promo2-cta">Pozrieť ponuku</div>
+              </div>
+            </a>
+          </article>
+        </div>
+      </div>
+
+      
+    </div>
+  </div>
+</section>
 
 
 

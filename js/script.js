@@ -24,10 +24,13 @@ const MODEL_STRIP_CONFIG = {
   ],
   kgm: [
     { key: 'torres',     name: 'TORRES',     img: 'img/torres.png',        alt: 'KGM Torres' },
+    { key: 'torres-evx',  name: 'TORRES EVX',  img: 'img/torres-evx.png',   alt: 'KGM Torres EVX' },
     { key: 'korando',    name: 'KORANDO',    img: 'img/korando.png',       alt: 'KGM Korando' },
     { key: 'tivoli',     name: 'TIVOLI',     img: 'img/tivoli.png',        alt: 'KGM Tivoli' },
     { key: 'rexton',     name: 'REXTON',     img: 'img/rexton.png',        alt: 'KGM Rexton' },
-    { key: 'musso',      name: 'MUSSO',      img: 'img/musso.png',         alt: 'KGM Musso' },
+    { key: 'musso',       name: 'MUSSO GRAND', img: 'img/musso.png',        alt: 'KGM Musso Grand' },
+    { key: 'actyon',      name: 'ACTYON',      img: 'img/actyon.png',       alt: 'KGM Actyon' },
+    
   ],
   jeep: [
     { key: 'avenger',         name: 'AVENGER',        img: 'img/avenger.png',        alt: 'Jeep Avenger' },
@@ -122,25 +125,19 @@ function getBrandFromURLRaw() {
  * - ak je ?brand=all → vymaž storage a BRAND_CTX = null
  * - ak v URL nič nie je → zober zo storage (aby fungoval refresh)
  */
+/**
+ * Brand kontext berieme len z URL (vyber-znacky → index.html?brand=...).
+ * Nič neukladáme do localStorage/sessionStorage.
+ * - ?brand=subaru|kgm|jeep → BRAND_CTX
+ * - ?brand=all → null
+ */
 function resolveBrandContext() {
   const fromURL = getBrandFromURLRaw();
-
-  if (fromURL) {
-    if (fromURL === 'all') {
-      setStoredBrand(null);
-      return null;
-    }
-    if (isKnownBrand(fromURL)) {
-      setStoredBrand(fromURL);
-      return fromURL;
-    }
-    // neznámy brand → ignoruj a vymaž
-    setStoredBrand(null);
-    return null;
-  }
-
-  return getStoredBrand();
+  if (!fromURL) return null;
+  if (fromURL === 'all') return null;
+  return isKnownBrand(fromURL) ? fromURL : null;
 }
+
 
 function cleanBrandParamFromURL() {
   const url = new URL(location.href);
@@ -269,7 +266,7 @@ function applyFilters(filter) {
  */
 function applyBrandSections() {
   const brand = getBrandView(ACTIVE_FILTER);
-
+  applyPromoBrandFilter(brand);
   // --- ZNAČKY ---
   const znacky = document.getElementById('znacky');
   if (znacky) {
@@ -685,15 +682,18 @@ async function nacitajAuta() {
 
 document.addEventListener('DOMContentLoaded', () => {
   BRAND_CTX = resolveBrandContext();
+
   if (BRAND_CTX) document.documentElement.setAttribute('data-brand', BRAND_CTX);
   else document.documentElement.removeAttribute('data-brand');
+
+  // ✅ DOPLNIŤ – nech sa servisné akcie hneď vyfiltrujú podľa globálneho brandu
+  applyPromoBrandFilter(BRAND_CTX);
 
   applyBrandSections();
   cleanBrandParamFromURL();
 
   initModelsStrip();
   syncModelsStrip('all');
-
   nacitajAuta();
 });
 
@@ -854,4 +854,210 @@ function initModelsStrip() {
   }
 })();
 
+// ==============================
+// PROMO2 slider – brand aware, bez dots, reaguje na zmenu značky bez refreshu
+// ==============================
+(function () {
+  const state = {
+    idx: 0,
+    total: 0,
+    timer: null,
+    bound: false,
+  };
 
+  function safe(v){ return String(v || '').toLowerCase().trim(); }
+  function isBrand(b){ return b === 'subaru' || b === 'kgm' || b === 'jeep'; }
+
+  function getCurrentBrand(){
+    // 1) DOM atribút (téma)
+    const dom = safe(document.documentElement.getAttribute('data-brand'));
+    if (isBrand(dom)) return dom;
+
+    // 2) URL param (keď ešte DOM nie je prepnutý)
+    try {
+      const q = safe(new URLSearchParams(location.search).get('brand'));
+      if (q === 'all') return null;
+      if (isBrand(q)) return q;
+    } catch(e){}
+
+    // 3) storage fallback
+    
+
+    return null;
+  }
+
+  function stop(){
+    if (state.timer) clearInterval(state.timer);
+    state.timer = null;
+  }
+
+  function start(){
+    stop();
+    if (state.total <= 1) return;
+
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+
+    state.timer = setInterval(() => go(state.idx + 1, false), 2000);
+  }
+
+  function render(track){
+    track.style.transform = `translateX(-${state.idx * 100}%)`;
+  }
+
+  function go(i, user){
+    if (!state.total) return;
+    state.idx = (i + state.total) % state.total;
+    const track = document.getElementById('promo2Track');
+    if (track) render(track);
+    if (user) start();
+  }
+
+  function rebuild(){
+    const track = document.getElementById('promo2Track');
+    const viewport = document.getElementById('promo2Viewport');
+    if (!track || !viewport) return;
+
+    const brand = getCurrentBrand();
+    const slides = Array.from(track.querySelectorAll('.promo2-slide'));
+
+    // show/hide podľa brandu
+    slides.forEach(slide => {
+      const b = safe(slide.dataset.brand);
+      slide.style.display = (!brand || b === brand) ? '' : 'none';
+    });
+
+    let active = slides.filter(s => s.style.display !== 'none');
+
+    // safeguard: keby si mal chybu v data-brand a nezostane nič, radšej ukáž všetko
+    if (!active.length) {
+      slides.forEach(s => (s.style.display = ''));
+      active = slides;
+    }
+
+    state.total = active.length;
+    state.idx = 0;
+
+    // reset bez skoku animácie
+    track.style.transition = 'none';
+    track.style.transform = 'translateX(0%)';
+    requestAnimationFrame(() => { track.style.transition = ''; });
+
+    // bind controls len raz
+    if (!state.bound) {
+      state.bound = true;
+
+      document.querySelectorAll('[data-promo2="next"]').forEach(btn =>
+        btn.addEventListener('click', () => go(state.idx + 1, true))
+      );
+      document.querySelectorAll('[data-promo2="prev"]').forEach(btn =>
+        btn.addEventListener('click', () => go(state.idx - 1, true))
+      );
+
+      viewport.addEventListener('mouseenter', stop);
+      viewport.addEventListener('mouseleave', start);
+
+      viewport.addEventListener('touchstart', stop, { passive:true });
+      viewport.addEventListener('touchend', () => setTimeout(start, 600), { passive:true });
+
+      window.addEventListener('pageshow', () => rebuild());
+    }
+
+    render(track);
+    start();
+  }
+
+  // init
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', rebuild, { once:true });
+  } else {
+    rebuild();
+  }
+
+  // reaguj na zmenu data-brand (napr. keď sa značka prepne)
+  const mo = new MutationObserver((muts) => {
+    for (const m of muts) {
+      if (m.type === 'attributes' && m.attributeName === 'data-brand') {
+        rebuild();
+        break;
+      }
+    }
+  });
+  mo.observe(document.documentElement, { attributes:true, attributeFilter:['data-brand'] });
+
+  // voliteľné ručné volanie
+  window.PP_PROMO2_UPDATE = rebuild;
+})();
+
+// ==============================
+// PROMO2 LIGHTBOX – klik na kartu/foto = plné rozlíšenie
+// (CTA "Pozrieť ponuku" zostáva normálne klikateľné)
+// ==============================
+(function () {
+
+  function ensureLightbox(){
+    let lb = document.querySelector('.promo2-lightbox');
+    if (lb) return lb;
+
+    lb = document.createElement('div');
+    lb.className = 'promo2-lightbox';
+    lb.innerHTML = `
+      <div class="promo2-lightbox__panel" role="dialog" aria-modal="true" aria-label="Náhľad obrázka">
+        <button class="promo2-lightbox__close" type="button" aria-label="Zavrieť">×</button>
+        <img class="promo2-lightbox__img" alt="">
+      </div>
+    `;
+    document.body.appendChild(lb);
+
+    // klik mimo panelu = zavrieť
+    lb.addEventListener('click', (e) => {
+      if (e.target === lb) close(lb);
+    });
+
+    // X = zavrieť
+    lb.querySelector('.promo2-lightbox__close').addEventListener('click', () => close(lb));
+
+    // ESC = zavrieť
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lb.classList.contains('is-open')) close(lb);
+    });
+
+    return lb;
+  }
+
+  function open(src, alt){
+    const lb = ensureLightbox();
+    const img = lb.querySelector('.promo2-lightbox__img');
+    img.src = src;
+    img.alt = alt || '';
+    lb.classList.add('is-open');
+    document.body.classList.add('promo2-lock');
+  }
+
+  function close(lb){
+    const img = lb.querySelector('.promo2-lightbox__img');
+    lb.classList.remove('is-open');
+    document.body.classList.remove('promo2-lock');
+    img.src = '';
+    img.alt = '';
+  }
+
+  // Delegácia: klik na promo2 kartu otvorí lightbox (okrem CTA)
+  document.addEventListener('click', (e) => {
+    const card = e.target.closest('.promo2-card');
+    if (!card) return;
+
+    // CTA nech ostane normálny link na #ponuka
+    if (e.target.closest('.promo2-cta')) return;
+
+    const imgEl = card.querySelector('.promo2-img');
+    if (!imgEl) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const full = imgEl.getAttribute('data-full') || imgEl.currentSrc || imgEl.src;
+    open(full, imgEl.getAttribute('alt') || 'Foto');
+  }, true);
+
+})();

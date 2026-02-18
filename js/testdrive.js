@@ -21,19 +21,7 @@
     return isKnownBrand(s) ? s : null;
   }
 
-  function getBrandFromStorage() {
-    try {
-      const b = safeLower(localStorage.getItem('ppauto.brand'));
-      return isKnownBrand(b) ? b : null;
-    } catch (e) {
-      try {
-        const b = safeLower(sessionStorage.getItem('ppauto.brand'));
-        return isKnownBrand(b) ? b : null;
-      } catch (e2) {
-        return null;
-      }
-    }
-  }
+
 
   function getBrandFromURL() {
     const raw = new URLSearchParams(location.search).get('brand');
@@ -283,7 +271,7 @@
     });
 
     // predvyplnenie brandu (DOM -> URL -> storage)
-    const preBrand = getBrandFromDOM() || getBrandFromURL() || getBrandFromStorage();
+    const preBrand = getBrandFromDOM() || getBrandFromURL();
     if (preBrand) setBrand(preBrand);
     else {
       populateModels(null);

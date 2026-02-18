@@ -1093,12 +1093,26 @@ html[data-brand] #ponuka .filter-row .tag[data-filter="jeep"] {
 
 /* row */
 .models-strip__row{
-  display: flex;
-  align-items: stretch;
+  --ms-gap: clamp(12px, 1.6vw, 22px);
+
+  display: grid;
+  grid-template-columns: repeat(5, minmax(170px, 220px));
   justify-content: center;
-  gap: clamp(12px, 1.6vw, 22px);
-  flex-wrap: wrap;
+  gap: var(--ms-gap);
   padding: 0 10px;
+}
+
+@media (max-width: 1180px){
+  .models-strip__row{ grid-template-columns: repeat(4, minmax(170px, 220px)); }
+}
+@media (max-width: 920px){
+  .models-strip__row{ grid-template-columns: repeat(3, minmax(170px, 220px)); }
+}
+@media (max-width: 680px){
+  .models-strip__row{ grid-template-columns: repeat(2, minmax(170px, 220px)); }
+}
+@media (max-width: 420px){
+  .models-strip__row{ grid-template-columns: 1fr; }
 }
 
 /* tile */
@@ -1106,7 +1120,7 @@ html[data-brand] #ponuka .filter-row .tag[data-filter="jeep"] {
   display: flex;
   flex-direction: column;
   position: relative;
-  flex: 1 1 170px;
+  width: 100%;
   max-width: 220px;
   text-decoration: none;
   user-select: none;
@@ -1321,22 +1335,7 @@ html[data-brand] #jazda #tdBrandRow{ display: none !important; }
 
 
 
-  .models-strip__row{
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    overflow-x: auto;
-    padding: 0 12px 6px;
-    gap: 12px;
-
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .models-strip__row::-webkit-scrollbar{ height: 6px; }
-  .models-strip__row::-webkit-scrollbar-thumb{
-    background: rgba(100,116,139,0.35);
-    border-radius: 999px;
-  }
+ 
 
 
 
@@ -2081,5 +2080,260 @@ html[data-brand="jeep"]{ --td-accent: var(--accent-3); }
 /* 4) preškrtnutú cenu nechaj väčšiu (ak už máš, môže ostať) */
 .car.car-pro .price-old{
   font-size: 14px;
+}
+
+/* =========================
+   PROMO2 SLIDER (Hero → Ponuka)
+   ========================= */
+.promo2{
+  padding: 26px 0 30px;
+  border-bottom: 1px solid var(--line);
+  
+}
+
+.promo2-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom: 25px;
+}
+
+.promo2-title{
+  
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: .2px;
+}
+
+.promo2-sub{
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.promo2-controls{
+  display:flex;
+  gap:10px;
+  flex-shrink: 0;
+}
+
+.promo2-btn{
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
+  color: #fff;
+  cursor: pointer;
+  display:grid;
+  place-items:center;
+  font-size: 22px;
+  transition: transform .12s ease, border-color .2s ease, background .2s ease;
+}
+.promo2-btn:hover{ transform: translateY(-1px); border-color: #2a3443; }
+.promo2-btn:active{ transform: translateY(0px); }
+
+.promo2-shell{
+  position: relative;
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(255,255,255,.08);
+  background:
+    radial-gradient(900px 420px at 18% 15%, rgba(59,130,246,.10), transparent 60%),
+    radial-gradient(900px 420px at 88% 10%, rgba(245,158,11,.08), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0)),
+    var(--card);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.promo2-viewport{
+  overflow:hidden;
+}
+
+.promo2-track{
+  display:flex;
+  transition: transform .55s cubic-bezier(.2,.8,.2,1);
+  will-change: transform;
+}
+
+.promo2-slide{
+  flex: 0 0 100%;
+  
+}
+
+.promo2-card{
+  position: relative;
+  display:block;
+  height: 320px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.08);
+  background: #0e131a;
+  box-shadow: var(--shadow-soft);
+  transform: translateZ(0);
+}
+
+.promo2-img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit: cover;
+  transform: scale(1.02);
+  transition: transform .9s cubic-bezier(.2,.8,.2,1);
+}
+
+.promo2-card:hover .promo2-img{
+  transform: scale(1.07);
+}
+
+.promo2-overlay{
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,0) 40%),
+    linear-gradient(0deg, rgba(0,0,0,.55), rgba(0,0,0,0) 55%);
+}
+
+.promo2-meta{
+  position:absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 14px;
+  display:flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+
+
+.promo2-name{
+  font-weight: 900;
+  font-size: 22px;
+  line-height: 1.1;
+  letter-spacing: .2px;
+  color: #fff;
+  text-shadow: 0 10px 30px rgba(0,0,0,.45);
+}
+
+.promo2-cta{
+  margin-top: 2px;
+  display:inline-flex;
+  width: fit-content;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(11,14,19,.55);
+  backdrop-filter: blur(8px) saturate(160%);
+  font-size: 13px;
+  font-weight: 700;
+  transition: transform .12s ease, border-color .2s ease, background .2s ease;
+}
+.promo2-card:hover .promo2-cta{
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,.22);
+  background: rgba(11,14,19,.68);
+}
+
+/* dots */
+.promo2-dots{
+  display:flex;
+  gap: 8px;
+  justify-content:center;
+  padding: 12px 0 14px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  background: rgba(255,255,255,.01);
+}
+
+.promo2-dot{
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.10);
+  cursor:pointer;
+  transition: transform .12s ease, background .2s ease, width .2s ease, border-color .2s ease;
+}
+.promo2-dot:hover{ transform: scale(1.15); }
+.promo2-dot.is-active{
+  width: 28px;
+  background: rgba(255,255,255,.28);
+  border-color: rgba(255,255,255,.32);
+}
+
+/* Responzívne */
+@media (max-width: 680px){
+  .promo2-title{ font-size: 20px; }
+  .promo2-card{ height: 240px; }
+  .promo2-slide{ padding: 12px; }
+}
+
+/* Zruš čiary nad a pod promo sliderom */
+.hero{ border-bottom: 0 !important; }          /* čiara nad sliderom */
+.promo2{ border-top: 0 !important; border-bottom: 0 !important; }  /* čiara pod sliderom */
+
+/* Ak by čiara bola priamo z rámika slidera (promo2-shell), vypni len hornú/spodnú hranu */
+.promo2-shell{ border-top: 0 !important; border-bottom: 0 !important; }
+
+/* PROMO2 – klik má ísť na kartu/fotku (nie na overlay) */
+.promo2-overlay{ pointer-events: none; }
+
+/* Text nech neblokuje klik na fotku (okrem CTA) */
+.promo2-meta{ pointer-events: none; }
+.promo2-cta{ pointer-events: auto; cursor: pointer; }
+
+/* UX: nech je jasné, že sa dá zväčšiť */
+.promo2-card{ cursor: zoom-in; }
+.promo2-cta{ cursor: pointer; }
+
+body.promo2-lock{ overflow: hidden; }
+
+.promo2-lightbox{
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  background: rgba(0,0,0,.72);
+  backdrop-filter: blur(6px) saturate(150%);
+  z-index: 9999;
+}
+.promo2-lightbox.is-open{ display:flex; }
+
+.promo2-lightbox__panel{
+  width: min(1280px, 96vw);
+  max-height: 92vh;
+  position: relative;
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(255,255,255,.10);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.promo2-lightbox__img{
+  display:block;
+  width:100%;
+  height:auto;
+  max-height:92vh;
+  object-fit: contain;
+  background:#0b0e13;
+}
+.promo2-lightbox__close{
+  position:absolute;
+  top:10px;
+  right:10px;
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(17,21,27,.65);
+  color:#fff;
+  cursor:pointer;
+  display:grid;
+  place-items:center;
+  font-size:22px;
+  line-height:1;
 }
 

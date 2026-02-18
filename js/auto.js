@@ -326,11 +326,6 @@ function parseLegacyPrevodovka(raw) {
     const make = (car?.znacka || '').toLowerCase().trim();
     if (make === 'subaru' || make === 'kgm' || make === 'jeep') {
       document.documentElement.setAttribute('data-brand', make);
-      try {
-        localStorage.setItem('ppauto.brand', make);
-      } catch (e) {
-        try { sessionStorage.setItem('ppauto.brand', make); } catch (e2) {}
-      }
     }
   }
 
