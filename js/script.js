@@ -51,35 +51,65 @@ const BRAND_LABEL = {
 const BRAND_CONFIG = {
   subaru: {
     tileText:
-      'Symetrický AWD, BOXER motory a bezpečnosť EyeSight. Ideálne do Tatier aj na každý deň — stabilita, istota v zime a komfort na dlhých trasách.',
-    testiTitle: 'Čo o nás hovoria zákazníci',
+      'Subaru je synonymom istoty v každom počasí. Symetrický pohon AWD, nízke ťažisko BOXER motorov a špičková bezpečnostná technológia EyeSight prinášajú stabilitu, presnosť a pokoj za volantom. Či ideš cez zasnežené priesmyky, po mokrej okreske alebo na dlhú diaľničnú trasu, Subaru drží stopu a zároveň ponúkne komfort, ktorý si rýchlo obľúbiš. Pre ľudí, ktorí chcú spoľahlivé auto „na roky“ – bez kompromisov v bezpečí, trakcii a jazdnom prejave.',
+    testiTitle: 'Skúsenosti našich zákazníkov',
     quotes: [
-      { text: '„Profesionálny prístup, rýchle dodanie a perfektný servis. Odporúčam.“', by: '— Zákazník z Popradu' },
-      { text: '„Test jazda Subaru vybavená na počkanie, všetko zrozumiteľne vysvetlené.“', by: '— P. J., Kežmarok' },
-      { text: '„AWD v zime neoceniteľné. PP AUTO sa o všetko postaralo.“', by: '— M. K., Svit' },
+      {
+        text: '„Od prvého kontaktu po odovzdanie auta všetko prebehlo profesionálne. Oceňujem férový prístup, rýchle vybavenie a servis, na ktorý sa dá spoľahnúť.“',
+        by: '— zákazník z Popradu',
+      },
+      {
+        text: '„Testovaciu jazdu mi pripravili prakticky hneď. Vysvetlili rozdiely výbav, financovanie aj prevádzku bez zbytočných rečí – vecne a zrozumiteľne.“',
+        by: '— P. J., Kežmarok',
+      },
+      {
+        text: '„V zime je AWD na nezaplatenie. Auto drží, cítiš sa bezpečne a v PP AUTO sa postarali o všetko okolo – registrácia, papiere, nastavenie auta.“',
+        by: '— M. K., Svit',
+      },
     ],
   },
+
   kgm: {
     tileText:
-      'Moderné SUV a praktické rodinné modely, spoľahlivý pohon 4×4 a výborný pomer ceny a výbavy. KGM je robustné, komfortné a pripravené na mesto aj dlhé cesty.',
-    testiTitle: 'Čo o nás hovoria zákazníci',
+      'KGM je praktická voľba pre ľudí, ktorí chcú moderné SUV s výbornou výbavou a rozumnými nákladmi. Robustná konštrukcia, pohodlný podvozok a dostupný pohon 4×4 robia z KGM spoľahlivého partnera do mesta, na rodinné výlety aj na dlhé trasy. Dostaneš veľa auta za férové peniaze – priestor, komfort a technológie, ktoré reálne využiješ každý deň. Ideálne pre tých, čo chcú maximum hodnoty bez zbytočného preplácania.',
+    testiTitle: 'Skúsenosti našich zákazníkov',
     quotes: [
-      { text: '„Výborný prístup, férové jednanie a rýchle vybavenie všetkých formalít.“', by: '— Zákazník z Popradu' },
-      { text: '„KGM ma milo prekvapilo výbavou a komfortom. Odporúčam prísť si to vyskúšať.“', by: '— R. S., Levoča' },
-      { text: '„Všetko vysvetlené jasne a bez tlaku. Super skúsenosť.“', by: '— J. T., Spišská Nová Ves' },
+      {
+        text: '„Komunikácia bola rýchla, ústretová a férová. Všetky kroky vybavili bez komplikácií a presne tak, ako sme sa dohodli.“',
+        by: '— zákazník z Popradu',
+      },
+      {
+        text: '„KGM ma prekvapilo – výbava, priestor aj jazda. Najlepšie je prísť sa previezť a porovnať, mne to rozhodlo.“',
+        by: '— R. S., Levoča',
+      },
+      {
+        text: '„Žiadny nátlak, všetko vysvetlené normálne a na rovinu. Výborná skúsenosť a dobrý pocit z kúpy.“',
+        by: '— J. T., Spišská Nová Ves',
+      },
     ],
   },
+
   jeep: {
     tileText:
-      'DNA terénu a sloboda na každom kilometri. Jeep ponúka charakter, robustnosť a schopnosti od mesta až po off-road — s modernými technológiami a pohodlím.',
-    testiTitle: 'Čo o nás hovoria zákazníci',
+      'Jeep je životný štýl aj schopnosti – jedno aj druhé v jednom aute. Charakter, robustnosť a legenda terénu sa tu spájajú s modernými technológiami, komfortom a bezpečnosťou. V meste pôsobí sebavedomo, na dlhých cestách je pohodlný a keď zídeš z asfaltu, ukáže svoju pravú DNA. Jeep je pre ľudí, ktorí chcú auto s osobnosťou – a zároveň chcú vedieť, že sa môžu spoľahnúť, kamkoľvek sa vyberú.',
+    testiTitle: 'Skúsenosti našich zákazníkov',
     quotes: [
-      { text: '„Jeep pripravený na odber rýchlo, všetko prebehlo hladko. Perfektný prístup.“', by: '— Zákazník z Popradu' },
-      { text: '„Test jazda vybavená na počkanie, vysvetlené financovanie bez skrytých poplatkov.“', by: '— P. J., Kežmarok' },
-      { text: '„Auto má charakter a v teréne je to radosť. Ďakujem za servis a starostlivosť.“', by: '— M. K., Svit' },
+      {
+        text: '„Auto bolo pripravené na odber rýchlo a bez stresu. Prístup bol profesionálny a všetko prebehlo hladko od začiatku do konca.“',
+        by: '— zákazník z Popradu',
+      },
+      {
+        text: '„Testovaciu jazdu mi vybavili na počkanie. Financovanie mi vysvetlili transparentne, bez skrytých poplatkov a bez nátlaku.“',
+        by: '— P. J., Kežmarok',
+      },
+      {
+        text: '„Jeep má charakter a v teréne je to radosť. Servis aj starostlivosť po kúpe boli presne také, ako si predstavujem.“',
+        by: '— M. K., Svit',
+      },
     ],
   },
 };
+
 
 function isKnownBrand(b) {
   return b === 'subaru' || b === 'kgm' || b === 'jeep';
@@ -1060,4 +1090,152 @@ function initModelsStrip() {
     open(full, imgEl.getAttribute('alt') || 'Foto');
   }, true);
 
+})();
+
+
+// ==============================
+// Financovanie – kalkulačka + rýchly dopyt (EmailJS)
+// ==============================
+(function () {
+  const calcRoot = document.querySelector('[data-finance-calc]');
+  const form = document.getElementById('financeForm');
+
+  const fmtEUR = new Intl.NumberFormat('sk-SK', {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  });
+
+  function isKnownBrandSafe(b){
+    return b === 'subaru' || b === 'kgm' || b === 'jeep';
+  }
+
+  function currentBrand(){
+    const b = (document.documentElement.getAttribute('data-brand') || '').toLowerCase().trim();
+    return isKnownBrandSafe(b) ? b : null;
+  }
+
+  function formatMoney(n){
+    if (!isFinite(n)) return '—';
+    return fmtEUR.format(Math.round(n));
+  }
+
+  function computePayment(principal, months, annualRatePct){
+    const n = Number(months) || 0;
+    const P = Number(principal) || 0;
+    const r = (Number(annualRatePct) || 0) / 100 / 12;
+
+    if (!n || P <= 0) return 0;
+    if (r <= 0) return P / n;
+
+    const pow = Math.pow(1 + r, -n);
+    return (P * r) / (1 - pow);
+  }
+
+  function readCalcValues(){
+    if (!calcRoot) return null;
+    const priceEl = calcRoot.querySelector('#finPrice');
+    const downEl  = calcRoot.querySelector('#finDown');
+    const monEl   = calcRoot.querySelector('#finMonths');
+    const rateEl  = calcRoot.querySelector('#finRate');
+    if (!priceEl || !downEl || !monEl || !rateEl) return null;
+
+    const price = Math.max(0, Number(priceEl.value) || 0);
+    const down  = Math.max(0, Number(downEl.value) || 0);
+    const months = Math.max(0, Number(monEl.value) || 0);
+    const rate = Math.max(0, Number(rateEl.value) || 0);
+
+    const principal = Math.max(0, price - down);
+    const monthly = computePayment(principal, months, rate);
+    const total = (monthly * months) + down;
+
+    return { price, down, months, rate, principal, monthly, total };
+  }
+
+  function financeSummaryText(v){
+    if (!v) return '';
+
+    const b = currentBrand();
+    const hasBrandLabel = (typeof BRAND_LABEL !== 'undefined' && BRAND_LABEL);
+    const bLabel = b ? ((hasBrandLabel && BRAND_LABEL[b]) ? BRAND_LABEL[b] : b) : 'Všetky značky';
+
+    return [
+      'Dopyt: financovanie',
+      `Značka: ${bLabel}`,
+      `Cena vozidla: ${formatMoney(v.price)}`,
+      `Akontácia: ${formatMoney(v.down)}`,
+      `Doba splácania: ${v.months} mes.`,
+      `Úrok p.a.: ${v.rate}%`,
+      `Orientačná splátka: ${formatMoney(v.monthly)} / mes.`,
+      '',
+      'Prosím o prípravu ponuky.',
+    ].join('\n');
+  }
+
+  function renderCalc(){
+    const v = readCalcValues();
+    if (!v) return;
+
+    const monthlyEl = calcRoot.querySelector('#finMonthly');
+    const princEl   = calcRoot.querySelector('#finPrincipal');
+    const totalEl   = calcRoot.querySelector('#finTotal');
+
+    if (monthlyEl) monthlyEl.textContent = formatMoney(v.monthly);
+    if (princEl)   princEl.textContent   = formatMoney(v.principal);
+    if (totalEl)   totalEl.textContent   = formatMoney(v.total);
+
+    calcRoot.dataset.financeSummary = financeSummaryText(v);
+  }
+
+  if (calcRoot) {
+    ['input', 'change'].forEach(ev => {
+      calcRoot.addEventListener(ev, (e) => {
+        if (!e.target) return;
+        const id = e.target.id;
+        if (id === 'finPrice' || id === 'finDown' || id === 'finMonths' || id === 'finRate') renderCalc();
+      });
+    });
+    renderCalc();
+  }
+
+  
+
+  // Rýchly dopyt – odoslanie cez EmailJS (rovnaký template ako kontakt)
+  if (form) {
+    const submitBtn = document.getElementById('financeSubmit');
+    const statusEl = document.getElementById('financeStatus');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // honeypot anti-spam
+      const hp = form.querySelector('input[name="website"]');
+      if (hp && hp.value) return;
+
+      const ta = form.querySelector('textarea[name="sprava"]');
+      const summary = (calcRoot?.dataset?.financeSummary || '').trim();
+      if (ta && !ta.value.trim() && summary) ta.value = summary;
+
+      if (!window.emailjs || typeof window.emailjs.sendForm !== 'function') {
+        if (statusEl) statusEl.textContent = 'Odoslanie formulára nie je dostupné (EmailJS). Použite prosím e-mail alebo telefón.';
+        return;
+      }
+
+      try {
+        if (statusEl) statusEl.textContent = 'Odosielam...';
+        if (submitBtn) submitBtn.disabled = true;
+
+        await window.emailjs.sendForm('service_i68hphn', 'template_contact', form);
+
+        if (statusEl) statusEl.textContent = 'Dopyt bol odoslaný. Ozveme sa vám čo najskôr.';
+        form.reset();
+        renderCalc();
+      } catch (err) {
+        if (statusEl) statusEl.textContent = 'Odoslanie zlyhalo. Skúste to prosím znova alebo použite e-mail.';
+        console.error(err);
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    });
+  }
 })();

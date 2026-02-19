@@ -271,3 +271,47 @@ form.admin-form .actions{
 }
 .progress-overlay[hidden] { display: none !important; }
 
+/* oddeľovač značky (využíva existujúci .vybava-section span cez grid) */
+.vybava-section.vybava-brand{
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+/* riadok na pridanie vlastnej položky */
+.vybava-custom{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 8px 0 6px;
+}
+
+.vybava-custom input{
+  flex: 1 1 auto;
+  min-width: 240px;
+  height: 42px;
+}
+
+.vybava-brand-switch{
+  display:flex;
+  gap:10px;
+  margin: 10px 0 12px;
+}
+
+.vybava-brand-switch .brand-tab{
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.vybava-brand-switch .brand-tab.is-active{
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.22);
+}

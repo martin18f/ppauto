@@ -52,7 +52,8 @@
       <nav class="nav-links">
         <a href="#ponuka">Ponuka áut</a>
         <a href="#servis">Servis</a>
-        <a href="#znacky">Značky</a>  
+        <a href="#financovanie">Financovanie</a>
+        <a href="#znacky">Značky</a> 
         <a href="#tim">Tím</a>
         <a href="#kontakt">Kontakt</a>
         
@@ -266,6 +267,258 @@
   </div>
 </section>
 
+<!-- FINANCOVANIE -->
+<section id="financovanie" class="finance-landing">
+  <div class="container">
+
+    <div class="finance-hero">
+      <div class="finance-hero__content">
+        <span class="finance-kicker">Financovanie</span>
+        <h3>Financovanie a poistenie bez stresu</h3>
+        <p class="finance-sub">
+          Vyberieme vhodnú formu financovania, nastavíme akontáciu a splátky, pripravíme poistenie
+          a vybavíme administratívu. Všetko zrozumiteľne a bez skrytých poplatkov.
+        </p>
+
+        <div class="finance-pills">
+          <span class="pill">Úver</span>
+          <span class="pill">Finančný leasing</span>
+          <span class="pill">Operatívny leasing</span>
+          <span class="pill">PZP + havarijné</span>
+          <span class="pill">GAP / pripoistenia</span>
+        </div>
+      </div>
+
+      <div class="finance-hero__meta">
+        <div class="finance-mini">
+          <div class="finance-dot"></div>
+          <div>
+            <div class="finance-mini__title">Ponuka na mieru</div>
+            <div class="finance-mini__text">Zohľadníme cenu vozidla, akontáciu, dobu splácania a vaše preferencie.</div>
+          </div>
+        </div>
+        <div class="finance-mini">
+          <div class="finance-dot"></div>
+          <div>
+            <div class="finance-mini__title">Rýchle schválenie</div>
+            <div class="finance-mini__text">Väčšinu dopytov vyriešime v ten istý deň (podľa partnera).</div>
+          </div>
+        </div>
+        <div class="finance-mini">
+          <div class="finance-dot"></div>
+          <div>
+            <div class="finance-mini__title">Poistenie a prepis</div>
+            <div class="finance-mini__text">Pomôžeme s PZP/havarijným a papiermi, aby ste odchádzali pripravení.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="finance-layout">
+
+      <div class="finance-left">
+
+        <div class="service-block finance-block">
+          <div class="service-block__head">
+            <h4>Možnosti financovania</h4>
+            <p>Najčastejšie riešenia pre nové aj jazdené vozidlá.</p>
+          </div>
+
+          <div class="finance-grid">
+            <div class="finance-card">
+              <h5>Úver</h5>
+              <p>Vozidlo je vaše, splácate dohodnutú sumu. Flexibilná akontácia a doba splácania.</p>
+            </div>
+            <div class="finance-card">
+              <h5>Finančný leasing</h5>
+              <p>Vhodné pri podnikaní aj súkromne. Nastavíme splátky a odkúpenie po skončení.</p>
+            </div>
+            <div class="finance-card">
+              <h5>Operatívny leasing</h5>
+              <p>Jazdíte, platíte mesačný paušál. Po skončení vozidlo vrátite alebo vymeníte.</p>
+            </div>
+            <div class="finance-card">
+              <h5>Poistenie</h5>
+              <p>PZP, havarijné, GAP a pripoistenia. Porovnáme varianty a nastavíme krytie.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="service-block finance-block">
+          <div class="service-block__head">
+            <h4>Ako to prebieha</h4>
+            <p>Jednoduchý proces od dopytu po odovzdanie vozidla.</p>
+          </div>
+
+          <ol class="service-steps finance-steps">
+            <li>
+              <div class="step-n">1</div>
+              <div class="step-t">
+                <strong>Vyberiete vozidlo</strong>
+                <span>Vyberiete si auto z ponuky alebo si dohodnete konfiguráciu.</span>
+              </div>
+            </li>
+            <li>
+              <div class="step-n">2</div>
+              <div class="step-t">
+                <strong>Spoločné nastavenie splátok</strong>
+                <span>Akontácia, doba splácania, prípadne poistenie. Vysvetlíme rozdiely.</span>
+              </div>
+            </li>
+            <li>
+              <div class="step-n">3</div>
+              <div class="step-t">
+                <strong>Schválenie</strong>
+                <span>Vyplníme podklady a odošleme žiadosť na schválenie k partnerovi.</span>
+              </div>
+            </li>
+            <li>
+              <div class="step-n">4</div>
+              <div class="step-t">
+                <strong>Podpis a odovzdanie</strong>
+                <span>Podpis zmlúv, poistka, prepis a odovzdanie pripraveného vozidla.</span>
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <div class="service-block finance-block" data-finance-calc>
+          <div class="service-block__head">
+            <h4>Orientačná kalkulačka splátok</h4>
+            <p>Výpočet je informatívny. Presnú ponuku pripravíme podľa vozidla a partnera.</p>
+          </div>
+
+          <div class="finance-calc">
+            <div class="finance-field">
+              <label for="finPrice">Cena vozidla (€)</label>
+              <input id="finPrice" type="number" inputmode="numeric" min="0" step="100" value="25000">
+            </div>
+
+            <div class="finance-field">
+              <label for="finDown">Akontácia (€)</label>
+              <input id="finDown" type="number" inputmode="numeric" min="0" step="100" value="5000">
+            </div>
+
+            <div class="finance-field">
+              <label for="finMonths">Doba splácania (mesiace)</label>
+              <select id="finMonths">
+                <option value="24">24</option>
+                <option value="36">36</option>
+                <option value="48" selected>48</option>
+                <option value="60">60</option>
+                <option value="72">72</option>
+                <option value="84">84</option>
+              </select>
+            </div>
+
+            <div class="finance-field">
+              <label for="finRate">Úrok p.a. (%)</label>
+              <input id="finRate" type="number" inputmode="decimal" min="0" step="0.1" value="6.9">
+            </div>
+          </div>
+
+          <div class="finance-result" aria-live="polite">
+            <div class="finance-result__main">
+              <div class="finance-result__label">Orientačná mesačná splátka</div>
+              <div class="finance-result__value" id="finMonthly">—</div>
+            </div>
+            <div class="finance-result__meta">
+              <div class="finance-meta-row">
+                <span>Financovaná suma</span><strong id="finPrincipal">—</strong>
+              </div>
+              <div class="finance-meta-row">
+                <span>Celkom zaplatíte</span><strong id="finTotal">—</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="service-block finance-block">
+          <div class="service-block__head">
+            <h4>Čo si pripraviť</h4>
+            <p>Základné dokumenty pre rýchle vybavenie (môže sa líšiť podľa typu financovania).</p>
+          </div>
+
+          <div class="finance-docs">
+            <div class="finance-docs__col">
+              <h5>Fyzická osoba</h5>
+              <ul>
+                <li>Občiansky preukaz (príp. 2. doklad)</li>
+                <li>Potvrdenie o príjme / výpisy (podľa partnera)</li>
+                <li>Kontaktné údaje + adresa</li>
+              </ul>
+            </div>
+            <div class="finance-docs__col">
+              <h5>Firma / SZČO</h5>
+              <ul>
+                <li>IČO, údaje spoločnosti</li>
+                <li>Daňové priznanie / výkazy (podľa partnera)</li>
+                <li>Podpisové práva a splnomocnenia</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        
+
+      </div>
+
+      <aside class="finance-right">
+
+        <div class="finance-cta">
+          <h4>Chcete ponuku na mieru?</h4>
+          <p>Napíšte nám základné údaje. Ozveme sa s návrhom financovania a poistenia.</p>
+
+          <div class="finance-actions">
+            <a class="btn" href="tel:+421903905280">Zavolať predaj</a>
+            <a class="btn" href="mailto:predaj@ppauto.sk?subject=Financovanie%20-%20dopyt">E-mail</a>
+            <a class="btn primary" href="#kontakt">Kontakt formulár</a>
+          </div>
+
+          <div class="finance-info">
+            <div class="info-row">
+              <strong>Predaj</strong>
+              <span><a href="tel:+421903905280">+421 903 905 280</a> · <a href="mailto:predaj@ppauto.sk">predaj@ppauto.sk</a></span>
+              <span><a href="tel:+421903905280">+421 918 767 443</a> · <a href="mailto:predaj@ppauto.sk">predaj@ppauto.sk</a></span>
+            </div>
+            <div class="info-row">
+              <strong>Otváracie hodiny</strong>
+              <span>Po–Pia · 8:00–17:00</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="finance-lead">
+          <h4>Rýchly dopyt</h4>
+
+          <form id="financeForm">
+            <div class="finance-form">
+              <input name="meno" required placeholder="Meno">
+              <input name="email" required type="email" placeholder="E-mail">
+              <input name="telefon" placeholder="Telefón">
+
+              <input name="website" tabindex="-1" autocomplete="off" style="display:none">
+
+              <textarea name="sprava" required rows="4" placeholder="O aké vozidlo máte záujem a aké máte predstavy o splátkach?"></textarea>
+
+              <button class="btn primary" id="financeSubmit" type="submit">Odoslať dopyt</button>
+              <div class="form-status" id="financeStatus" aria-live="polite"></div>
+            </div>
+          </form>
+        </div>
+
+        <div class="finance-note">
+          <h5>Poznámka</h5>
+          <p>Financovanie je predmetom schválenia financujúcou spoločnosťou. Podmienky sa môžu líšiť podľa produktu.</p>
+        </div>
+
+      </aside>
+    </div>
+  </div>
+</section>
+
+
+
     <!-- SERVICE -->
     <!-- =========================
      AUTORIZOVANÝ SERVIS (v2)
@@ -435,11 +688,11 @@
           <div class="service-info">
             <div class="info-row">
               <strong>Servis e-mail</strong>
-              <span><a href="mailto:servis.ppauto@ppauto.sk">servis.ppauto@ppauto.sk</a></span>
+              <span><a href="tel:+421911440052">+421 911 440 052</a> · <a href="mailto:technik@ppauto.sk">servis.ppauto@ppauto.sk</a></span>
             </div>
             <div class="info-row">
               <strong>Príjmací technik</strong>
-              <span><a href="tel:+421911440052">+421 911 440 052</a> · <a href="mailto:technik@ppauto.sk">technik@ppauto.sk</a></span>
+              <span><a href="tel:+421911440052">+421 902 905 277</a> · <a href="mailto:technik@ppauto.sk">technik@ppauto.sk</a></span>
             </div>
             <div class="info-row">
               <strong>Otváracie hodiny</strong>
@@ -769,6 +1022,7 @@
         <li><a href="#servis">Servis</a></li>
         <li><a href="#znacky">Značky</a></li>
         <li><a href="#tim">Tím</a></li>
+        <li><a href="#financovanie">Financovanie</a></li>
         <li><a href="#kontakt">Kontakt</a></li>
       </ul>
     </div>
@@ -788,7 +1042,7 @@
     <div class="foot-contact">
       <h5>Kontakt</h5>
       <ul>
-        <li><a href="tel:+421911440052">+421 911 440 052</a></li>
+        <li><a href="tel:+421 903 905 280">+421 903 905 280</a></li>
         <li><a href="mailto:predaj@ppauto.sk">predaj@ppauto.sk</a></li>
         <li><a href="https://maps.google.com?q=Partizánska+5660/107+Poprad" target="_blank">
           Partizánska 5660/107, Poprad
