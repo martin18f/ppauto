@@ -1,4 +1,5 @@
 // /api/promos
+
 function encodeGithubPath(path) {
   return String(path)
     .split("/")
@@ -12,8 +13,19 @@ function isConflictError(err) {
   return msg.includes(" 409 ") || msg.includes("409 Conflict");
 }
 
+function normalizePromoBrand(b) {
+  const v = String(b || '').toLowerCase().trim();
+  return (v === 'subaru' || v === 'kgm' || v === 'jeep') ? v : null;
+}
+
+function getIsAdmin(req) {
+  const c = String(req.headers.cookie || "");
+  // presnejšie než includes("admin=1")
+  return /(?:^|;\s*)admin=1(?:;|$)/.test(c);
+}
+
 export default async function handler(req, res) {
-  const isAdmin = !!req.headers.cookie?.includes("admin=1");
+  const isAdmin = getIsAdmin(req);
 
   try {
     const { GITHUB_TOKEN, GITHUB_REPO, GITHUB_BRANCH } = process.env;
@@ -39,11 +51,9 @@ export default async function handler(req, res) {
 
       const r = await fetch(url, { headers });
 
-      // ak súbor ešte neexistuje → prázdne pole
       if (r.status === 404) {
         return { promos: [], sha: null };
       }
-
       if (!r.ok) {
         throw new Error(`GET file failed: ${r.status} ${r.statusText} | url=${url}`);
       }
@@ -61,6 +71,12 @@ export default async function handler(req, res) {
     }
 
     async function putFile(promos, sha, message) {
+      if (!Array.isArray(promos)) {
+        const err = new Error("Internal: promos must be an array");
+        err.status = 500;
+        throw err;
+      }
+
       const safePath = encodeGithubPath(PROMOS_PATH);
       const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${safePath}`;
 
@@ -70,7 +86,6 @@ export default async function handler(req, res) {
         branch: GITHUB_BRANCH,
       };
 
-      // sha posielame iba ak súbor existuje
       if (sha) body.sha = sha;
 
       const r = await fetch(url, {
@@ -88,10 +103,16 @@ export default async function handler(req, res) {
     }
 
     async function mutate(mutator, message) {
-      // 2 pokusy – pri 409 refetch a skúsi znovu
       for (let attempt = 1; attempt <= 2; attempt++) {
         const { promos, sha } = await getFile();
-        const next = mutator([...promos]);
+
+        let next;
+        try {
+          next = mutator([...promos]);
+        } catch (e) {
+          // ak mutator vyhodí error so statusom (napr. 400/404), propaguj
+          throw e;
+        }
 
         try {
           await putFile(next, sha, message);
@@ -119,7 +140,7 @@ export default async function handler(req, res) {
 
     // GET (public) / GET include_hidden=1 (admin only)
     if (req.method === "GET") {
-      const includeHidden = (req.query?.include_hidden || "").toString() === "1";
+      const includeHidden = String(req.query?.include_hidden || "") === "1";
       if (includeHidden && !isAdmin) return res.status(401).json({ error: "Unauthorized" });
 
       const { promos } = await getFile();
@@ -136,15 +157,16 @@ export default async function handler(req, res) {
       const promo = {
         id: p.id || `promo_${Date.now()}_${Math.random().toString(16).slice(2)}`,
         title: String(p.title || "").trim(),
-        brand: String(p.brand || "all").toLowerCase().trim() || "all", // subaru/kgm/jeep/all
+        brand: normalizeBrand(p.brand), // iba subaru/kgm/jeep
         image: String(p.image || "").trim(),
         link: String(p.link || "#ponuka").trim() || "#ponuka",
         skryte: !!p.skryte,
         createdAt: p.createdAt || now,
       };
 
-      if (!promo.image) return res.status(400).json({ error: "Missing image" });
       if (!promo.title) return res.status(400).json({ error: "Missing title" });
+      if (!promo.image) return res.status(400).json({ error: "Missing image" });
+      if (!promo.brand) return res.status(400).json({ error: "Invalid brand (subaru/kgm/jeep)" });
 
       await mutate(
         (arr) => {
@@ -174,13 +196,39 @@ export default async function handler(req, res) {
           }
 
           const prev = arr[index] || {};
+
+          // brand je buď nezmenený (prev.brand), alebo musí byť validný
+          const nextBrand =
+            incoming.brand === undefined ? normalizeBrand(prev.brand) : normalizeBrand(incoming.brand);
+
+          if (!nextBrand) {
+            const err = new Error("Invalid brand (subaru/kgm/jeep)");
+            err.status = 400;
+            throw err;
+          }
+
+          const nextTitle = String(incoming.title ?? prev.title ?? "").trim();
+          const nextImage = String(incoming.image ?? prev.image ?? "").trim();
+          const nextLink = String(incoming.link ?? prev.link ?? "#ponuka").trim() || "#ponuka";
+
+          if (!nextTitle) {
+            const err = new Error("Missing title");
+            err.status = 400;
+            throw err;
+          }
+          if (!nextImage) {
+            const err = new Error("Missing image");
+            err.status = 400;
+            throw err;
+          }
+
           arr[index] = {
             ...prev,
             ...incoming,
-            title: String(incoming.title ?? prev.title ?? "").trim(),
-            brand: String(incoming.brand ?? prev.brand ?? "all").toLowerCase().trim() || "all",
-            image: String(incoming.image ?? prev.image ?? "").trim(),
-            link: String(incoming.link ?? prev.link ?? "#ponuka").trim() || "#ponuka",
+            title: nextTitle,
+            brand: nextBrand,
+            image: nextImage,
+            link: nextLink,
             skryte: incoming.skryte === undefined ? !!prev.skryte : !!incoming.skryte,
           };
 
@@ -217,7 +265,10 @@ export default async function handler(req, res) {
     res.setHeader("Allow", ["GET", "POST", "PUT", "DELETE"]);
     return res.status(405).json({ error: "Method Not Allowed" });
   } catch (e) {
-    if (e && e.status === 404) return res.status(404).json({ error: "Not found" });
+    const status = e?.status;
+    if (status === 400) return res.status(400).json({ error: e.message || "Bad Request" });
+    if (status === 404) return res.status(404).json({ error: "Not found" });
+
     console.error(e);
     return res.status(500).json({ error: e.message || "Internal error" });
   }

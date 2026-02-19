@@ -1,142 +1,156 @@
 /* =========================================================
-   auto.css — Detail vozidla (moderný, profesionálny)
-   - neutrálnejší price blok (bez žltého “highlightu”)
-   - krajšie primary tlačidlá (bez krikľavej modrej)
-   - sticky panel s odsadením od navigácie
-   - zelené pulzujúce bodky pri nadpisoch sekcií
-   - bez emoji (žiadne ✓ v CSS)
+   auto.css — Detail vozidla
+   Cieľ: vizuálne zjednotené so zvyškom projektu (style.css)
+   - používa globálne tokeny: --card, --line, --radius-xl, --shadow-soft…
+   - CTA tlačidlá vizuálne zhodné s .btn / .btn.primary
+   - stabilná výška galérie + korektný object-fit
+   - bez globálnych zásahov mimo .car-page
 ========================================================= */
 
+/* =========================
+   TOKENS (rozšírenie globálnych)
+========================= */
 :root{
-  --car-accent: var(--accent);       /* brand accent (subaru/kgm/jeep) */
-  --car-green: var(--accent-2);      /* zelená (bodky + jemné akcenty) */
-  --sticky-top: 112px;              /* odsadenie sticky panelu od headeru */
+  --car-accent: var(--accent);
+  --car-accent-rgb: 59,130,246;
+
+  --car-green: var(--accent-2);
+  --car-green-rgb: 34,197,94;
+
+  --car-orange: var(--accent-3);
+  --car-orange-rgb: 245,158,11;
+
+  --sticky-top: 112px;
+  --gallery-h: clamp(320px, 42vw, 560px);
 }
 
-html[data-brand="subaru"]{ --car-accent: var(--accent); }
-html[data-brand="kgm"]   { --car-accent: var(--accent-2); }
-html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
+html[data-brand="subaru"]{ --car-accent: var(--accent);   --car-accent-rgb: 59,130,246; }
+html[data-brand="kgm"]   { --car-accent: var(--accent-2); --car-accent-rgb: 34,197,94; }
+html[data-brand="jeep"]  { --car-accent: var(--accent-3); --car-accent-rgb: 245,158,11; }
 
-/* --- page --- */
+@media (max-width: 1000px){
+  :root{ --gallery-h: clamp(260px, 58vw, 480px); }
+}
+
+@media (max-width: 680px){
+  :root{
+    --sticky-top: 96px;
+    --gallery-h: clamp(220px, 70vw, 420px);
+  }
+}
+
+/* =========================
+   PAGE WRAP
+========================= */
 .car-page{
-  padding: 26px 0 44px;
+  padding: 32px 0 48px;
   position: relative;
 }
 
-/* jemné pozadie (subtle), nie agresívne */
+/* jemný overlay v duchu ostatných sekcií (service-hero, cards, …) */
 .car-page::before{
   content:"";
   position:absolute;
   inset:0;
   pointer-events:none;
+  z-index: 0;
+  opacity: .8;
   background:
-    radial-gradient(900px 420px at 18% 8%, rgba(255,255,255,.03), transparent 60%),
-    radial-gradient(900px 420px at 86% 16%, rgba(255,255,255,.02), transparent 60%),
-    radial-gradient(900px 420px at 30% 92%, rgba(255,255,255,.02), transparent 60%);
-  opacity:.75;
+    radial-gradient(900px 520px at 18% 6%, rgba(255,255,255,.05), transparent 60%),
+    radial-gradient(900px 520px at 86% 10%, rgba(255,255,255,.04), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
 }
 
-/* breadcrumb */
+/* obsah nad overlayom */
+.car-page .container{ position: relative; z-index: 1; }
+
+/* =========================
+   BREADCRUMB
+========================= */
 .car-breadcrumb{
   display:flex;
   align-items:center;
   justify-content:space-between;
   margin: 14px 0 18px;
-  position: relative;
-  z-index: 1;
 }
 
+/* .pill je definovaný v style.css — tu len jemný hover */
 .car-breadcrumb .pill{
   background: rgba(255,255,255,.02);
   transition: transform .15s ease, border-color .2s ease, background .2s ease;
 }
+
 .car-breadcrumb .pill:hover{
   transform: translateY(-1px);
   border-color: rgba(255,255,255,.16);
   background: rgba(255,255,255,.04);
 }
 
-/* loading */
+/* =========================
+   LOADING
+========================= */
 .car-loading{
   background: var(--card);
-  border: 1px solid rgba(255,255,255,.07);
-  border-radius: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
   padding: 18px;
   box-shadow: var(--shadow-soft);
-  position: relative;
-  z-index: 1;
 }
+
 .skeleton{
   border-radius: 14px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.10), rgba(255,255,255,0.05));
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,.05),
+    rgba(255,255,255,.10),
+    rgba(255,255,255,.05)
+  );
   background-size: 240% 100%;
   animation: sk 1.05s ease-in-out infinite;
 }
+
 .sk-title{ height: 30px; width: min(520px, 70%); margin-bottom: 14px; }
 .sk-grid{ height: 520px; width: 100%; }
+
 @keyframes sk{
   0%{ background-position: 0% 50%; }
   100%{ background-position: 240% 50%; }
 }
 
-.car-detail{ display:block; position: relative; z-index: 1; }
+@media (prefers-reduced-motion: reduce){
+  .skeleton{ animation: none; }
+}
 
-/* --- cards (premium) --- */
+.car-detail{ display:block; }
+
+/* =========================
+   CARD BASE (zhodné s ostatnými sekciami)
+========================= */
 .car-card{
   background:
-    radial-gradient(1100px 650px at 70% -10%, rgba(255,255,255,.04), transparent 60%),
-    radial-gradient(900px 420px at 5% 110%, rgba(255,255,255,.03), transparent 60%),
+    radial-gradient(1100px 650px at 70% -10%, rgba(255,255,255,.05), transparent 60%),
+    radial-gradient(900px 420px at 5% 110%, rgba(255,255,255,.04), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)),
     var(--card);
-  border: 1px solid rgba(255,255,255,.07);
-  border-radius: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-soft);
   overflow: hidden;
   position: relative;
 }
+
 .car-card::after{
   content:"";
   position:absolute;
   inset:0;
   pointer-events:none;
-  opacity:.45;
+  opacity:.40;
   background: linear-gradient(180deg, rgba(255,255,255,.06), transparent 28%);
 }
 
-/* --- CTA button styling scoped to detail page (no nav conflicts) --- */
-.car-page .car-cta .btn.car-btn{
-  background: rgba(255,255,255,.02);
-  border: 1px solid rgba(255,255,255,.10);
-  color: #ffffff;
-  box-shadow: none;
-  transition: transform .16s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
-}
-
-.car-page .car-cta .btn.car-btn:hover{
-  transform: translateY(-1px);
-  background: rgba(255,255,255,.04);
-  border-color: rgba(255,255,255,.16);
-  box-shadow: 0 10px 24px rgba(0,0,0,.22);
-}
-
-.car-page .car-cta .btn.car-btn:active{
-  transform: translateY(0px);
-}
-
-/* Primary CTA len pre detail auta */
-.car-page .car-cta .btn.car-btn-primary{
-  background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.02));
-  border-color: rgba(34,197,94,.38);
-  box-shadow: 0 14px 30px rgba(0,0,0,.28);
-}
-
-.car-page .car-cta .btn.car-btn-primary:hover{
-  border-color: rgba(34,197,94,.55);
-  box-shadow:
-    0 0 0 4px rgba(34,197,94,.12),
-    0 16px 34px rgba(0,0,0,.35);
-}
-
-/* --- top layout --- */
+/* =========================
+   LAYOUT
+========================= */
 .car-top{
   display:grid;
   grid-template-columns: 1.45fr .55fr;
@@ -144,50 +158,64 @@ html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
   align-items: start;
 }
 
-/* sticky panel s odsadením od navigácie */
+/* sticky panel (odsadenie od headeru) */
 .car-top > aside.car-card{
   position: sticky;
   top: var(--sticky-top);
 }
 
-/* ===== Gallery ===== */
+@media (max-width: 1100px){
+  .car-top{ grid-template-columns: 1.25fr .75fr; }
+}
+
+@media (max-width: 1000px){
+  .car-top{ grid-template-columns: 1fr; }
+  .car-top > aside.car-card{ position: relative; top: auto; }
+}
+
+/* =========================
+   GALLERY
+========================= */
 .car-card.gallery{ overflow:hidden; }
 
 .gallery-main{
   position: relative;
-  border-bottom: 1px solid rgba(255,255,255,.07);
+  border-bottom: 1px solid var(--line);
   background:
-    radial-gradient(900px 500px at 20% 20%, rgba(255,255,255,.05), transparent 60%),
+    radial-gradient(900px 500px at 20% 20%, rgba(255,255,255,.06), transparent 60%),
     linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
 }
 
-.gallery-main .imgwrap{
-  aspect-ratio: 16 / 10;
-  display:grid;
-  place-items:center;
+/* stabilný rám galérie (bez skákania) */
+.car-page .gallery-main .imgwrap{
+  height: var(--gallery-h);
+  overflow: hidden;
+  background: #0b0e13;
   position: relative;
 }
 
-.gallery-main .imgwrap::before{
+.car-page .gallery-main .imgwrap::before{
   content:"";
   position:absolute;
   inset:0;
   pointer-events:none;
   background:
-    linear-gradient(180deg, rgba(0,0,0,.08), transparent 30%),
+    linear-gradient(180deg, rgba(0,0,0,.10), transparent 30%),
     linear-gradient(0deg, rgba(0,0,0,.35), transparent 45%);
-  opacity:.85;
+  opacity: .9;
 }
 
-.gallery-main img{
+.car-page .gallery-main img{
   width: 100%;
   height: 100%;
-  object-fit: cover;
   display:block;
+  object-fit: cover;          /* FIX: 'fit' neexistuje; cover zodpovedá dizajnu projektu */
+  object-position: center;
   transform: scale(1.01);
+  cursor: zoom-in;
 }
 
-/* gallery buttons */
+/* galéria – šípky */
 .gal-btn{
   position:absolute;
   top:50%;
@@ -195,8 +223,8 @@ html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
   width: 44px;
   height: 44px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(12, 15, 20, .55);
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(12, 15, 20, .60);
   color: #fff;
   cursor:pointer;
   display:grid;
@@ -206,31 +234,39 @@ html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
   opacity: .96;
   backdrop-filter: blur(8px) saturate(160%);
 }
+
 .gal-btn:hover{
   transform: translateY(-50%) scale(1.06);
-  background: rgba(12, 15, 20, .75);
-  border-color: rgba(255,255,255,.20);
+  background: rgba(12, 15, 20, .78);
+  border-color: rgba(255,255,255,.24);
 }
+
 .gal-btn:active{ transform: translateY(-50%) scale(0.98); }
 .gal-btn.prev{ left: 14px; }
 .gal-btn.next{ right: 14px; }
 
+/* thumbnails */
 .thumbs{
   display:flex;
   gap: 10px;
   padding: 12px 12px 14px;
   overflow-x:auto;
-  scrollbar-width: thin;
   scroll-snap-type: x mandatory;
   background: linear-gradient(180deg, rgba(255,255,255,.01), rgba(255,255,255,0));
+
+  scrollbar-width: none;          /* Firefox */
+  -ms-overflow-style: none;       /* IE/Edge legacy */
+  scrollbar-gutter: auto;
 }
+
+.thumbs::-webkit-scrollbar{ height: 0; width: 0; display: none; }
 
 .thumb{
   flex: 0 0 112px;
   height: 74px;
   border-radius: 14px;
   overflow:hidden;
-  border: 1px solid rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.10);
   background: #0b0e13;
   cursor:pointer;
   opacity: .82;
@@ -238,16 +274,19 @@ html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
   transition: opacity .18s ease, transform .18s ease, border-color .18s ease, box-shadow .18s ease;
   scroll-snap-align: start;
 }
+
 .thumb:hover{
   opacity: 1;
   transform: translateY(-1px);
-  border-color: rgba(255,255,255,.16);
+  border-color: rgba(255,255,255,.18);
 }
+
 .thumb.is-active{
   opacity: 1;
-  border-color: rgba(34,197,94,.55);
-  box-shadow: 0 0 0 4px rgba(34,197,94,.12);
+  border-color: rgba(var(--car-accent-rgb), .80);
+  box-shadow: 0 0 0 4px rgba(var(--car-accent-rgb), .14);
 }
+
 .thumb img{
   width:100%;
   height:100%;
@@ -255,14 +294,22 @@ html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
   display:block;
 }
 
-/* ===== Right panel ===== */
+@media (max-width: 680px){
+  .thumb{ flex-basis: 96px; height: 66px; }
+}
+
+/* =========================
+   RIGHT PANEL
+========================= */
 .car-hero{ padding: 18px 18px 14px; }
+
 .car-hero h2{
   margin: 0 0 8px;
   font-size: clamp(22px, 2.2vw, 30px);
   line-height: 1.15;
   letter-spacing: .2px;
 }
+
 .car-hero p{ margin: 0; color: var(--muted); }
 
 .chips{
@@ -272,15 +319,16 @@ html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
   margin-top: 10px;
 }
 
-/* Pricebox — neutrálnejší (bez žltého “highlightu”) */
+/* price box (neutrál) */
 .car-pricebox{
   margin: 0 18px 14px;
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.09);
+  border: 1px solid rgba(255,255,255,.10);
   background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
   padding: 16px 16px 14px;
   position: relative;
 }
+
 .car-pricebox::before{
   content:"";
   position:absolute;
@@ -298,6 +346,7 @@ html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
   line-height: 1.05;
   position: relative;
 }
+
 .price-old{
   margin-top: 6px;
   color: rgba(255,255,255,.55);
@@ -305,6 +354,7 @@ html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
   font-size: 14px;
   position: relative;
 }
+
 .price-note{
   margin-top: 10px;
   color: var(--muted);
@@ -312,19 +362,49 @@ html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
   position: relative;
 }
 
-/* CTA */
+/* =========================
+   CTA (tlačidlá)
+   - vizuálne zhodné s .btn a .btn.primary (style.css)
+========================= */
 .car-cta{
   display:flex;
   flex-direction: column;
   gap: 10px;
   padding: 0 18px 18px;
 }
-.car-cta .btn{
-  width: 100%;
-  justify-content:center;
+
+.car-cta .btn{ width: 100%; justify-content:center; }
+
+/* sekundárne CTA — necháme look .btn, iba jemne zjednotíme hover */
+.car-page .car-cta .btn.car-btn{
+  transition: transform .16s ease, filter .2s ease, border-color .2s ease;
 }
 
-/* ===== Sections ===== */
+.car-page .car-cta .btn.car-btn:hover{
+  transform: translateY(-1px);
+}
+
+.car-page .car-cta .btn.car-btn:active{ transform: translateY(0); }
+
+/* primary CTA (rovnaký feeling ako .btn.primary) */
+.car-page .car-cta .btn.car-btn-primary{
+  background: #0044d6;
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 10px 30px rgba(0,0,0,.28);
+}
+
+.car-page .car-cta .btn.car-btn-primary:hover{
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.30),
+    0 0 10px rgba(var(--car-accent-rgb), .35);
+}
+
+/* =========================
+   SECTIONS GRID
+========================= */
 .car-sections{
   margin-top: 18px;
   display:grid;
@@ -333,31 +413,43 @@ html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
 }
 
 /* Výbava cez celú šírku */
-.car-sections > section:nth-child(3){
-  grid-column: 1 / -1;
+.car-sections > section:nth-child(3){ grid-column: 1 / -1; }
+
+/* Testovacia jazda cez celú šírku */
+.car-sections > section:nth-child(4){ grid-column: 1 / -1; }
+
+@media (max-width: 1000px){
+  .car-sections{ grid-template-columns: 1fr; }
+  .car-sections > section:nth-child(3),
+  .car-sections > section:nth-child(4){ grid-column: auto; }
 }
-
-
 
 .section-title{ padding: 16px 18px 0; }
 .section-title h3{
   margin: 0;
   font-size: 16px;
   letter-spacing: .2px;
-  display:flex;
-  align-items:center;
-  gap: 10px;
 }
-
 
 .section-body{ padding: 12px 18px 18px; }
 
-/* KV */
+@media (max-width: 680px){
+  .car-cta{ padding: 0 14px 14px; }
+  .car-hero{ padding: 16px 14px 12px; }
+  .car-pricebox{ margin: 0 14px 12px; }
+  .section-title{ padding: 14px 14px 0; }
+  .section-body{ padding: 10px 14px 14px; }
+}
+
+/* =========================
+   KV TABLE
+========================= */
 .kv{
   display:grid;
   grid-template-columns: 1fr;
   gap: 8px;
 }
+
 .kv .row{
   display:grid;
   grid-template-columns: 1fr auto;
@@ -365,14 +457,16 @@ html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
   gap: 14px;
   padding: 12px 12px;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.07);
-  background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.02);
 }
+
 .kv .label{
   font-size: 12px;
   color: var(--muted);
   letter-spacing: .2px;
 }
+
 .kv .value{
   font-size: 14px;
   color: var(--text-strong);
@@ -381,45 +475,39 @@ html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
   white-space: nowrap;
 }
 
-/* Výbava — bez emoji, iba čistý bod */
+@media (max-width: 1000px){
+  .kv .value{ white-space: normal; text-align: left; }
+}
+
+/* =========================
+   EQUIPMENT GRID
+========================= */
 .equip{
   display:grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
+
 .equip .item{
   padding: 12px 12px;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.08);
   background:
     radial-gradient(700px 240px at 30% 0%, rgba(255,255,255,.03), transparent 55%),
-    linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
-  display:flex;
-  gap: 10px;
-  align-items: flex-start;
+    rgba(255,255,255,.02);
   color: var(--text-strong);
   line-height: 1.35;
 }
 
+@media (max-width: 680px){
+  .equip{ grid-template-columns: 1fr; }
+}
 
 .empty-note{ color: var(--muted); margin: 0; }
 
-/* Not found */
-.not-found{ padding: 18px; }
-.not-found h2{ margin: 0 0 8px; }
-.not-found p{ margin: 0 0 14px; color: var(--muted); }
-
-
-/* Testovacia jazda cez celú šírku (4. section) */
-.car-sections > section:nth-child(4){
-  grid-column: 1 / -1;
-}
-
-@media (max-width: 1000px){
-  .car-sections > section:nth-child(4){ grid-column: auto; }
-}
-
-/* Form štýly v sekcii testdrive */
+/* =========================
+   TEST DRIVE FORM (detail page)
+========================= */
 .car-td-picked{
   padding: 12px 12px;
   border: 1px solid rgba(255,255,255,.08);
@@ -427,6 +515,7 @@ html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
   border-radius: 14px;
   margin-bottom: 12px;
 }
+
 .car-td-title{ font-weight: 800; }
 .car-td-meta{ color: var(--muted); font-size: 13px; margin-top: 4px; }
 
@@ -436,6 +525,7 @@ html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
   gap: 12px;
   align-items: end;
 }
+
 .car-td-span{ grid-column: 1 / -1; }
 
 .car-td-field{ display: grid; gap: 6px; }
@@ -452,6 +542,13 @@ html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
   outline: none;
 }
 
+.car-td-form input:focus,
+.car-td-form select:focus,
+.car-td-form textarea:focus{
+  border-color: rgba(var(--car-accent-rgb), .55);
+  box-shadow: 0 0 0 4px rgba(var(--car-accent-rgb), .12);
+}
+
 .car-td-consent{
   display: flex;
   gap: 10px;
@@ -459,103 +556,23 @@ html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
   color: rgba(255,255,255,.85);
   font-size: 13px;
 }
+
 .car-td-consent input{ margin-top: 3px; }
 
 @media (max-width: 680px){
   .car-td-grid{ grid-template-columns: 1fr; }
 }
 
-
-
-/* ===== Responsive ===== */
-@media (max-width: 1100px){
-  .car-top{ grid-template-columns: 1.25fr .75fr; }
-}
-
-@media (max-width: 1000px){
-  .car-top{ grid-template-columns: 1fr; }
-  .car-top > aside.car-card{ position: relative; top: auto; }
-  .car-sections{ grid-template-columns: 1fr; }
-  .car-sections > section:nth-child(3){ grid-column: auto; }
-  .kv .value{ white-space: normal; text-align: left; }
-}
-
-@media (max-width: 680px){
-  :root{ --sticky-top: 96px; }
-  .thumb{ flex-basis: 96px; height: 66px; }
-  .equip{ grid-template-columns: 1fr; }
-  .car-cta{ padding: 0 14px 14px; }
-  .car-hero{ padding: 16px 14px 12px; }
-  .car-pricebox{ margin: 0 14px 12px; }
-  .section-title{ padding: 14px 14px 0; }
-  .section-body{ padding: 10px 14px 14px; }
-}
+/* =========================
+   NOT FOUND
+========================= */
+.not-found{ padding: 18px; }
+.not-found h2{ margin: 0 0 8px; }
+.not-found p{ margin: 0 0 14px; color: var(--muted); }
 
 /* =========================
-   FIX: stabilná výška galérie (bez skákania)
-   - galéria má vždy rovnakú výšku
-   - obrázky sa len menia vnútri rámu
+   LIGHTBOX
 ========================= */
-
-:root{
-  --gallery-h: clamp(320px, 42vw, 560px);
-}
-
-@media (max-width: 1000px){
-  :root{ --gallery-h: clamp(260px, 58vw, 480px); }
-}
-
-@media (max-width: 680px){
-  :root{ --gallery-h: clamp(220px, 70vw, 420px); }
-}
-
-/* rám galérie musí mať fixnú výšku */
-.car-page .gallery-main .imgwrap{
-  height: var(--gallery-h);
-  aspect-ratio: auto;     /* prebijeme prípadný aspect-ratio aby výška bola fixná */
-  overflow: hidden;       /* nič nebude meniť výšku/šírku */
-  background: #0b0e13;    /* neutrálne pozadie pod fotkou */
-  display: block;
-}
-
-/* obrázok sa vždy natiahne do rámu (nebude meniť layout) */
-.car-page .gallery-main img{
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: fit;       /* STATICKÝ rám, fotka sa oreže */
-  object-position: center;
-}
-
-/* Skryť horizontálny scrollbar pod thumbnails (thumbs ostanú scrollovateľné) */
-.car-page .thumbs{
-  scrollbar-width: none;          /* Firefox */
-  -ms-overflow-style: none;       /* IE/Edge legacy */
-  scrollbar-gutter: auto;         /* aby si nerezervovalo miesto na scrollbar */
-}
-
-.car-page .thumbs::-webkit-scrollbar{
-  height: 0;                      /* Chrome/Safari */
-  width: 0;
-  display: none;
-}
-
-.car-page .thumbs::-webkit-scrollbar-track{
-  background: transparent;
-}
-
-.car-page .thumbs::-webkit-scrollbar-thumb{
-  background: transparent;
-  border: none;
-}
-
-/* =========================
-   LIGHTBOX (plné rozlíšenie)
-========================= */
-.car-page .gallery-main img{
-  cursor: zoom-in;
-}
-
 .car-lightbox{
   position: fixed;
   inset: 0;
@@ -567,9 +584,7 @@ html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
   z-index: 10000;
 }
 
-.car-lightbox.open{
-  display: flex;
-}
+.car-lightbox.open{ display: flex; }
 
 .car-lightbox__inner{
   position: relative;
@@ -583,7 +598,7 @@ html[data-brand="jeep"]  { --car-accent: var(--accent-3); }
   height: auto;
   max-width: min(1600px, 96vw);
   max-height: 92vh;
-  border-radius: 18px;
+  border-radius: var(--radius-xl);
   background: #0b0e13;
   box-shadow: 0 30px 90px rgba(0,0,0,.55);
   cursor: zoom-out;
