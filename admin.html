@@ -584,6 +584,109 @@
     </div>
   </div>
 
+<hr style="margin:28px 0; border:0; border-top:1px solid var(--line);">
+
+<h2>📰 Admin panel – aktuality / akcie (slider)</h2>
+
+<div class="wrap" id="promosWrap">
+  <!-- FORM -->
+  <form id="promoForm" class="admin-form">
+    <div>
+      <label>Nadpis aktuality</label>
+      <input type="text" id="promoTitle" placeholder="Napíš krátky nadpis…" />
+      <div class="hint">Zobrazí sa ako text v slideri.</div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Značka</label>
+        <select id="promoBrand">
+          <option value="all">Všetky značky</option>
+          <option value="subaru">Subaru</option>
+          <option value="kgm">KGM</option>
+          <option value="jeep">Jeep</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Odkaz (voliteľné)</label>
+        <input type="text" id="promoLink" placeholder="#ponuka alebo https://…" />
+        <div class="hint">Keď je prázdne, použije sa #ponuka.</div>
+      </div>
+    </div>
+
+    <label class="pp-check pp-check--lg">
+      <input type="checkbox" id="promoHidden">
+      <svg viewBox="0 0 18 18" aria-hidden="true">
+        <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 17,16 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
+        <polyline points="1 9 7 14 15 4"></polyline>
+      </svg>
+      <span class="pp-check__text">Skryť aktualitu (nezobrazí sa na webe)</span>
+    </label>
+
+    <div class="row row--image">
+      <div>
+        <label>Obrázok</label>
+
+        <div class="upload-inline">
+          <input type="file" id="promoImageFile" accept="image/*">
+          <button class="btnx" id="promoUploadBtn" type="button">Nahrať</button>
+        </div>
+
+        <input type="text" id="promoImageUrl" placeholder="URL obrázka (doplní sa po nahratí)…" />
+
+        <div class="preview" id="promoPreview">
+          <small class="hint">Zatiaľ nie je nahraný obrázok</small>
+        </div>
+      </div>
+    </div>
+
+    <input type="hidden" id="promoEditIndex" value="-1"/>
+
+    <div class="actions">
+      <button class="btnx primary" id="promoSaveBtn" type="submit">Pridať aktualitu</button>
+      <button class="btnx" id="promoResetBtn" type="button">Nová</button>
+    </div>
+  </form>
+
+  <!-- LIST -->
+  <div class="list">
+    <div class="toolbar">
+      <div class="search">
+        <input type="text" id="promoSearch" placeholder="Hľadať aktuality…">
+      </div>
+
+      <div class="actions">
+        <label class="pp-check pp-check--sm">
+          <input type="checkbox" id="promoShowHidden">
+          <svg viewBox="0 0 18 18" aria-hidden="true">
+            <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 17,16 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
+            <polyline points="1 9 7 14 15 4"></polyline>
+          </svg>
+          <span class="pp-check__text">Zobraziť skryté</span>
+        </label>
+
+        <button class="btnx" id="promoReloadBtn" type="button">Načítať</button>
+      </div>
+    </div>
+
+    <table id="promoTable">
+      <thead>
+        <tr>
+          <th style="width:64px;">Foto</th>
+          <th>#</th>
+          <th>Značka</th>
+          <th>Nadpis</th>
+          <th>Stav</th>
+          <th>Akcie</th>
+        </tr>
+      </thead>
+      <tbody><!-- render --></tbody>
+    </table>
+  </div>
+</div>
+
+
   <script>
     // =============================
     // CONFIG
@@ -1503,6 +1606,310 @@ updateSelectAllForActiveBrand();
       const upData = await up.json().catch(() => ({}));
       return upData.url || '';
     }
+
+
+// =============================
+// PROMOS (Aktuality / Akcie)
+// =============================
+let promos = [];
+
+const promoForm = document.getElementById('promoForm');
+const promoTitle = document.getElementById('promoTitle');
+const promoBrand = document.getElementById('promoBrand');
+const promoLink = document.getElementById('promoLink');
+const promoHidden = document.getElementById('promoHidden');
+const promoImageFile = document.getElementById('promoImageFile');
+const promoUploadBtn = document.getElementById('promoUploadBtn');
+const promoImageUrl = document.getElementById('promoImageUrl');
+const promoPreview = document.getElementById('promoPreview');
+const promoEditIndex = document.getElementById('promoEditIndex');
+const promoSaveBtn = document.getElementById('promoSaveBtn');
+const promoResetBtn = document.getElementById('promoResetBtn');
+
+const promoSearch = document.getElementById('promoSearch');
+const promoShowHidden = document.getElementById('promoShowHidden');
+const promoReloadBtn = document.getElementById('promoReloadBtn');
+const promoTable = document.getElementById('promoTable');
+const promoTbody = promoTable?.querySelector('tbody');
+
+function escHtml(s) {
+  return String(s ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function normalizeBrand(b) {
+  const v = String(b || 'all').toLowerCase().trim();
+  return (v === 'subaru' || v === 'kgm' || v === 'jeep' || v === 'all') ? v : 'all';
+}
+
+function brandLabel(b) {
+  const v = normalizeBrand(b);
+  if (v === 'subaru') return 'Subaru';
+  if (v === 'kgm') return 'KGM';
+  if (v === 'jeep') return 'Jeep';
+  return 'Všetky';
+}
+
+function setPromoPreview(url) {
+  const u = String(url || '').trim();
+  promoPreview.innerHTML = u
+    ? `<img src="${escHtml(u)}" alt="promo">`
+    : `<small class="hint">Zatiaľ nie je nahraný obrázok</small>`;
+}
+
+function setPromoFormMode(mode, idx = -1) {
+  promoEditIndex.value = String(idx);
+
+  if (mode === 'edit') {
+    promoSaveBtn.textContent = 'Uložiť zmeny';
+  } else {
+    promoSaveBtn.textContent = 'Pridať aktualitu';
+  }
+}
+
+function resetPromoForm() {
+  promoTitle.value = '';
+  promoBrand.value = 'all';
+  promoLink.value = '#ponuka';
+  promoHidden.checked = false;
+  promoImageFile.value = '';
+  promoImageUrl.value = '';
+  setPromoPreview('');
+  setPromoFormMode('create', -1);
+}
+
+async function loadPromosFromApi() {
+  const includeHidden = promoShowHidden.checked ? '?include_hidden=1' : '';
+  const r = await fetch(apiUrl(`/api/promos${includeHidden}`), { cache: 'no-store' });
+
+  if (!r.ok) {
+    const t = await r.text().catch(() => '');
+    console.error('Promos load failed:', r.status, t);
+    alert('Nepodarilo sa načítať aktuality (' + r.status + '). Pozri konzolu.');
+    return;
+  }
+
+  const data = await r.json().catch(() => []);
+  promos = Array.isArray(data) ? data : [];
+  renderPromosTable();
+}
+
+function getPromosFiltered() {
+  const q = String(promoSearch.value || '').toLowerCase().trim();
+  return promos
+    .map((p, idx) => ({ p, idx }))
+    .filter(({ p }) => {
+      if (!q) return true;
+      return (
+        String(p.title || '').toLowerCase().includes(q) ||
+        String(p.brand || '').toLowerCase().includes(q)
+      );
+    });
+}
+
+function renderPromosTable() {
+  if (!promoTbody) return;
+
+  const rows = getPromosFiltered();
+  promoTbody.innerHTML = rows.map(({ p, idx }, i) => {
+    const img = String(p.image || '').trim();
+    const title = escHtml(p.title || '');
+    const brand = escHtml(brandLabel(p.brand));
+    const hidden = !!p.skryte;
+
+    return `
+      <tr>
+        <td>${img ? `<img src="${escHtml(img)}" style="width:52px;height:36px;object-fit:cover;border-radius:8px;border:1px solid var(--line);" alt="">` : ''}</td>
+        <td>${idx + 1}</td>
+        <td><span class="pill-mini">${brand}</span></td>
+        <td>${title}</td>
+        <td>${hidden ? '<span class="pill-mini">Skryté</span>' : '<span class="pill-mini">Viditeľné</span>'}</td>
+        <td class="cell-actions">
+          <button class="btnx" type="button" data-promo-action="edit" data-index="${idx}">Upraviť</button>
+          <button class="btnx" type="button" data-promo-action="toggle" data-index="${idx}">${hidden ? 'Zobraziť' : 'Skryť'}</button>
+          <button class="btnx danger" type="button" data-promo-action="delete" data-index="${idx}">Zmazať</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function onPromoUpload() {
+  const file = promoImageFile.files?.[0];
+  if (!file) {
+    alert('Vyber obrázok.');
+    return;
+  }
+
+  showProgress(3, 'Nahrávam obrázok…');
+
+  try {
+    stepProgress('Upload…');
+    const url = await uploadImage(file); // používa existujúcu funkciu z adminu
+    promoImageUrl.value = url;
+    setPromoPreview(url);
+    setProgress(3, 'Hotovo');
+  } catch (e) {
+    console.error(e);
+    alert(e.message || 'Nahratie zlyhalo.');
+  } finally {
+    hideProgress();
+  }
+}
+
+function getPromoPayloadFromForm() {
+  const title = String(promoTitle.value || '').trim();
+  const brand = normalizeBrand(promoBrand.value);
+  const image = String(promoImageUrl.value || '').trim();
+  const link = String(promoLink.value || '').trim() || '#ponuka';
+  const skryte = !!promoHidden.checked;
+
+  return { title, brand, image, link, skryte };
+}
+
+async function onPromoSubmit(e) {
+  e.preventDefault();
+
+  const payload = getPromoPayloadFromForm();
+  if (!payload.title) return alert('Chýba nadpis.');
+  if (!payload.image) return alert('Chýba obrázok (nahraj alebo vlož URL).');
+
+  const idx = parseInt(promoEditIndex.value, 10);
+  const isEdit = Number.isInteger(idx) && idx >= 0;
+
+  showProgress(3, isEdit ? 'Ukladám zmeny…' : 'Pridávam aktualitu…');
+
+  try {
+    const url = isEdit ? apiUrl(`/api/promos?index=${idx}`) : apiUrl('/api/promos');
+    const method = isEdit ? 'PUT' : 'POST';
+
+    stepProgress('Ukladám…');
+    const r = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!r.ok) {
+      const t = await r.text().catch(() => '');
+      console.error('Promo save failed:', r.status, t);
+      alert('Uloženie zlyhalo (' + r.status + '). Pozri konzolu.');
+      return;
+    }
+
+    stepProgress('Načítavam…');
+    await loadPromosFromApi();
+
+    resetPromoForm();
+    setProgress(3, 'Hotovo');
+  } catch (err) {
+    console.error(err);
+    alert('Uloženie zlyhalo (chyba siete alebo servera).');
+  } finally {
+    hideProgress();
+  }
+}
+
+async function onPromoDelete(index) {
+  if (!confirm('Naozaj vymazať túto aktualitu?')) return;
+
+  showProgress(3, 'Mažem…');
+
+  try {
+    const r = await fetch(apiUrl(`/api/promos?index=${index}`), { method: 'DELETE' });
+    if (!r.ok) {
+      const t = await r.text().catch(() => '');
+      console.error('Promo delete failed:', r.status, t);
+      alert('Vymazanie zlyhalo (' + r.status + '). Pozri konzolu.');
+      return;
+    }
+    await loadPromosFromApi();
+    setProgress(3, 'Hotovo');
+  } catch (e) {
+    console.error(e);
+    alert('Vymazanie zlyhalo.');
+  } finally {
+    hideProgress();
+  }
+}
+
+async function onPromoToggleHidden(index) {
+  const current = promos[index];
+  if (!current) return;
+
+  const next = { ...current, skryte: !current.skryte };
+
+  showProgress(3, next.skryte ? 'Skrývam…' : 'Zobrazujem…');
+
+  try {
+    const r = await fetch(apiUrl(`/api/promos?index=${index}`), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(next),
+    });
+
+    if (!r.ok) {
+      const t = await r.text().catch(() => '');
+      console.error('Promo toggle failed:', r.status, t);
+      alert('Skryť/Zobraziť zlyhalo (' + r.status + '). Pozri konzolu.');
+      return;
+    }
+
+    await loadPromosFromApi();
+    setProgress(3, 'Hotovo');
+  } catch (e) {
+    console.error(e);
+    alert('Skryť/Zobraziť zlyhalo.');
+  } finally {
+    hideProgress();
+  }
+}
+
+function fillPromoFormForEdit(index) {
+  const p = promos[index];
+  if (!p) return;
+
+  promoTitle.value = p.title || '';
+  promoBrand.value = normalizeBrand(p.brand);
+  promoLink.value = p.link || '#ponuka';
+  promoHidden.checked = !!p.skryte;
+  promoImageUrl.value = p.image || '';
+  promoImageFile.value = '';
+
+  setPromoPreview(p.image || '');
+  setPromoFormMode('edit', index);
+  window.scrollTo({ top: promoForm.getBoundingClientRect().top + window.scrollY - 10, behavior: 'smooth' });
+}
+
+// listeners
+promoUploadBtn?.addEventListener('click', onPromoUpload);
+promoForm?.addEventListener('submit', onPromoSubmit);
+promoResetBtn?.addEventListener('click', resetPromoForm);
+
+promoReloadBtn?.addEventListener('click', loadPromosFromApi);
+promoShowHidden?.addEventListener('change', loadPromosFromApi);
+promoSearch?.addEventListener('input', renderPromosTable);
+
+promoTable?.addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-promo-action]');
+  if (!btn) return;
+
+  const action = btn.getAttribute('data-promo-action');
+  const index = parseInt(btn.getAttribute('data-index'), 10);
+  if (!Number.isInteger(index) || index < 0) return;
+
+  if (action === 'edit') fillPromoFormForEdit(index);
+  if (action === 'delete') onPromoDelete(index);
+  if (action === 'toggle') onPromoToggleHidden(index);
+});
+
+// init
+resetPromoForm();
+
 
     toggleZlavaUI();
 loadFromApi();

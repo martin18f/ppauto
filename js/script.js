@@ -885,6 +885,111 @@ function initModelsStrip() {
 })();
 
 // ==============================
+// PROMOS → naplnenie PROMO2 slidera z /api/promos
+// ==============================
+(function () {
+  const API_BASE = (location.protocol === 'file:')
+    ? 'https://ppauto.sk'
+    : location.origin;
+
+  const apiUrl = (path) => `${API_BASE}${path}`;
+
+  function normalizeBrand(b) {
+    const v = String(b || 'all').toLowerCase().trim();
+    return (v === 'subaru' || v === 'kgm' || v === 'jeep' || v === 'all') ? v : 'all';
+  }
+
+  async function loadPromosIntoPromo2() {
+    const track = document.getElementById('promo2Track');
+    if (!track) return;
+
+    // empty state počas loadingu
+    track.innerHTML = `<div class="promo2-empty">Načítavam…</div>`;
+
+    try {
+      const r = await fetch(apiUrl('/api/promos'), { cache: 'no-store' });
+      if (!r.ok) throw new Error(`GET /api/promos failed: ${r.status}`);
+
+      const items = await r.json().catch(() => []);
+      const promos = Array.isArray(items) ? items : [];
+
+      // nič nie je → empty
+      if (!promos.length) {
+        track.innerHTML = `<div class="promo2-empty">Momentálne nie sú žiadne актуálne ponuky.</div>`;
+        window.PP_PROMO2_UPDATE && window.PP_PROMO2_UPDATE();
+        return;
+      }
+
+      // render DOM bezpečne (bez innerHTML pre title)
+      track.innerHTML = '';
+      for (const p of promos) {
+        const brand = normalizeBrand(p.brand);
+        const title = String(p.title || '').trim();
+        const imgUrl = String(p.image || '').trim();
+        const link = String(p.link || '#ponuka').trim() || '#ponuka';
+
+        if (!imgUrl || !title) continue;
+
+        const article = document.createElement('article');
+        article.className = 'promo2-slide';
+        article.dataset.brand = brand;
+
+        const a = document.createElement('a');
+        a.className = 'promo2-card';
+        a.href = link;
+
+        const img = document.createElement('img');
+        img.className = 'promo2-img';
+        img.loading = 'lazy';
+        img.src = imgUrl;
+        img.alt = title;
+        img.setAttribute('data-full', imgUrl);
+
+        const overlay = document.createElement('div');
+        overlay.className = 'promo2-overlay';
+
+        const meta = document.createElement('div');
+        meta.className = 'promo2-meta';
+
+        const name = document.createElement('div');
+        name.className = 'promo2-name';
+        name.textContent = title;
+
+        const cta = document.createElement('div');
+        cta.className = 'promo2-cta';
+        cta.textContent = 'Pozrieť ponuku';
+
+        meta.appendChild(name);
+        meta.appendChild(cta);
+
+        a.appendChild(img);
+        a.appendChild(overlay);
+        a.appendChild(meta);
+
+        article.appendChild(a);
+        track.appendChild(article);
+      }
+
+      window.PP_PROMO2_UPDATE && window.PP_PROMO2_UPDATE();
+    } catch (e) {
+      console.error(e);
+      track.innerHTML = `<div class="promo2-empty">Aktuality sa nepodarilo načítať.</div>`;
+      window.PP_PROMO2_UPDATE && window.PP_PROMO2_UPDATE();
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadPromosIntoPromo2, { once: true });
+  } else {
+    loadPromosIntoPromo2();
+  }
+
+  // voliteľné: ručný refresh z konzoly
+  window.PP_PROMOS_RELOAD = loadPromosIntoPromo2;
+})();
+
+
+// ==============================
 // PROMO2 slider – brand aware, bez dots, reaguje na zmenu značky bez refreshu
 // ==============================
 (function () {
@@ -954,7 +1059,7 @@ function initModelsStrip() {
     // show/hide podľa brandu
     slides.forEach(slide => {
       const b = safe(slide.dataset.brand);
-      slide.style.display = (!brand || b === brand) ? '' : 'none';
+      slide.style.display = (!brand || b === brand || b === 'all') ? '' : 'none';
     });
 
     let active = slides.filter(s => s.style.display !== 'none');

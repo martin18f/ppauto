@@ -1826,7 +1826,18 @@ html[data-brand] #jazda #tdBrandRow{ display: none !important; }
   .service-promo.promo-slider img{ width: 260px; height: 200px; }
 }
 
+
+
 .promo-hidden{ display:none !important; }
+
+.promo2-empty{
+  flex: 0 0 100%;
+  padding: 18px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
 
 /* =========================
    TESTDRIVE – primary button

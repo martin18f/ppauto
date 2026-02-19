@@ -39,19 +39,16 @@ export default async function handler(req, res) {
 
       const r = await fetch(url, { headers });
 
-      // ak súbor ešte neexistuje → berieme ako prázdne pole
+      // ak súbor ešte neexistuje → prázdne pole
       if (r.status === 404) {
-        return { promos: [], sha: null, exists: false };
+        return { promos: [], sha: null };
       }
 
       if (!r.ok) {
-        throw new Error(
-          `GET file failed: ${r.status} ${r.statusText} | url=${url}`
-        );
+        throw new Error(`GET file failed: ${r.status} ${r.statusText} | url=${url}`);
       }
 
       const data = await r.json();
-
       if (!data || Array.isArray(data) || !data.content) {
         throw new Error("PROMOS_PATH neukazuje na súbor (akcie.json)");
       }
@@ -60,7 +57,7 @@ export default async function handler(req, res) {
       const json = JSON.parse(content);
       if (!Array.isArray(json)) throw new Error("akcie.json nie je pole []");
 
-      return { promos: json, sha: data.sha, exists: true };
+      return { promos: json, sha: data.sha };
     }
 
     async function putFile(promos, sha, message) {
@@ -69,13 +66,11 @@ export default async function handler(req, res) {
 
       const body = {
         message,
-        content: Buffer.from(JSON.stringify(promos, null, 2), "utf8").toString(
-          "base64"
-        ),
+        content: Buffer.from(JSON.stringify(promos, null, 2), "utf8").toString("base64"),
         branch: GITHUB_BRANCH,
       };
 
-      // sha sa posiela len keď súbor existuje
+      // sha posielame iba ak súbor existuje
       if (sha) body.sha = sha;
 
       const r = await fetch(url, {
@@ -86,9 +81,7 @@ export default async function handler(req, res) {
 
       if (!r.ok) {
         const txt = await r.text();
-        throw new Error(
-          `PUT file failed: ${r.status} ${r.statusText} – ${txt} | url=${url}`
-        );
+        throw new Error(`PUT file failed: ${r.status} ${r.statusText} – ${txt} | url=${url}`);
       }
 
       return r.json();
@@ -119,33 +112,18 @@ export default async function handler(req, res) {
       const r = await fetch(url, { headers });
       const text = await r.text();
       return res.status(200).json({
-        env: {
-          GITHUB_REPO,
-          GITHUB_BRANCH,
-          PROMOS_PATH,
-          hasToken: !!GITHUB_TOKEN,
-        },
-        github: {
-          url,
-          status: r.status,
-          statusText: r.statusText,
-          bodyPreview: text.slice(0, 300),
-        },
+        env: { GITHUB_REPO, GITHUB_BRANCH, PROMOS_PATH, hasToken: !!GITHUB_TOKEN },
+        github: { url, status: r.status, statusText: r.statusText, bodyPreview: text.slice(0, 300) },
       });
     }
 
     // GET (public) / GET include_hidden=1 (admin only)
     if (req.method === "GET") {
       const includeHidden = (req.query?.include_hidden || "").toString() === "1";
-      if (includeHidden && !isAdmin) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
+      if (includeHidden && !isAdmin) return res.status(401).json({ error: "Unauthorized" });
 
       const { promos } = await getFile();
-      const visible = includeHidden
-        ? promos
-        : promos.filter((p) => p && p.skryte !== true);
-
+      const visible = includeHidden ? promos : promos.filter((p) => p && p.skryte !== true);
       return res.status(200).json(visible);
     }
 
@@ -158,15 +136,15 @@ export default async function handler(req, res) {
       const promo = {
         id: p.id || `promo_${Date.now()}_${Math.random().toString(16).slice(2)}`,
         title: String(p.title || "").trim(),
-        brand: String(p.brand || "all").toLowerCase().trim() || "all",
+        brand: String(p.brand || "all").toLowerCase().trim() || "all", // subaru/kgm/jeep/all
         image: String(p.image || "").trim(),
+        link: String(p.link || "#ponuka").trim() || "#ponuka",
         skryte: !!p.skryte,
         createdAt: p.createdAt || now,
       };
 
-      if (!promo.image) {
-        return res.status(400).json({ error: "Missing image" });
-      }
+      if (!promo.image) return res.status(400).json({ error: "Missing image" });
+      if (!promo.title) return res.status(400).json({ error: "Missing title" });
 
       await mutate(
         (arr) => {
@@ -183,11 +161,10 @@ export default async function handler(req, res) {
       if (!isAdmin) return res.status(401).json({ error: "Unauthorized" });
 
       const index = parseInt(req.query?.index, 10);
-      if (!Number.isInteger(index) || index < 0) {
-        return res.status(400).json({ error: "Bad index" });
-      }
+      if (!Number.isInteger(index) || index < 0) return res.status(400).json({ error: "Bad index" });
 
       const incoming = req.body || {};
+
       await mutate(
         (arr) => {
           if (index >= arr.length) {
@@ -200,14 +177,13 @@ export default async function handler(req, res) {
           arr[index] = {
             ...prev,
             ...incoming,
-            // normalize
             title: String(incoming.title ?? prev.title ?? "").trim(),
-            brand: String(incoming.brand ?? prev.brand ?? "all")
-              .toLowerCase()
-              .trim() || "all",
+            brand: String(incoming.brand ?? prev.brand ?? "all").toLowerCase().trim() || "all",
             image: String(incoming.image ?? prev.image ?? "").trim(),
+            link: String(incoming.link ?? prev.link ?? "#ponuka").trim() || "#ponuka",
             skryte: incoming.skryte === undefined ? !!prev.skryte : !!incoming.skryte,
           };
+
           return arr;
         },
         `chore(admin): update promo #${index + 1}`
@@ -220,9 +196,7 @@ export default async function handler(req, res) {
       if (!isAdmin) return res.status(401).json({ error: "Unauthorized" });
 
       const index = parseInt(req.query?.index, 10);
-      if (!Number.isInteger(index) || index < 0) {
-        return res.status(400).json({ error: "Bad index" });
-      }
+      if (!Number.isInteger(index) || index < 0) return res.status(400).json({ error: "Bad index" });
 
       await mutate(
         (arr) => {
