@@ -316,10 +316,34 @@ html {
     .quote p{margin:0 0 8px}
     .by{font-size:12px; color:var(--muted)}
     /* TEAM & CONTACT */
-    .team{display:grid; grid-template-columns: 1fr 1fr; gap:16px}
-    .person{display:flex; gap:12px; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px}
-    .avatar{width:48px; height:48px; border-radius:12px; background:linear-gradient(135deg,#1f2937,#0b0e13); border:1px solid var(--line)}
-    .person h5{margin:2px 0 4px}
+    .team{display:grid; grid-template-columns: 1fr 1fr; gap:20px}
+    
+    .person{
+  display:flex;
+  gap: 30px;
+  align-items:center;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:24px;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.person:hover{
+  transform: translateY(-4px);
+  box-shadow: 0 20px 50px rgba(0,0,0,.35);
+}
+
+.avatar{
+  width:180px;
+  height:180px;
+  border-radius:16px;
+  object-fit: cover;
+  object-position: center 0%;
+  border:1px solid var(--line);
+}
+
+    .person h5{margin:2px 0 4px; font-size: 20px;}
     .person p{margin:0; color:var(--muted)}
     .contact{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px}
     .contact .row{display:grid; grid-template-columns: 1fr 1fr; gap:10px}

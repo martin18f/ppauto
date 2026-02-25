@@ -895,8 +895,9 @@ function initModelsStrip() {
   const apiUrl = (path) => `${API_BASE}${path}`;
 
   function normalizeBrand(b) {
-    const v = String(b || 'all').toLowerCase().trim();
-    return (v === 'subaru' || v === 'kgm' || v === 'jeep' || v === 'all') ? v : 'all';
+  // neznámy/nezadaný brand NEMÁ byť univerzálny (univerzálne je len explicitné "all")
+  const v = String(b || '').toLowerCase().trim();
+  return (v === 'subaru' || v === 'kgm' || v === 'jeep' || v === 'all') ? v : '';
   }
 
   async function loadPromosIntoPromo2() {
@@ -1048,29 +1049,39 @@ function initModelsStrip() {
     if (user) start();
   }
 
-  function rebuild(){
-    const track = document.getElementById('promo2Track');
-    const viewport = document.getElementById('promo2Viewport');
-    if (!track || !viewport) return;
+ function rebuild(){
+  const track = document.getElementById('promo2Track');
+  const viewport = document.getElementById('promo2Viewport');
+  if (!track || !viewport) return;
 
-    const brand = getCurrentBrand();
-    const slides = Array.from(track.querySelectorAll('.promo2-slide'));
+  // odstráň náš brand-specific empty stav (ak tam ostal z predchádzajúceho brandu)
+  track.querySelector('.promo2-empty--brand')?.remove();
 
-    // show/hide podľa brandu
-    slides.forEach(slide => {
-      const b = safe(slide.dataset.brand);
-      slide.style.display = (!brand || b === brand || b === 'all') ? '' : 'none';
-    });
+  const brand = getCurrentBrand();
+  const slides = Array.from(track.querySelectorAll('.promo2-slide'));
 
-    let active = slides.filter(s => s.style.display !== 'none');
+  // ešte nič nie je načítané (loading/empty rieši loader inde)
+  if (!slides.length) {
+    state.total = 0;
+    state.idx = 0;
+    stop();
+    track.style.transition = 'none';
+    track.style.transform = 'translateX(0%)';
+    requestAnimationFrame(() => { track.style.transition = ''; });
+    return;
+  }
 
-    // safeguard: keby si mal chybu v data-brand a nezostane nič, radšej ukáž všetko
-    if (!active.length) {
-      slides.forEach(s => (s.style.display = ''));
-      active = slides;
-    }
+  // show/hide podľa brandu
+  slides.forEach(slide => {
+    const b = safe(slide.dataset.brand);
+    slide.style.display = (!brand || b === brand || b === 'all') ? '' : 'none';
+  });
 
-    state.total = active.length;
+  let active = slides.filter(s => s.style.display !== 'none');
+
+  // ak je zvolený konkrétny brand a nemá žiadne promo → NEukazuj iné značky
+  if (brand && !active.length) {
+    state.total = 0;
     state.idx = 0;
 
     // reset bez skoku animácie
@@ -1078,29 +1089,47 @@ function initModelsStrip() {
     track.style.transform = 'translateX(0%)';
     requestAnimationFrame(() => { track.style.transition = ''; });
 
-    // bind controls len raz
-    if (!state.bound) {
-      state.bound = true;
+    const msg = document.createElement('div');
+    msg.className = 'promo2-empty promo2-empty--brand';
+    msg.textContent = 'Pre túto značku momentálne nie sú žiadne aktuálne ponuky.';
+    track.appendChild(msg);
 
-      document.querySelectorAll('[data-promo2="next"]').forEach(btn =>
-        btn.addEventListener('click', () => go(state.idx + 1, true))
-      );
-      document.querySelectorAll('[data-promo2="prev"]').forEach(btn =>
-        btn.addEventListener('click', () => go(state.idx - 1, true))
-      );
-
-      viewport.addEventListener('mouseenter', stop);
-      viewport.addEventListener('mouseleave', start);
-
-      viewport.addEventListener('touchstart', stop, { passive:true });
-      viewport.addEventListener('touchend', () => setTimeout(start, 600), { passive:true });
-
-      window.addEventListener('pageshow', () => rebuild());
-    }
-
-    render(track);
-    start();
+    stop();
+    return;
   }
+
+  state.total = active.length;
+  state.idx = 0;
+
+  // reset bez skoku animácie
+  track.style.transition = 'none';
+  track.style.transform = 'translateX(0%)';
+  requestAnimationFrame(() => { track.style.transition = ''; });
+
+  // bind controls len raz
+  if (!state.bound) {
+    state.bound = true;
+
+    document.querySelectorAll('[data-promo2="next"]').forEach(btn =>
+      btn.addEventListener('click', () => go(state.idx + 1, true))
+    );
+    document.querySelectorAll('[data-promo2="prev"]').forEach(btn =>
+      btn.addEventListener('click', () => go(state.idx - 1, true))
+    );
+
+    viewport.addEventListener('mouseenter', stop);
+    viewport.addEventListener('mouseleave', start);
+
+    viewport.addEventListener('touchstart', stop, { passive:true });
+    viewport.addEventListener('touchend', () => setTimeout(start, 600), { passive:true });
+
+    window.addEventListener('pageshow', () => rebuild());
+  }
+
+  render(track);
+  start();
+}
+
 
   // init
   if (document.readyState === 'loading') {

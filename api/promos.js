@@ -157,7 +157,7 @@ export default async function handler(req, res) {
       const promo = {
         id: p.id || `promo_${Date.now()}_${Math.random().toString(16).slice(2)}`,
         title: String(p.title || "").trim(),
-        brand: normalizeBrand(p.brand), // iba subaru/kgm/jeep
+        brand: normalizePromoBrand(p.brand),
         image: String(p.image || "").trim(),
         link: String(p.link || "#ponuka").trim() || "#ponuka",
         skryte: !!p.skryte,
@@ -199,7 +199,8 @@ export default async function handler(req, res) {
 
           // brand je buď nezmenený (prev.brand), alebo musí byť validný
           const nextBrand =
-            incoming.brand === undefined ? normalizeBrand(prev.brand) : normalizeBrand(incoming.brand);
+            incoming.brand === undefined ? normalizePromoBrand(prev.brand) : normalizePromoBrand(incoming.brand);
+
 
           if (!nextBrand) {
             const err = new Error("Invalid brand (subaru/kgm/jeep)");
