@@ -112,8 +112,8 @@
         </div>
 
         <div class="hero-media">
-          <img src="img/firmazpredu.jpeg" alt="companyphoto">
-        </div>
+  <img id="brandHeroImage" src="img/firma-subaru.jpeg" alt="PP AUTO">
+</div>
       </div>
     </section>
 
@@ -1208,6 +1208,24 @@ document.addEventListener("DOMContentLoaded", () => {
 })();
 </script>
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const img = document.getElementById("brandHeroImage");
+  if (!img) return;
+
+  const brand = document.documentElement.getAttribute("data-brand");
+
+  const images = {
+    subaru: "img/firma-subaru.jpeg",
+    kgm: "img/firma-kgm.jpeg",
+    jeep: "img/firma-jeep.jpeg"
+  };
+
+  if (images[brand]) {
+    img.src = images[brand];
+  }
+});
+</script>
 
 
 </body>
