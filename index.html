@@ -111,8 +111,9 @@
           </div>
         </div>
 
-        <div class="hero-media">
-  <img id="brandHeroImage" src="img/firma-subaru.jpeg" alt="PP AUTO">
+        <div class="hero-media hero-slider">
+  <img class="hero-img active" id="heroImg1" alt="PP AUTO">
+  <img class="hero-img" id="heroImg2" alt="PP AUTO">
 </div>
       </div>
     </section>
@@ -1209,9 +1210,11 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  const img = document.getElementById("brandHeroImage");
-  if (!img) return;
+(function () {
+
+  const img1 = document.getElementById("heroImg1");
+  const img2 = document.getElementById("heroImg2");
+  if (!img1 || !img2) return;
 
   const brand = document.documentElement.getAttribute("data-brand");
 
@@ -1221,10 +1224,55 @@ document.addEventListener("DOMContentLoaded", function () {
     jeep: "img/firma-jeep.jpeg"
   };
 
-  if (images[brand]) {
-    img.src = images[brand];
+  const allImages = [
+    "img/firma-subaru.jpeg",
+    "img/firma-kgm.jpeg",
+    "img/firma-jeep.jpeg"
+  ];
+
+  let current = img1;
+  let next = img2;
+  let index = 0;
+  let interval;
+
+  function preload(arr) {
+    arr.forEach(src => {
+      const i = new Image();
+      i.src = src;
+    });
   }
-});
+
+  function crossFade(src) {
+    next.src = src;
+    next.onload = () => {
+      next.classList.add("active");
+      current.classList.remove("active");
+      [current, next] = [next, current];
+    };
+  }
+
+  // --- SINGLE BRAND ---
+  if (images[brand]) {
+    preload([images[brand]]);
+    img1.src = images[brand];
+    img1.classList.add("active");
+    return;
+  }
+
+  // --- ALL BRANDS SLIDER ---
+  if (!brand || brand === "all") {
+    preload(allImages);
+
+    img1.src = allImages[0];
+    img1.classList.add("active");
+
+    interval = setInterval(() => {
+      index = (index + 1) % allImages.length;
+      crossFade(allImages[index]);
+    }, 3000);
+  }
+
+})();
 </script>
 
 
