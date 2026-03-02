@@ -1139,7 +1139,13 @@ function hideProgress() {
           if (!hay.includes(q)) return;
         }
 
-        if (filterBrand.value && c.znacka !== filterBrand.value) return;
+        if (
+              filterBrand.value &&
+              String(c.znacka || '').toLowerCase().trim() !==
+              String(filterBrand.value || '').toLowerCase().trim()
+            ) return;
+
+
         if (filterYear.value && String(c.rok) !== filterYear.value) return;
 
         if (filterPrice.value) {
