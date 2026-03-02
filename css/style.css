@@ -859,18 +859,61 @@ footer {
 }
 
 
-/* ===== MOBILE ENHANCEMENTS (≤ 680px) ===== */
+/* =========================
+   MOBILE + TOUCH (v2)
+   ========================= */
+
+/* Touch zariadenia: vypni hover “skoky” a kurzor efekt */
+@media (hover:none) and (pointer:coarse){
+  .global-cursorfx{ display:none !important; }
+
+  .car:hover,
+  .person:hover,
+  .brand svg:hover,
+  .promo-btn:hover,
+  .btn:hover,
+  .tag:hover,
+  .service-card:hover,
+  .finance-card:hover{
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* ===== MOBILE (≤ 680px) ===== */
 @media (max-width: 680px){
 
-  /* 1) Hlavička: kompaktná a čitateľná */
-  .brand h1{ font-size:14px; margin-left:8px; }
-  header .nav { position: relative; padding: 8px 0; }
+  /* layout / spacing */
+  .container{ padding: 0 14px; }
+  section{ padding: 28px 0; }
+  .section-head{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
 
-  /* 2) Burger menu panel (plávajúci dropdown) */
+  /* fix negatívnych marginov na mape (na mobile to často rozbíja layout) */
+  #mapa .section-head h3{ margin-top: 0; }
+
+  /* header */
+  header .nav{ position: relative; padding: 8px 0; gap: 10px; }
+  .brand{ gap: 10px; }
+  .brand svg{
+    width: 78px !important;
+    transform: none !important;
+    filter:
+      drop-shadow(0 0 6px rgba(255,0,0,.70))
+      drop-shadow(0 0 22px rgba(255,0,0,.45)) !important;
+  }
+  .brand h1{ font-size: 13px; margin-left: 6px; }
+
+  /* burger panel */
   .nav-links{
-    display: none;                 /* skryté kým nie je otvorené */
+    display: none;
     position: fixed;
-    left: 12px; right: 12px; top: 64px;
+    left: 12px; right: 12px;
+    top: calc(64px + env(safe-area-inset-top, 0px));
     z-index: 100;
     flex-direction: column;
     gap: 6px;
@@ -879,58 +922,153 @@ footer {
     border: 1px solid var(--line);
     border-radius: 14px;
     box-shadow: var(--shadow);
+    max-height: calc(100vh - 92px);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
   }
-  .nav.open .nav-links{ display: flex; }
+  .nav.open .nav-links{ display:flex; }
+
+  /* overlay len pri otvorenom menu (nezavadzia lightboxom) */
+  header .nav.open::before{
+    content:"";
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: 99;
+  }
+
   .nav-links a{ padding: 14px 12px; border-radius: 10px; }
 
-  /* 3) CTA v hlavičke – nech zostane len hlavné (Zavolať/Navigovať) + burger */
+  /* CTA v hlavičke: nechaj iba burger (brand-switch je na mobile v menu cez .nav-brand) */
   .nav-cta a.btn{ display: none; }
-  .nav-cta a.primary{ display: inline-flex; } /* ponechať hlavné CTA */
-  .mobile-toggle{ display: inline-flex; }
+  .mobile-toggle{
+    display: inline-flex;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 14px;
+    justify-content: center;
+  }
 
-  /* 4) Zablokuj skrol pri otvorenom menu */
+  /* scroll lock pri otvorenom menu */
   body.no-scroll{ overflow: hidden; }
 
-  /* 5) Hero – lepšia typografia a layout */
-  .hero-wrap{ grid-template-columns: 1fr; padding: 24px 0 20px; }
-  .hero h2{ font-size: 30px; line-height: 1.15; }
+  /* hero */
+  .hero-wrap{ grid-template-columns: 1fr; padding: 22px 0 18px; gap: 14px; }
+  .hero h2{ font-size: 28px; line-height: 1.15; }
+  .hero p{ font-size: 14px; }
   .hero-card{ padding: 16px; }
-  .hero .quick .btn{ flex: 1 1 100%; }  /* tlačidlá na celú šírku */
-  .hero-media{ aspect-ratio: 16 / 9; min-height: 220px; }
-  .hero-media img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .hero .quick{ gap: 10px; }
+  .hero .quick .btn{ flex: 1 1 100%; }
+  .hero-media{ aspect-ratio: 16 / 9; min-height: 210px; }
   .hero-media .ribbon{ bottom: 10px; left: 10px; right: 10px; }
 
-  /* 6) Rýchle kartičky a inventár – viac vzduchu, 1 stĺpec už máš */
-  .quick-grid{ grid-template-columns: 1fr; gap: 10px; }
-  .grid{ grid-template-columns: 1fr; gap: 12px; }
-  .car h4{ font-size: 17px; }
-  .specs{ grid-template-columns: repeat(3,1fr); gap: 6px; }
-  .pill{ display:inline-block; }
-
-  /* 7) Servis – odstrániť fixné výšky, nech sa prispôsobí obsahu */
-  .card{ height: auto; }
-  .service{ display:block; }
-  .service .card:first-child{ max-width: 100%; height: auto; }
-
-  /* 8) Promo slider v servise – lepšie škálovanie na mobiloch */
-  .promo-slider{ max-width: 100%; }
-  .promo-slider img{ width: 80vw; height: auto; }
-
-  /* 9) Značky / referencie – 1 stĺpec už riešiš, drobné doladenia */
-  .brand-tile{ padding:16px; }
-
-  /* 10) Kontakt – formulár a tlačidlá pohodlne na šírku */
-  .contact .row{ grid-template-columns: 1fr; }
-  .contact input, .contact textarea{ font-size:16px; } /* zabráni iOS zoomu */
-  .contact a.btn{ width: 100%; }
-
-
-  
-  /* 11) Galéria – obrázky nech sa zmestia */
-  .slider img{ width: 80vw; height: 48vw; }
-
-  /* 12) Filtre – väčšie tap-targety */
+  /* filters: horizontálny scroll (lepší UX ako “lámanie” do 3 riadkov) */
+  .filter-row{
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 8px;
+    padding-bottom: 6px;
+  }
+  .filter-row::-webkit-scrollbar{ display:none; }
   .tag{ padding: 12px 14px; }
+
+  /* inventory grid */
+  .grid{ grid-template-columns: 1fr; gap: 14px; }
+  .car .img{ min-height: 220px; }
+  .car h4{ font-size: 17px; }
+  .specs{ grid-template-columns: repeat(2,1fr); gap: 8px; }
+  .price-row{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .singleprice{ min-width: 0; }
+
+  /* promo slider (štvorcové bannery) */
+  .promo-slider{ max-width: 100%; }
+  .promo-slider img{
+    width: min(82vw, 320px);
+    height: min(82vw, 320px);
+    border-radius: 12px;
+  }
+  .promo-btn.prev{ left: 10px; }
+  .promo-btn.next{ right: 10px; }
+
+  /* promo2 (hero slider) – head + controls do stĺpca */
+  .promo2-head{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .promo2-controls{ width: 100%; justify-content: flex-end; }
+  .promo2-title{ font-size: 20px; }
+  .promo2-card{ height: 240px; }
+  .promo2-meta{ left: 12px; right: 12px; bottom: 12px; gap: 10px; }
+  .promo2-name{ font-size: 18px; }
+
+  /* service (ak používaš starú .service + .card sekciu) */
+  .service{ display:block; }
+  .card{ height: auto; padding: 16px; }
+
+  /* service promo (v2) – zmenši výšky, nech to nepôsobí “giganticky” */
+  #servis .service-promo.promo-slider{ min-height: 220px; }
+  #servis .service-promo.promo-slider img{ height: 200px; width: auto; }
+
+  /* team */
+  .team{ grid-template-columns: 1fr; gap: 12px; }
+  .person{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+  }
+  .avatar{
+    width: 100%;
+    height: 220px;
+    border-radius: 16px;
+  }
+  .person h5{ font-size: 18px; }
+
+  /* kontakt: odstráň fixnú výšku */
+  .contact{
+    max-width: none !important;
+    height: auto !important;
+  }
+  .contact .row{ grid-template-columns: 1fr; }
+  .contact-actions{ flex-direction: column; }
+  .btn-contact{ width: 100%; justify-content: center; }
+
+  /* iOS zoom fix – všetky formuláre na 16px */
+  .contact-form input,
+  .contact-form textarea,
+  .finance-field input,
+  .finance-field select,
+  .finance-form input,
+  .finance-form textarea,
+  .td-form input,
+  .td-form select,
+  .td-form textarea{
+    font-size: 16px;
+  }
+
+  /* galéria slider */
+  .slide-track{ width: max-content; }
+  .slider img{ width: 86vw; height: 54vw; }
+
+  /* footer */
+  footer{ padding: 28px 0 18px; }
+  .logo-foot{ width: 200px; }
+  .foot{ gap: 16px; }
+  .status-container{ font-size: 16px; margin: 0 0 18px; }
+}
+
+/* extra small (≤ 420px) */
+@media (max-width: 420px){
+  .hero h2{ font-size: 26px; }
+  .promo2-card{ height: 220px; }
+  .promo2-name{ font-size: 17px; }
 }
 
 /* --- BRAND PORTAL STYLING --- */
@@ -2634,4 +2772,77 @@ body.promo2-lock{ overflow: hidden; }
 
 .hero-img.active {
   opacity: 1;
+}
+
+/* =========================
+   SERVIS (v2) – MOBILE/TABLET FIX
+   (append na koniec style.css)
+========================= */
+
+@media (max-width: 980px){
+  /* v praxi je 2-stĺpcový grid už príliš tesný -> 1 stĺpec skôr */
+  #servis .service-grid{ grid-template-columns: 1fr; }
+
+  /* CTA box nech je prirodzene čitateľný */
+  #servis .service-cta{ padding: 16px; }
+  #servis .service-actions{ flex-direction: column; }
+  #servis .service-actions .btn{ width: 100%; justify-content: center; }
+}
+
+@media (max-width: 720px){
+  /* kompaktnejšie bloky */
+  #servis .service-hero{ padding: 16px; border-radius: 16px; }
+  #servis .service-block{ padding: 14px; border-radius: 16px; }
+  #servis .service-block__head h4{ font-size: 18px; }
+
+  /* kroky – menej “nafúknuté” */
+  #servis .service-steps li{ padding: 12px; border-radius: 14px; }
+  #servis .step-n{ width: 28px; height: 28px; border-radius: 10px; }
+
+  /* pills – na mobile radšej horizontálny scroll než lámanie do 3 riadkov */
+  #servis .service-pills{
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 8px;
+    padding-bottom: 6px;
+  }
+  #servis .service-pills::-webkit-scrollbar{ display:none; }
+  #servis .service-pills .pill{ white-space: nowrap; }
+
+  /* PROMO slider v servise – najčastejší problém na mobile:
+     fixné min-height a veľké obrázky -> nepôsobí responsive */
+  #servis .service-promo.promo-slider{
+    max-width: 100%;
+    padding: 10px 0;
+    min-height: 0 !important;
+  }
+  #servis .service-promo .promo-track{
+    min-height: 0 !important;
+    gap: 10px;
+  }
+
+  /* obrázok nech je “mobilný” (konzistentná veľkosť, bez čudných skokov) */
+  #servis .service-promo.promo-slider img{
+    width: min(86vw, 420px);
+    height: min(56vw, 260px);
+    object-fit: cover;
+    border-radius: 12px;
+  }
+
+  /* šípky – menšie, aby nezavadzali */
+  #servis .service-promo .promo-btn{
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(6px);
+  }
+  #servis .service-promo .promo-btn.prev{ left: 10px; }
+  #servis .service-promo .promo-btn.next{ right: 10px; }
+}
+
+@media (max-width: 420px){
+  #servis .service-hero h3{ font-size: 22px; }
+  #servis .service-sub{ font-size: 13px; }
 }
