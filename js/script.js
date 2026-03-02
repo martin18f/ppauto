@@ -44,7 +44,7 @@ const MODEL_STRIP_CONFIG = {
 
 const BRAND_LABEL = {
   subaru: 'Subaru',
-  kgm: 'KGM',
+  kgm: ['KGM', 'Kgm'],
   jeep: 'Jeep',
 };
 
