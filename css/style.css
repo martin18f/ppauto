@@ -2846,3 +2846,78 @@ body.promo2-lock{ overflow: hidden; }
   #servis .service-hero h3{ font-size: 22px; }
   #servis .service-sub{ font-size: 13px; }
 }
+
+/* =========================
+   #SERVIS – FIX HORIZONTAL OVERFLOW (MOBILE)
+   vlož ÚPLNE NA KONIEC style.css
+========================= */
+
+/* 1) ak niečo aj tak pretečie (shadow/transform), nech to nevyrobí stránke scroll */
+#servis { overflow-x: clip; }
+
+/* 2) grid položky musia vedieť shrinknúť (inak dlhý text roztiahne layout) */
+#servis .service-layout,
+#servis .service-left,
+#servis .service-right,
+#servis .service-hero,
+#servis .service-block,
+#servis .service-cta {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* 3) e-maily/linky musia vedieť zalomiť */
+#servis .service-info,
+#servis .info-row,
+#servis .info-row span,
+#servis .info-row a {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* 4) promo wrapper nech nikdy nepresiahne šírku kontajnera */
+#servis .promo-slider.service-promo { width: 100%; max-width: 100%; }
+
+/* ===== MOBILE ===== */
+@media (max-width: 720px){
+
+  /* pills radšej scroll než rozbíjanie layoutu */
+  #servis .service-pills{
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 8px;
+    padding-bottom: 6px;
+  }
+  #servis .service-pills::-webkit-scrollbar{ display:none; }
+
+  /* promo scroll nech robí TRACK (kvôli tvojmu JS: track.scrollBy) */
+  #servis .service-promo .promo-track{
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    gap: 12px;
+    padding: 2px 4px 8px;
+    max-width: 100%;
+  }
+  #servis .service-promo .promo-track::-webkit-scrollbar{ display:none; }
+
+  /* prepíš problémové desktop pravidlo: width:auto (to je častý zdroj overflowu) */
+  #servis .service-promo.promo-slider img{
+    width: min(86vw, 420px);
+    height: min(54vw, 260px);
+    max-width: 100%;
+    object-fit: cover;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    border-radius: 12px;
+  }
+
+  /* aby slider box nepôsobil „nafúknuto“ */
+  #servis .service-promo.promo-slider{
+    padding: 10px 0;
+    min-height: 0 !important;
+  }
+}
