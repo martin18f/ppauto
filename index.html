@@ -2,16 +2,8 @@
 <html lang="sk">
 <head>
 
+<link rel="stylesheet" href="css/cookie-consent.css">
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-D1M84JBWQG"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-D1M84JBWQG');
-</script>
 
   <meta charset="utf-8" />
 
@@ -51,6 +43,7 @@
 
 </head>
 <body>
+  
   <div class="global-cursorfx" aria-hidden="true"></div>
 
   <header>
@@ -430,8 +423,17 @@
 
               <textarea name="sprava" required rows="4" placeholder="O aké vozidlo máte záujem a aké máte predstavy o splátkach?"></textarea>
 
-              <button class="btn primary" id="financeSubmit" type="submit">Odoslať dopyt</button>
-              <div class="form-status" id="financeStatus" aria-live="polite"></div>
+<label class="form-privacy">
+  <input type="checkbox" required>
+  <span>
+    Beriem na vedomie, že PP AUTO s.r.o. spracúva moje údaje za účelom vybavenia dopytu na financovanie.
+    Viac informácií nájdete v dokumente
+    <a href="gdpr.html" target="_blank" rel="noopener">Ochrana osobných údajov</a>.
+  </span>
+</label>
+
+<button class="btn primary" id="financeSubmit" type="submit">Odoslať dopyt</button>
+<div class="form-status" id="financeStatus" aria-live="polite"></div>
             </div>
           </form>
         </div>
@@ -842,7 +844,17 @@
 
       <textarea name="sprava" required rows="4" placeholder="Vaša správa"></textarea>
 
-      <button class="btn primary" id="contactSubmit" type="submit">Odoslať</button>
+      <label class="form-privacy">
+  <input type="checkbox" required>
+  <span>
+    Beriem na vedomie, že PP AUTO s.r.o. spracúva moje údaje za účelom vybavenia správy.
+    Viac informácií nájdete v dokumente
+    <a href="gdpr.html" target="_blank" rel="noopener">Ochrana osobných údajov</a>.
+  </span>
+</label>
+
+<button class="btn primary" id="contactSubmit" type="submit">Odoslať</button>
+<div class="form-status" id="contactStatus" aria-live="polite"></div>
       
     </div>
   </form>
@@ -916,9 +928,13 @@
       <div class="section-head">
         <h3>Tu nás nájdete</h3>
       </div>
-      <div style="border:1px solid var(--line); border-radius:16px; overflow:hidden; height:400px;">
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2614.48533049073!2d20.27042869295732!3d49.05840869751401!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x473e3ac76f700a4b%3A0xeb85fa2fc8d16126!2sPP%20AUTO%20s.r.o.!5e0!3m2!1ssk!2ssk!4v1759102923060!5m2!1ssk!2ssk" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-      </div>
+      <div
+  data-cookie-embed="maps"
+  data-title="Mapa PP AUTO"
+  data-height="400"
+  data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2614.48533049073!2d20.27042869295732!3d49.05840869751401!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x473e3ac76f700a4b%3A0xeb85fa2fc8d16126!2sPP%20AUTO%20s.r.o.!5e0!3m2!1ssk!2ssk!4v1759102923060!5m2!1ssk!2ssk"
+  style="border:1px solid var(--line); border-radius:16px; overflow:hidden; height:400px;"
+></div>
     </div>
   </section>
 
@@ -951,10 +967,10 @@
     <div class="foot-links">
       <h5>Dokumenty</h5>
       <ul>
-        <li><a href="#">GDPR</a></li>
-        <li><a href="#">Ochrana osobných údajov</a></li>
-        <li><a href="#">Cookies</a></li>
-        <li><a href="#">VOP</a></li>
+        <li><a href="gdpr.html">GDPR</a></li>
+        <li><a href="gdpr.html">Ochrana osobných údajov</a></li>
+        <li><a href="cookies.html">Cookies</a></li>
+        <li><a href="podmienky-pouzivania.html">Podmienky používania</a></li>
       </ul>
     </div>
 
@@ -962,7 +978,7 @@
     <div class="foot-contact">
       <h5>Kontakt</h5>
       <ul>
-        <li><a href="tel:+421 903 905 280">+421 903 905 280</a></li>
+        <li><a href="tel:+421903905280">+421 903 905 280</a></li>
         <li><a href="mailto:predaj@ppauto.sk">predaj@ppauto.sk</a></li>
         <li><a href="https://maps.google.com?q=Partizánska+5660/107+Poprad" target="_blank">
           Partizánska 5660/107, Poprad
@@ -1287,6 +1303,6 @@ document.addEventListener("DOMContentLoaded", () => {
 })();
 </script>
 
-
+<script src="js/cookie-consent.js"></script>
 </body>
 </html>

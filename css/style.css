@@ -2921,3 +2921,29 @@ body.promo2-lock{ overflow: hidden; }
     min-height: 0 !important;
   }
 }
+
+.form-privacy {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.form-privacy input {
+  margin-top: 3px;
+  flex: 0 0 auto;
+}
+
+.form-privacy a {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.form-status {
+  font-size: 13px;
+  color: var(--muted);
+  min-height: 20px;
+}

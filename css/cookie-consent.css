@@ -1,0 +1,37 @@
+/* PP AUTO cookie consent */
+.pp-cookie-banner,.pp-cookie-modal{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,"Helvetica Neue",Arial,sans-serif;}
+.pp-cookie-banner{position:fixed;left:18px;right:18px;bottom:18px;z-index:99999;display:none;}
+.pp-cookie-banner.is-visible{display:block;}
+.pp-cookie-card{max-width:1120px;margin:0 auto;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02)),#0b0e13;color:#e8ecf2;border:1px solid #232a35;border-radius:20px;box-shadow:0 28px 80px rgba(0,0,0,.55);padding:18px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;}
+.pp-cookie-card h2{font-size:18px;line-height:1.2;margin:0 0 6px;color:#fff;}
+.pp-cookie-card p{font-size:14px;line-height:1.5;margin:0;color:#98a2b3;max-width:760px;}
+.pp-cookie-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
+.pp-cookie-btn{border:1px solid #232a35;background:#11151b;color:#e8ecf2;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;transition:transform .12s ease,background .2s ease,border-color .2s ease;}
+.pp-cookie-btn:hover{transform:translateY(-1px);border-color:#3b82f6;}
+.pp-cookie-btn.primary{background:#0044d6;border-color:transparent;color:#fff;}
+.pp-cookie-btn.ghost{background:transparent;}
+.pp-cookie-open-settings{position:fixed;left:18px;bottom:18px;z-index:99998;border:1px solid #232a35;background:#11151b;color:#e8ecf2;border-radius:999px;padding:9px 12px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.35);display:none;}
+.pp-cookie-open-settings.is-visible{display:inline-flex;}
+.pp-cookie-modal{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.64);padding:18px;}
+.pp-cookie-modal.is-visible{display:flex;}
+.pp-cookie-dialog{width:min(720px,100%);max-height:92vh;overflow:auto;background:#0b0e13;color:#e8ecf2;border:1px solid #232a35;border-radius:20px;box-shadow:0 30px 90px rgba(0,0,0,.70);}
+.pp-cookie-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border-bottom:1px solid #232a35;background:#111827;}
+.pp-cookie-head h2{font-size:18px;margin:0;color:#fff;}
+.pp-cookie-close{background:transparent;border:0;color:#fff;font-size:26px;line-height:1;cursor:pointer;}
+.pp-cookie-body{padding:18px;}
+.pp-cookie-body p{color:#98a2b3;margin:0 0 14px;line-height:1.55;}
+.pp-cookie-row{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;border:1px solid #232a35;border-radius:16px;padding:14px;margin:10px 0;background:#11151b;}
+.pp-cookie-row h3{margin:0 0 4px;font-size:15px;color:#fff;}
+.pp-cookie-row p{margin:0;font-size:13px;}
+.pp-cookie-switch{position:relative;display:inline-flex;width:52px;height:30px;flex:0 0 52px;}
+.pp-cookie-switch input{opacity:0;width:0;height:0;}
+.pp-cookie-slider{position:absolute;cursor:pointer;inset:0;background:#303845;border-radius:999px;transition:.2s;}
+.pp-cookie-slider:before{content:"";position:absolute;width:24px;height:24px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+.pp-cookie-switch input:checked + .pp-cookie-slider{background:#0044d6;}
+.pp-cookie-switch input:checked + .pp-cookie-slider:before{transform:translateX(22px);}
+.pp-cookie-switch input:disabled + .pp-cookie-slider{opacity:.55;cursor:not-allowed;}
+.pp-cookie-foot{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;padding:16px 18px;border-top:1px solid #232a35;}
+.pp-map-placeholder{display:grid;place-items:center;min-height:280px;border:1px solid #232a35;border-radius:16px;background:linear-gradient(135deg,#111827,#0b0e13);color:#e8ecf2;text-align:center;padding:24px;}
+.pp-map-placeholder p{margin:0 0 12px;color:#98a2b3;max-width:520px;}
+.pp-map-placeholder strong{display:block;margin-bottom:6px;color:#fff;font-size:18px;}
+@media(max-width:860px){.pp-cookie-card{grid-template-columns:1fr}.pp-cookie-actions{justify-content:flex-start}.pp-cookie-btn{flex:1}.pp-cookie-row{gap:12px}.pp-cookie-banner{left:10px;right:10px;bottom:10px}.pp-cookie-open-settings{left:10px;bottom:10px}}
