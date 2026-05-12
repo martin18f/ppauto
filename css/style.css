@@ -2071,19 +2071,22 @@ html[data-brand="jeep"]{ --td-accent: var(--accent-3); }
     0 16px 34px rgba(0,0,0,.35);
 }
 
-/* "Zmeniť značku" – na desktope je ako tlačidlo vpravo (CTA),
-   na mobile sa zobrazí ako položka v burger menu */
-.nav-links a.nav-brand{
+/* Header CTA – na desktope sú ako tlačidlá vpravo,
+   na mobile sa zobrazia ako položky v burger menu */
+.nav-links a.nav-brand,
+.nav-links a.nav-login{
   display: none;           /* default: skryť v desktop nav */
 }
 
-.nav-cta a.brand-switch{
+.nav-cta a.brand-switch,
+.nav-cta a.login-link{
   white-space: nowrap;
 }
 
-/* Mobile (≤ 680px): položka v burger menu sa zobrazí */
+/* Mobile (≤ 680px): položky v burger menu sa zobrazia */
 @media (max-width: 680px){
-  .nav-links a.nav-brand{
+  .nav-links a.nav-brand,
+  .nav-links a.nav-login{
     display: block;
   }
 }
