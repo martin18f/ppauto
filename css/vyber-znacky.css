@@ -43,9 +43,14 @@ a{color:inherit}
 }
 
 .choice-lang{
-  margin-top: 4px;
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 20;
   min-width: 44px;
+  padding-inline: 12px;
   text-decoration: none;
+  box-shadow: 0 12px 34px rgba(0,0,0,.28);
 }
 
 .grid{ display:grid; gap:18px; grid-template-columns:repeat(3,1fr); align-items:stretch }
