@@ -16,6 +16,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Detail vozidla | PP AUTO s.r.o.</title>
   <meta name="description" content="Detail vozidla z ponuky PP AUTO s.r.o. – Subaru • KGM • Jeep | Poprad" />
+  <link id="canonicalUrl" rel="canonical" href="https://ppauto.sk/auto.html" />
+  <link id="alternateSk" rel="alternate" hreflang="sk" href="https://ppauto.sk/auto.html" />
+  <link id="alternateEn" rel="alternate" hreflang="en" href="https://ppauto.sk/auto.html?lang=en" />
+  <link id="alternateDefault" rel="alternate" hreflang="x-default" href="https://ppauto.sk/auto.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Detail vozidla | PP AUTO s.r.o." />
+  <meta property="og:description" content="Detail vozidla z ponuky PP AUTO s.r.o. - Subaru, KGM a Jeep v Poprade." />
+  <meta property="og:url" content="https://ppauto.sk/auto.html" />
+  <meta property="og:image" content="https://ppauto.sk/img/firmazpredu.jpeg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Detail vozidla | PP AUTO s.r.o." />
+  <meta name="twitter:description" content="Detail vozidla z ponuky PP AUTO s.r.o. - Subaru, KGM a Jeep v Poprade." />
+  <meta name="twitter:image" content="https://ppauto.sk/img/firmazpredu.jpeg" />
+  <link rel="icon" type="image/svg+xml" href="img/logo.svg" />
+  <script>
+    (function () {
+      var id = new URLSearchParams(location.search).get('id');
+      if (!id) return;
+
+      var sk = 'https://ppauto.sk/auto.html?id=' + encodeURIComponent(id);
+      var en = sk + '&lang=en';
+      var canonical = document.getElementById('canonicalUrl');
+      var alternateSk = document.getElementById('alternateSk');
+      var alternateEn = document.getElementById('alternateEn');
+      var alternateDefault = document.getElementById('alternateDefault');
+
+      if (canonical) canonical.setAttribute('href', sk);
+      if (alternateSk) alternateSk.setAttribute('href', sk);
+      if (alternateEn) alternateEn.setAttribute('href', en);
+      if (alternateDefault) alternateDefault.setAttribute('href', sk);
+    })();
+  </script>
 
   <!-- Zachová brand theme (ak si návštevník vybral značku) -->
   <script>

@@ -28,7 +28,7 @@
   // Klik a klávesnica na kartách
   cards.forEach(card => {
     card.addEventListener('click', (e) => {
-      if (e.target.closest('.enter')) return;
+      if (e.target.closest('a, button')) return;
       const brand = card.dataset.brand;
       if (brand) go(brand);
     });

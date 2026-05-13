@@ -67,6 +67,17 @@ a{color:inherit}
 }
 .card:hover{ box-shadow:0 40px 120px rgba(0,0,0,.55); border-color:#2a3443 }
 .card:active{ transform:translateY(1px) }
+.card-main-link{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  border-radius:inherit;
+  text-decoration:none;
+}
+.card-main-link:focus-visible{
+  outline:2px solid #fff;
+  outline-offset:4px;
+}
 .card::after{
   content:""; position:absolute; inset:0; pointer-events:none; z-index:1;
   background:linear-gradient(180deg, rgba(255,255,255,.06), transparent 18%);
@@ -165,6 +176,7 @@ a{color:inherit}
   left: 14px;
   right: 14px;
   bottom: 10px;
+  z-index: 3;
 
   display: inline-flex;
   align-items: center;
