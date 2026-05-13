@@ -42,6 +42,12 @@ a{color:inherit}
   margin-top: 0px;
 }
 
+.choice-lang{
+  margin-top: 4px;
+  min-width: 44px;
+  text-decoration: none;
+}
+
 .grid{ display:grid; gap:18px; grid-template-columns:repeat(3,1fr); align-items:stretch }
 @media (max-width:980px){ .grid{ grid-template-columns:1fr } }
 

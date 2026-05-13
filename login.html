@@ -19,6 +19,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
   <!-- EXISTUJÚCE ŠTÝLY -->
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/i18n.js" defer></script>
 
   <style>
     .login-switch {
@@ -144,6 +145,14 @@
       color: var(--muted);
     }
 
+    .login-lang {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 20;
+      text-decoration: none;
+    }
+
     /* ===== LOGIN BUTTON – MINIMAL SECURE ===== */
 .login-btn {
   height: 46px;
@@ -194,6 +203,8 @@
 </head>
 
 <body>
+
+  <a class="btn login-lang" href="#" data-lang-switch aria-label="Switch to English">EN</a>
 
   <div class="login-window">
 

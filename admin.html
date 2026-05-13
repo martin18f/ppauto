@@ -162,6 +162,15 @@
       </label>
 
       <label class="pp-check pp-check--lg">
+        <input type="checkbox" id="predvadzacie">
+        <svg viewBox="0 0 18 18" aria-hidden="true">
+          <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 17,16 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
+          <polyline points="1 9 7 14 15 4"></polyline>
+        </svg>
+        <span class="pp-check__text">Predvádzacie vozidlo</span>
+      </label>
+
+      <label class="pp-check pp-check--lg">
         <input type="checkbox" id="skryte">
         <svg viewBox="0 0 18 18" aria-hidden="true">
           <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 17,16 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
@@ -747,6 +756,7 @@
     const unhideBtn = document.getElementById('unhideBtn');
 
     const zlava = document.getElementById('zlava');
+    const predvadzacie = document.getElementById('predvadzacie');
     const skryte = document.getElementById('skryte');
     const novaCenaWrap = document.getElementById('novaCenaWrap');
 
@@ -993,6 +1003,57 @@ function hideProgress() {
       return !!(car && (car.skryte === true || car.hidden === true));
     }
 
+    const DEMO_TAG = 'predvadzacie';
+
+    function normalizeTagKey(tag) {
+      return String(tag || '')
+        .toLowerCase()
+        .trim()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '-');
+    }
+
+    function isDemoTag(tag) {
+      const key = normalizeTagKey(tag);
+      return key === DEMO_TAG || key === 'predvadzacie-vozidlo' || key === 'demo';
+    }
+
+    function carIsDemo(car) {
+      return Array.isArray(car?.tagy) && car.tagy.some(isDemoTag);
+    }
+
+    function getManualTagsFromInput() {
+      const seen = new Set();
+      const tags = [];
+
+      (form.elements['tagy']?.value || '')
+        .split(',')
+        .map(t => t.trim())
+        .filter(Boolean)
+        .forEach(t => {
+          if (isDemoTag(t)) return;
+          const key = normalizeTagKey(t);
+          if (seen.has(key)) return;
+          seen.add(key);
+          tags.push(t);
+        });
+
+      return tags;
+    }
+
+    function getTagsForSave() {
+      const tags = getManualTagsFromInput();
+      if (predvadzacie.checked) tags.push(DEMO_TAG);
+      return tags;
+    }
+
+    function formatTagInputValue(tags) {
+      return (Array.isArray(tags) ? tags : [])
+        .filter(t => !isDemoTag(t))
+        .join(', ');
+    }
+
     function toggleZlavaUI() {
       if (zlava.checked) {
         novaCenaWrap.style.display = 'block';
@@ -1028,6 +1089,7 @@ function hideProgress() {
         checkAll.checked = false;
 
         zlava.checked = false;
+        predvadzacie.checked = false;
         skryte.checked = false;
         toggleZlavaUI();
 
@@ -1342,10 +1404,7 @@ galeria: galeria,
 obrazky: galeria,   // detail stránky si to vie hneď zobrať
 obrazok: titulkaUrl, // karta v ponuke (starý script.js)
 
-      tagy: (form.elements['tagy']?.value || '')
-        .split(',')
-        .map(t => t.trim())
-        .filter(Boolean),
+      tagy: getTagsForSave(),
 
       skryte: !!skryte.checked,
       objem: form.elements['objem']?.value ? Number(form.elements['objem'].value) : null,
@@ -1416,7 +1475,7 @@ form.elements['vybava_paket'].value = a.vybava_paket || parsed.paket || '';
 
       form.elements['stara_cena'].value = a.stara_cena || '';
       form.elements['nova_cena'].value = a.nova_cena || '';
-      form.elements['tagy'].value = (a.tagy || []).join(', ');
+      form.elements['tagy'].value = formatTagInputValue(a.tagy);
 
       form.elements['objem'].value = a.objem ?? '';
       form.elements['vykon'].value = a.vykon ?? '';
@@ -1441,6 +1500,7 @@ form.elements['vybava_paket'].value = a.vybava_paket || parsed.paket || '';
 
 
       zlava.checked = !!(a.nova_cena && String(a.nova_cena).trim() !== '');
+      predvadzacie.checked = carIsDemo(a);
       skryte.checked = isHidden(a);
       toggleZlavaUI();
 

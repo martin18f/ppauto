@@ -19,13 +19,15 @@
 
     const params = new URLSearchParams(location.search);
     const brand = (params.get('brand') || '').toLowerCase().trim();
+    const lang = (params.get('lang') || '').toLowerCase().trim();
+    const langQuery = lang === 'en' ? '?lang=en' : '';
 
     const isAllowed = (b) =>
       b === 'subaru' || b === 'kgm' || b === 'jeep' || b === 'all';
 
     // Bez platného ?brand=... sa vždy ide na výber značky
     if (!isAllowed(brand)) {
-      location.replace('vyber-znacky.html');
+      location.replace('vyber-znacky.html' + langQuery);
       return;
     }
 
@@ -39,6 +41,7 @@
 </script>
 
 <link rel="stylesheet" href="css/style.css">
+<script src="js/i18n.js" defer></script>
 
 
 </head>
@@ -63,12 +66,14 @@
         <a href="#kontakt">Kontakt</a>
         <a class="nav-brand" href="vyber-znacky.html">Zmeniť značku</a>
         <a class="nav-login" href="https://ppauto.sk/admin.html">Prihlásiť sa</a>
+        <a class="nav-lang" href="#" data-lang-switch aria-label="Switch to English">EN</a>
       </nav>
       <div class="nav-cta">
   
 
   <a class="btn brand-switch" href="vyber-znacky.html" aria-label="Zmeniť značku">Zmeniť značku</a>
   <a class="btn login-link" href="https://ppauto.sk/admin.html" aria-label="Prihlásiť sa">Prihlásiť sa</a>
+  <a class="btn lang-switch" href="#" data-lang-switch aria-label="Switch to English">EN</a>
 
   
   <button class="btn mobile-toggle" aria-label="Otvoriť menu" onclick="toggleMenu()">☰</button>
@@ -96,12 +101,12 @@
 
           <div class="quick-grid">
             <div class="quick-card">
-              <div class="pill">Skladom</div>
+              
               <h4>Expresný odber</h4>
               <p>Vybrané modely ihneď k odberu – pripravíme na prihlásenie.</p>
             </div>
             <div class="quick-card">
-              <div class="pill">Servis</div>
+              
               <h4>Originálne diely</h4>
               <p>Diagnostika, záruka, pozáručný servis a sezónne prehliadky.</p>
             </div>
@@ -181,6 +186,7 @@
         <button class="tag" data-filter="jeep">Jeep</button>
         <button class="tag" data-filter="novinky">Novinky</button>
         <button class="tag" data-filter="skladom">Skladom</button>
+        <button class="tag" data-filter="predvadzacie">Predvádzacie</button>
       </div>
     </div>
 
@@ -833,7 +839,7 @@
 
         <!-- Pravý stĺpec -->
 <div class="contact-form">
-  <h4>Napíšte nám</h4>
+  
 
   <form id="contactForm">
     <div class="form-grid">

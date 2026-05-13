@@ -21,7 +21,8 @@
 
   // Navigácia – len parametrom v URL (nič neukladáme)
   function go(brand){
-    location.href = 'index.html?brand=' + encodeURIComponent(brand);
+    const href = 'index.html?brand=' + encodeURIComponent(brand);
+    location.href = window.ppI18n ? window.ppI18n.withLang(href) : href;
   }
 
   // Klik a klávesnica na kartách

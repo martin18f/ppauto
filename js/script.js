@@ -172,12 +172,13 @@ function resolveBrandContext() {
 function cleanBrandParamFromURL() {
   const url = new URL(location.href);
   if (!url.searchParams.has('brand')) return;
+  if (url.searchParams.has('lang')) return;
   url.searchParams.delete('brand');
   history.replaceState({}, '', url.pathname + (url.search || '') + (url.hash || ''));
 }
 
 /**
- * Zobraz len povolené záložky pre brand: Všetko, Novinky, Skladom
+ * Zobraz len povolené záložky pre brand: Všetko, Novinky, Skladom, Predvádzacie
  * (brand taby schováme, lebo už si v brand režime)
  */
 function pruneTabsForBrand() {
@@ -190,7 +191,7 @@ function pruneTabsForBrand() {
     return;
   }
 
-  const allowed = new Set(['all', 'novinky', 'skladom']);
+  const allowed = new Set(['all', 'novinky', 'skladom', 'predvadzacie']);
   buttons.forEach(btn => {
     const v = (btn.getAttribute('data-filter') || '').toLowerCase().trim();
     btn.style.display = allowed.has(v) ? '' : 'none';
@@ -237,7 +238,7 @@ function applyPromoBrandFilter(brandView) {
 
 
 /**
- * Aplikuje filtrovanie: brand (ak je) + vybraná kategória (Novinky/Skladom)
+ * Aplikuje filtrovanie: brand (ak je) + vybraná kategória (Novinky/Skladom/Predvádzacie)
  */
 function applyFilters(filter) {
   const cards = document.querySelectorAll('#inventory .car');
@@ -464,7 +465,8 @@ function vykresliKartu(auto) {
 
   // --- ID + link na detail ---
   const carId = auto.__resolvedId || (auto.id || '').toString().trim();
-  const detailHref = carId ? `auto.html?id=${encodeURIComponent(carId)}` : '#kontakt';
+  const rawDetailHref = carId ? `auto.html?id=${encodeURIComponent(carId)}` : '#kontakt';
+  const detailHref = window.ppI18n ? window.ppI18n.withLang(rawDetailHref) : rawDetailHref;
 
   // --- titulka / galéria fallback ---
   const coverImg =
@@ -539,8 +541,9 @@ function vykresliKartu(auto) {
   const status = [];
   if (tags.includes('novinky')) status.push('Novinka');
   if (tags.includes('skladom')) status.push('Skladom');
+  if (tags.includes('predvadzacie')) status.push('Predvádzacie');
 
-  const blacklist = new Set(['subaru', 'kgm', 'jeep', 'all', 'novinky', 'skladom']);
+  const blacklist = new Set(['subaru', 'kgm', 'jeep', 'all', 'novinky', 'skladom', 'predvadzacie']);
   for (const t of tags) {
     if (status.length >= 3) break;
     if (blacklist.has(t)) continue;
