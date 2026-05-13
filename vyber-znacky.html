@@ -15,9 +15,80 @@
 
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Vyber značku • PP AUTO</title>
+  <title>Vyberte značku | PP AUTO Poprad - Subaru, KGM, Jeep</title>
+  <meta name="description" content="Vyberte si značku vozidiel v PP AUTO Poprad. Autorizovaný predaj a servis Subaru, KGM a Jeep, skladové vozidlá a testovacie jazdy." />
+  <link rel="canonical" href="https://ppauto.sk/vyber-znacky.html" />
+  <link rel="alternate" hreflang="sk" href="https://ppauto.sk/vyber-znacky.html" />
+  <link rel="alternate" hreflang="en" href="https://ppauto.sk/vyber-znacky.html?lang=en" />
+  <link rel="alternate" hreflang="x-default" href="https://ppauto.sk/vyber-znacky.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Vyberte značku | PP AUTO Poprad" />
+  <meta property="og:description" content="Subaru, KGM a Jeep v PP AUTO Poprad. Vyberte značku a pozrite si aktuálnu ponuku vozidiel." />
+  <meta property="og:url" content="https://ppauto.sk/vyber-znacky.html" />
+  <meta property="og:image" content="https://ppauto.sk/img/firmazpredu.jpeg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Vyberte značku | PP AUTO Poprad" />
+  <meta name="twitter:description" content="Subaru, KGM a Jeep v PP AUTO Poprad. Vyberte značku a pozrite si aktuálnu ponuku vozidiel." />
+  <meta name="twitter:image" content="https://ppauto.sk/img/firmazpredu.jpeg" />
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#0b0e13">
+  <link rel="icon" type="image/svg+xml" href="img/logo.svg">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "AutoDealer",
+    "@id": "https://ppauto.sk/#ppauto",
+    "name": "PP AUTO s.r.o.",
+    "legalName": "PP AUTO s.r.o.",
+    "url": "https://ppauto.sk/",
+    "logo": "https://ppauto.sk/img/logo.svg",
+    "image": "https://ppauto.sk/img/firmazpredu.jpeg",
+    "description": "Autorizovaný predaj a servis vozidiel Subaru, KGM a Jeep v Poprade.",
+    "priceRange": "€€",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Partizánska 5660/107",
+      "postalCode": "058 01",
+      "addressLocality": "Poprad",
+      "addressCountry": "SK"
+    },
+    "contactPoint": [
+      {
+        "@type": "ContactPoint",
+        "telephone": "+421903905280",
+        "contactType": "sales",
+        "areaServed": "SK",
+        "availableLanguage": ["sk", "en"]
+      },
+      {
+        "@type": "ContactPoint",
+        "telephone": "+421911440052",
+        "contactType": "service",
+        "areaServed": "SK",
+        "availableLanguage": ["sk", "en"]
+      }
+    ],
+    "email": "predaj@ppauto.sk",
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "opens": "08:00",
+        "closes": "17:00"
+      }
+    ],
+    "brand": [
+      { "@type": "Brand", "name": "Subaru" },
+      { "@type": "Brand", "name": "KGM" },
+      { "@type": "Brand", "name": "Jeep" }
+    ],
+    "sameAs": [
+      "https://www.facebook.com/ppautopoprad/",
+      "https://www.instagram.com/ppautopoprad/"
+    ],
+    "additionalType": "https://schema.org/AutoRepair"
+  }
+  </script>
   <link rel="stylesheet" href="css/vyber-znacky.css">
   <script src="js/i18n.js" defer></script>
 </head>
@@ -59,7 +130,8 @@
 
     <section class="grid" aria-label="Značky">
       <!-- SUBARU -->
-      <article class="card subaru" data-brand="subaru" tabindex="0" role="button" aria-label="Subaru – vstúpiť">
+      <article class="card subaru" data-brand="subaru">
+        <a class="card-main-link" href="index.html?brand=subaru" aria-label="Zobraziť ponuku Subaru"></a>
         <div class="media">
           <img src="img/subarulogo.png" alt="Subaru – ilustračné vozidlo" loading="eager" onerror="this.style.display='none'">
           <div class="shine" aria-hidden="true"></div>
@@ -71,7 +143,7 @@
           </div>
           <p>Symetrický AWD, BOXER motory a bezpečnosť EyeSight. Istota na každom kilometri.</p>
 
-          <a href="https://www.subaruslovakia.sk/"> <button class="btn ghost">Prejsť na officiálnu stránku</button> </a>
+          <a class="btn ghost" href="https://www.subaruslovakia.sk/">Prejsť na oficiálnu stránku</a>
           
 
 
@@ -81,7 +153,8 @@
       </article>
 
       <!-- KGM -->
-      <article class="card kgm" data-brand="kgm" tabindex="0" role="button" aria-label="KGM – vstúpiť">
+      <article class="card kgm" data-brand="kgm">
+        <a class="card-main-link" href="index.html?brand=kgm" aria-label="Zobraziť ponuku KGM"></a>
         <div class="media">
           <img src="img/kgm-placeholder.avif" alt="KGM – ilustračné vozidlo" loading="lazy" onerror="this.src='img/kgmlogo.svg'">
           <div class="shine" aria-hidden="true"></div>
@@ -92,12 +165,13 @@
             <h3>KGM</h3>
           </div>
           <p>Robustné SUV, moderné technológie a poctivý výkon. Auto pripravené na každý deň.“</p>
-          <a href="https://kgmcars.sk/"> <button class="btn ghost">Prejsť na officiálnu stránku</button> </a>
+          <a class="btn ghost" href="https://kgmcars.sk/">Prejsť na oficiálnu stránku</a>
         </div>
       </article>
 
       <!-- JEEP -->
-      <article class="card jeep" data-brand="jeep" tabindex="0" role="button" aria-label="Jeep – vstúpiť">
+      <article class="card jeep" data-brand="jeep">
+        <a class="card-main-link" href="index.html?brand=jeep" aria-label="Zobraziť ponuku Jeep"></a>
         <div class="media">
           <img src="img/jeeplogo.webp" alt="Jeep – ilustračné vozidlo" loading="lazy">
           <div class="shine" aria-hidden="true"></div>
@@ -108,7 +182,7 @@
             <h3>Jeep</h3>
           </div>
           <p>Ikonický dizajn, skutočný off‑road a sloboda ísť kamkoľvek. Dobrodružstvo bez hraníc.</p>
-          <a href="https://www.jeep.sk/"> <button class="btn ghost">Prejsť na officiálnu stránku</button> </a>
+          <a class="btn ghost" href="https://www.jeep.sk/">Prejsť na oficiálnu stránku</a>
         </div>
       </article>
     </section>

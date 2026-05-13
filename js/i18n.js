@@ -14,8 +14,10 @@
   const translations = {
     'PP AUTO s.r.o. - Subaru • KGM • Jeep | Poprad': 'PP AUTO s.r.o. - Subaru • KGM • Jeep | Poprad',
     'Vyber značku • PP AUTO': 'Choose a Brand • PP AUTO',
+    'Vyberte značku | PP AUTO Poprad - Subaru, KGM, Jeep': 'Choose a Brand | PP AUTO Poprad - Subaru, KGM, Jeep',
     'Detail vozidla | PP AUTO s.r.o.': 'Vehicle Detail | PP AUTO s.r.o.',
     'Autorizovaný predaj a servis Subaru, KGM a Jeep v Poprade. Skladové vozidlá, testovacie jazdy, financovanie, servis a náhradné diely.': 'Authorized Subaru, KGM and Jeep sales and service in Poprad. Stock vehicles, test drives, financing, service and genuine parts.',
+    'Vyberte si značku vozidiel v PP AUTO Poprad. Autorizovaný predaj a servis Subaru, KGM a Jeep, skladové vozidlá a testovacie jazdy.': 'Choose a vehicle brand at PP AUTO Poprad. Authorized Subaru, KGM and Jeep sales and service, stock vehicles and test drives.',
     'Detail vozidla z ponuky PP AUTO s.r.o. – Subaru • KGM • Jeep | Poprad': 'Vehicle detail from the PP AUTO s.r.o. offer - Subaru • KGM • Jeep | Poprad',
 
     'Ponuka áut': 'Vehicle Offer',
@@ -206,7 +208,11 @@
     'Robustné SUV, moderné technológie a poctivý výkon. Auto pripravené na každý deň.“': 'Robust SUVs, modern technology and honest performance. A vehicle ready for every day.',
     'Ikonický dizajn, skutočný off‑road a sloboda ísť kamkoľvek. Dobrodružstvo bez hraníc.': 'Iconic design, genuine off-road ability and the freedom to go anywhere. Adventure without limits.',
     'Prejsť na officiálnu stránku': 'Go to Official Website',
+    'Prejsť na oficiálnu stránku': 'Go to Official Website',
     'Zobraziť všetko': 'Show All',
+    'Zobraziť ponuku Subaru': 'View Subaru Offer',
+    'Zobraziť ponuku KGM': 'View KGM Offer',
+    'Zobraziť ponuku Jeep': 'View Jeep Offer',
     'Subaru – vstúpiť': 'Subaru - enter',
     'KGM – vstúpiť': 'KGM - enter',
     'Jeep – vstúpiť': 'Jeep - enter',

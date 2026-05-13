@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /login.html
+Disallow: /api/auth-check
+Disallow: /api/login
+Disallow: /api/upload-image
+
+Sitemap: https://ppauto.sk/sitemap.xml
