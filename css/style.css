@@ -718,12 +718,9 @@ footer {
 }
 
 .foot-bottom {
-  border-top: 1px solid var(--line);
-  margin-top: 30px;
-  padding-top: 14px;
-  text-align: center;
-  font-size: 12px;
-  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 
@@ -2960,4 +2957,96 @@ body.promo2-lock{ overflow: hidden; }
   font-size: 13px;
   color: var(--muted);
   min-height: 20px;
+}
+
+#martin-sulak-logo-widget {
+  --martin-logo-bg: #050508;
+  --martin-logo-accent: #64ffd4;
+  --martin-logo-accent-secondary: #5a8fff;
+  --martin-logo-glow: rgba(100,255,212,0.13);
+  --martin-logo-text: #eaeaf8;
+  --martin-logo-text-muted: #7878a0;
+
+  --martin-logo-font-head: 'Syne', sans-serif;
+  --martin-logo-font-body: 'DM Sans', sans-serif;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--martin-logo-font-body);
+}
+
+#martin-sulak-logo-widget,
+#martin-sulak-logo-widget *::before,
+#martin-sulak-logo-widget *::after,
+#martin-sulak-logo-widget * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.martin-sulak-logo-link {
+  display: inline-block;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.martin-sulak-logo-avatar {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    var(--martin-logo-accent) 0%,
+    var(--martin-logo-accent-secondary) 100%
+  );
+  display: grid;
+  place-items: center;
+  font-family: var(--martin-logo-font-head);
+  font-weight: 800;
+  font-size: 1.35rem;
+  color: #000;
+  flex-shrink: 0;
+  box-shadow: 0 0 28px var(--martin-logo-glow);
+  transition: box-shadow .3s, transform .3s;
+}
+
+.martin-sulak-logo-avatar:hover {
+  box-shadow: 
+    0 0 44px var(--martin-logo-glow), 
+    0 0 0 3px var(--martin-logo-accent);
+  transform: scale(1.05);
+}
+
+.martin-credit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 15px;
+  margin-bottom: 30px;
+}
+
+.martin-credit-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.martin-credit-text span {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+}
+
+.martin-credit-text a {
+  font-size: 15px;
+  font-weight: 700;
+  color: #eaeaf8;
+  text-decoration: none;
+}
+
+.martin-credit-text a:hover {
+  color: #64ffd4;
 }
