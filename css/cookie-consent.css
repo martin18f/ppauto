@@ -34,4 +34,4 @@
 .pp-map-placeholder{display:grid;place-items:center;min-height:280px;border:1px solid #232a35;border-radius:16px;background:linear-gradient(135deg,#111827,#0b0e13);color:#e8ecf2;text-align:center;padding:24px;}
 .pp-map-placeholder p{margin:0 0 12px;color:#98a2b3;max-width:520px;}
 .pp-map-placeholder strong{display:block;margin-bottom:6px;color:#fff;font-size:18px;}
-@media(max-width:860px){.pp-cookie-card{grid-template-columns:1fr}.pp-cookie-actions{justify-content:flex-start}.pp-cookie-btn{flex:1}.pp-cookie-row{gap:12px}.pp-cookie-banner{left:10px;right:10px;bottom:10px}.pp-cookie-open-settings{left:10px;bottom:10px}}
+@media(max-width:860px){.pp-cookie-card{grid-template-columns:1fr;max-width:none;width:100%;min-width:0}.pp-cookie-card>*{min-width:0}.pp-cookie-actions{display:grid;grid-template-columns:1fr;justify-content:stretch;width:100%;min-width:0}.pp-cookie-btn{width:100%;min-width:0;white-space:normal}.pp-cookie-row{gap:12px}.pp-cookie-banner{left:10px;right:10px;bottom:10px}.pp-cookie-open-settings{left:10px;bottom:10px}}

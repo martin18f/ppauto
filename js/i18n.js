@@ -13,12 +13,17 @@
 
   const translations = {
     'PP AUTO s.r.o. - Subaru • KGM • Jeep | Poprad': 'PP AUTO s.r.o. - Subaru • KGM • Jeep | Poprad',
+    'PP AUTO s.r.o. - Subaru • KGM • Jeep • Chery | Poprad': 'PP AUTO s.r.o. - Subaru • KGM • Jeep • Chery | Poprad',
     'Vyber značku • PP AUTO': 'Choose a Brand • PP AUTO',
     'Vyberte značku | PP AUTO Poprad - Subaru, KGM, Jeep': 'Choose a Brand | PP AUTO Poprad - Subaru, KGM, Jeep',
+    'Vyberte značku | PP AUTO Poprad - Subaru, KGM, Jeep, Chery': 'Choose a Brand | PP AUTO Poprad - Subaru, KGM, Jeep, Chery',
     'Detail vozidla | PP AUTO s.r.o.': 'Vehicle Detail | PP AUTO s.r.o.',
     'Autorizovaný predaj a servis Subaru, KGM a Jeep v Poprade. Skladové vozidlá, testovacie jazdy, financovanie, servis a náhradné diely.': 'Authorized Subaru, KGM and Jeep sales and service in Poprad. Stock vehicles, test drives, financing, service and genuine parts.',
+    'Autorizovaný predaj a servis Subaru, KGM, Jeep a Chery v Poprade. Skladové vozidlá, testovacie jazdy, financovanie, servis a náhradné diely.': 'Authorized Subaru, KGM, Jeep and Chery sales and service in Poprad. Stock vehicles, test drives, financing, service and genuine parts.',
     'Vyberte si značku vozidiel v PP AUTO Poprad. Autorizovaný predaj a servis Subaru, KGM a Jeep, skladové vozidlá a testovacie jazdy.': 'Choose a vehicle brand at PP AUTO Poprad. Authorized Subaru, KGM and Jeep sales and service, stock vehicles and test drives.',
+    'Vyberte si značku vozidiel v PP AUTO Poprad. Autorizovaný predaj a servis Subaru, KGM, Jeep a Chery, skladové vozidlá a testovacie jazdy.': 'Choose a vehicle brand at PP AUTO Poprad. Authorized Subaru, KGM, Jeep and Chery sales and service, stock vehicles and test drives.',
     'Detail vozidla z ponuky PP AUTO s.r.o. – Subaru • KGM • Jeep | Poprad': 'Vehicle detail from the PP AUTO s.r.o. offer - Subaru • KGM • Jeep | Poprad',
+    'Detail vozidla z ponuky PP AUTO s.r.o. – Subaru • KGM • Jeep • Chery | Poprad': 'Vehicle detail from the PP AUTO s.r.o. offer - Subaru • KGM • Jeep • Chery | Poprad',
 
     'Ponuka áut': 'Vehicle Offer',
     'Servis': 'Service',
@@ -40,6 +45,10 @@
     'Pozrieť skladové vozidlá': 'View Stock Vehicles',
     'Objednať servis': 'Book Service',
     'Značky a demo jazdy': 'Brands and Demo Drives',
+    'Subaru a demo jazdy': 'Subaru and Demo Drives',
+    'KGM a demo jazdy': 'KGM and Demo Drives',
+    'Jeep a demo jazdy': 'Jeep and Demo Drives',
+    'Chery a demo jazdy': 'Chery and Demo Drives',
     'Skladom': 'In Stock',
     'Expresný odber': 'Fast Delivery',
     'Vybrané modely ihneď k odberu – pripravíme na prihlásenie.': 'Selected models are ready for immediate delivery - we will prepare them for registration.',
@@ -49,6 +58,11 @@
     'Transparentné mesačné splátky na mieru vašemu rozpočtu.': 'Transparent monthly payments tailored to your budget.',
     'Rezervujte si termín': 'Reserve a Time',
     'Zažite Subaru, KGM alebo Jeep naživo na cestách.': 'Experience Subaru, KGM or Jeep on the road.',
+    'Zažite Subaru, KGM, Jeep alebo Chery naživo na cestách.': 'Experience Subaru, KGM, Jeep or Chery on the road.',
+    'Zažite Subaru naživo na cestách.': 'Experience Subaru on the road.',
+    'Zažite KGM naživo na cestách.': 'Experience KGM on the road.',
+    'Zažite Jeep naživo na cestách.': 'Experience Jeep on the road.',
+    'Zažite Chery naživo na cestách.': 'Experience Chery on the road.',
     'Aktuálne ponuky': 'Current Offers',
     'Ovládanie slidera': 'Slider Controls',
     'Predchádzajúci': 'Previous',
@@ -125,6 +139,11 @@
 
     'Servis PP AUTO, ktorému veríte': 'PP AUTO Service You Can Trust',
     'Profesionálna starostlivosť pre Subaru, KGM a Jeep. Originálne diely, moderná diagnostika, zázemie a procesy, ktoré chránia hodnotu vášho auta.': 'Professional care for Subaru, KGM and Jeep. Genuine parts, modern diagnostics, facilities and processes that protect the value of your vehicle.',
+    'Profesionálna starostlivosť pre Subaru, KGM, Jeep a Chery. Originálne diely, moderná diagnostika, zázemie a procesy, ktoré chránia hodnotu vášho auta.': 'Professional care for Subaru, KGM, Jeep and Chery. Genuine parts, modern diagnostics, facilities and processes that protect the value of your vehicle.',
+    'Profesionálna starostlivosť pre Subaru. Originálne diely, moderná diagnostika, zázemie a procesy, ktoré chránia hodnotu vášho auta.': 'Professional care for Subaru. Genuine parts, modern diagnostics, facilities and processes that protect the value of your vehicle.',
+    'Profesionálna starostlivosť pre KGM. Originálne diely, moderná diagnostika, zázemie a procesy, ktoré chránia hodnotu vášho auta.': 'Professional care for KGM. Genuine parts, modern diagnostics, facilities and processes that protect the value of your vehicle.',
+    'Profesionálna starostlivosť pre Jeep. Originálne diely, moderná diagnostika, zázemie a procesy, ktoré chránia hodnotu vášho auta.': 'Professional care for Jeep. Genuine parts, modern diagnostics, facilities and processes that protect the value of your vehicle.',
+    'Profesionálna starostlivosť pre Chery. Originálne diely, moderná diagnostika, zázemie a procesy, ktoré chránia hodnotu vášho auta.': 'Professional care for Chery. Genuine parts, modern diagnostics, facilities and processes that protect the value of your vehicle.',
     'Diagnostika': 'Diagnostics',
     'Záručný': 'Warranty',
     'pozáručný servis': 'Post-Warranty Service',
@@ -169,6 +188,7 @@
     'Symetrický AWD, BOXER motory a bezpečnosť EyeSight. Ideálne do Tatier aj na každý deň. Subaru spája tradíciu spoľahlivosti s modernými technológiami, ktoré prinášajú istotu v každom počasí. Vďaka nízkemu ťažisku a stabilite na ceste si užijete komfort aj v náročných horských podmienkach, pričom oceníte aj priestrannosť interiéru a praktické riešenia pre rodiny i dobrodruhov.': 'Symmetrical AWD, BOXER engines and EyeSight safety. Ideal for the Tatras and everyday driving. Subaru combines a tradition of reliability with modern technologies that bring confidence in every weather. Thanks to a low center of gravity and road stability, you enjoy comfort even in demanding mountain conditions, along with a spacious interior and practical solutions for families and adventurers.',
     'Moderné SUV a hybridné modely, spoľahlivý pohon 4x4 a elektrická budúcnosť – napríklad Torres EVX, Tivoli, Rexton či Musso. KGM prináša robustnosť spojenú s eleganciou, technológie pre vyššiu bezpečnosť a komfort, ako aj priaznivý pomer ceny a výkonu. Vozidlá sú navrhnuté tak, aby zvládli mestskú premávku aj dlhé cesty, pričom v teréne ukážu svoju skutočnú silu.': 'Modern SUVs and hybrid models, reliable 4x4 drive and an electric future - including Torres EVX, Tivoli, Rexton and Musso. KGM brings robustness combined with elegance, technologies for greater safety and comfort, and strong value for money. The vehicles are designed for city traffic and long journeys, while showing their true strength off road.',
     'DNA terénu a sloboda na každom kilometri. Od mesta po off-road, vždy s charakterom. Jeep je symbolom dobrodružstva a nezávislosti, ponúka robustný dizajn, vysokú priechodnosť terénom a moderné technológie pre pohodlie vodiča aj posádky. Či už hľadáte istotu v náročných podmienkach, alebo štýlového spoločníka do mesta, Jeep vám vždy poskytne pravý pocit slobody.': 'Off-road DNA and freedom on every kilometer. From the city to off-road trails, always with character. Jeep is a symbol of adventure and independence, offering robust design, strong off-road capability and modern technology for driver and passenger comfort. Whether you need confidence in demanding conditions or a stylish city companion, Jeep always gives you a true feeling of freedom.',
+    'Moderné SUV z Číny s dôrazom na technológie, komfort a výbornú hodnotu. Chery prináša modely Tiggo s bohatou výbavou, priestranným interiérom, pokročilými asistenčnými systémami a efektívnymi hybridnými alebo plug-in hybridnými pohonmi. Je to praktická voľba pre rodiny aj vodičov, ktorí chcú veľa moderného auta za férové peniaze.': 'Modern SUVs from China with a focus on technology, comfort and strong value. Chery brings Tiggo models with rich equipment, a spacious interior, advanced assistance systems and efficient hybrid or plug-in hybrid powertrains. It is a practical choice for families and drivers who want a lot of modern car for fair money.',
     'Test jazda': 'Test Drive',
     'Čo hovoria zákazníci': 'What Customers Say',
     'Skúsenosti našich zákazníkov': 'Customer Experiences',
@@ -197,6 +217,11 @@
     'Tu nás nájdete': 'Where to Find Us',
     'Autorizovaný predaj a servis Subaru,': 'Authorized Subaru,',
     'KGM a Jeep v Poprade od roku 2011.': 'KGM and Jeep sales and service in Poprad since 2011.',
+    'KGM, Jeep a Chery v Poprade od roku 2011.': 'KGM, Jeep and Chery sales and service in Poprad since 2011.',
+    'Autorizovaný predaj a servis Subaru v Poprade od roku 2011.': 'Authorized Subaru sales and service in Poprad since 2011.',
+    'Autorizovaný predaj a servis KGM v Poprade od roku 2011.': 'Authorized KGM sales and service in Poprad since 2011.',
+    'Autorizovaný predaj a servis Jeep v Poprade od roku 2011.': 'Authorized Jeep sales and service in Poprad since 2011.',
+    'Autorizovaný predaj a servis Chery v Poprade od roku 2011.': 'Authorized Chery sales and service in Poprad since 2011.',
     'Navigácia': 'Navigation',
     'Dokumenty': 'Documents',
     'Podmienky používania': 'Terms of Use',
@@ -207,18 +232,22 @@
     'Symetrický AWD, BOXER motory a bezpečnosť EyeSight. Istota na každom kilometri.': 'Symmetrical AWD, BOXER engines and EyeSight safety. Confidence on every kilometer.',
     'Robustné SUV, moderné technológie a poctivý výkon. Auto pripravené na každý deň.“': 'Robust SUVs, modern technology and honest performance. A vehicle ready for every day.',
     'Ikonický dizajn, skutočný off‑road a sloboda ísť kamkoľvek. Dobrodružstvo bez hraníc.': 'Iconic design, genuine off-road ability and the freedom to go anywhere. Adventure without limits.',
+    'Moderné čínske SUV, hybridné technológie a bohatá výbava pre každý deň.': 'Modern Chinese SUVs, hybrid technology and rich equipment for everyday driving.',
     'Prejsť na officiálnu stránku': 'Go to Official Website',
     'Prejsť na oficiálnu stránku': 'Go to Official Website',
     'Zobraziť všetko': 'Show All',
     'Zobraziť ponuku Subaru': 'View Subaru Offer',
     'Zobraziť ponuku KGM': 'View KGM Offer',
     'Zobraziť ponuku Jeep': 'View Jeep Offer',
+    'Zobraziť ponuku Chery': 'View Chery Offer',
     'Subaru – vstúpiť': 'Subaru - enter',
     'KGM – vstúpiť': 'KGM - enter',
     'Jeep – vstúpiť': 'Jeep - enter',
+    'Chery – vstúpiť': 'Chery - enter',
     'Subaru – ilustračné vozidlo': 'Subaru - illustrative vehicle',
     'KGM – ilustračné vozidlo': 'KGM - illustrative vehicle',
     'Jeep – ilustračné vozidlo': 'Jeep - illustrative vehicle',
+    'Chery – ilustračné vozidlo': 'Chery - illustrative vehicle',
 
     '← Späť na ponuku': '← Back to Offer',
     'Zavolať predaj': 'Call Sales',
@@ -569,7 +598,16 @@
     const path = queryIndex >= 0 ? beforeHash.slice(0, queryIndex) : beforeHash;
     const query = queryIndex >= 0 ? beforeHash.slice(queryIndex + 1) : '';
 
-    if (!path || !/\.html$/i.test(path)) return raw;
+    const isCleanLocalPath =
+      path === '/' ||
+      path === '/ponuka' ||
+      path === '/subaru' ||
+      path === '/kgm' ||
+      path === '/jeep' ||
+      path === '/chery' ||
+      path.startsWith('/auta/');
+
+    if (!path || (!/\.html$/i.test(path) && !isCleanLocalPath)) return raw;
 
     const params = new URLSearchParams(query);
     if (/^index\.html$/i.test(path) && !params.has('brand')) {
@@ -592,7 +630,7 @@
     const url = new URL(location.href);
     if (/\/index\.html$/i.test(url.pathname) && !url.searchParams.has('brand')) {
       const brand = normalize(document.documentElement.getAttribute('data-brand')).toLowerCase();
-      url.searchParams.set('brand', ['subaru', 'kgm', 'jeep'].includes(brand) ? brand : 'all');
+      url.searchParams.set('brand', ['subaru', 'kgm', 'jeep', 'chery'].includes(brand) ? brand : 'all');
     }
 
     if (lang === 'en') url.searchParams.set('lang', 'en');

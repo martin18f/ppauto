@@ -1,80 +1,86 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://ppauto.sk/vyber-znacky.html</loc>
-    <lastmod>2026-05-13</lastmod>
+    <loc>https://ppauto.sk/</loc>
+    <lastmod>2026-06-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://ppauto.sk/index.html?brand=all</loc>
-    <lastmod>2026-05-13</lastmod>
+    <loc>https://ppauto.sk/ponuka</loc>
+    <lastmod>2026-06-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ppauto.sk/index.html?brand=subaru</loc>
-    <lastmod>2026-05-13</lastmod>
+    <loc>https://ppauto.sk/subaru</loc>
+    <lastmod>2026-06-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ppauto.sk/index.html?brand=kgm</loc>
-    <lastmod>2026-05-13</lastmod>
+    <loc>https://ppauto.sk/kgm</loc>
+    <lastmod>2026-06-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ppauto.sk/index.html?brand=jeep</loc>
-    <lastmod>2026-05-13</lastmod>
+    <loc>https://ppauto.sk/jeep</loc>
+    <lastmod>2026-06-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ppauto.sk/auto.html?id=subaru-outback-2025</loc>
-    <lastmod>2026-05-13</lastmod>
+    <loc>https://ppauto.sk/chery</loc>
+    <lastmod>2026-06-16</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ppauto.sk/auta/subaru-outback-2025</loc>
+    <lastmod>2026-06-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://ppauto.sk/auto.html?id=jeep-grand-cherokee-2024</loc>
-    <lastmod>2026-05-13</lastmod>
+    <loc>https://ppauto.sk/auta/jeep-grand-cherokee-2024</loc>
+    <lastmod>2026-06-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://ppauto.sk/auto.html?id=jeep-avenger-2024</loc>
-    <lastmod>2026-05-13</lastmod>
+    <loc>https://ppauto.sk/auta/jeep-avenger-2024</loc>
+    <lastmod>2026-06-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://ppauto.sk/auto.html?id=jeep-wrangler-2024</loc>
-    <lastmod>2026-05-13</lastmod>
+    <loc>https://ppauto.sk/auta/jeep-wrangler-2024</loc>
+    <lastmod>2026-06-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://ppauto.sk/auto.html?id=jeep-renegade-2023</loc>
-    <lastmod>2026-05-13</lastmod>
+    <loc>https://ppauto.sk/auta/jeep-renegade-2023</loc>
+    <lastmod>2026-06-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://ppauto.sk/gdpr.html</loc>
-    <lastmod>2026-05-13</lastmod>
+    <lastmod>2026-06-16</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://ppauto.sk/cookies.html</loc>
-    <lastmod>2026-05-13</lastmod>
+    <lastmod>2026-06-16</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://ppauto.sk/podmienky-pouzivania.html</loc>
-    <lastmod>2026-05-13</lastmod>
+    <lastmod>2026-06-16</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

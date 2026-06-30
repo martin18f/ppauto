@@ -1,9 +1,11 @@
 User-agent: *
 Allow: /
+Allow: /llms.txt
 Disallow: /admin.html
 Disallow: /login.html
 Disallow: /api/auth-check
 Disallow: /api/login
 Disallow: /api/upload-image
 
+LLMS: https://ppauto.sk/llms.txt
 Sitemap: https://ppauto.sk/sitemap.xml

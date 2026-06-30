@@ -15,7 +15,7 @@ function isConflictError(err) {
 
 function normalizePromoBrand(b) {
   const v = String(b || '').toLowerCase().trim();
-  return (v === 'subaru' || v === 'kgm' || v === 'jeep') ? v : null;
+  return (v === 'subaru' || v === 'kgm' || v === 'jeep' || v === 'chery') ? v : null;
 }
 
 function getIsAdmin(req) {
@@ -166,7 +166,7 @@ export default async function handler(req, res) {
 
       if (!promo.title) return res.status(400).json({ error: "Missing title" });
       if (!promo.image) return res.status(400).json({ error: "Missing image" });
-      if (!promo.brand) return res.status(400).json({ error: "Invalid brand (subaru/kgm/jeep)" });
+      if (!promo.brand) return res.status(400).json({ error: "Invalid brand (subaru/kgm/jeep/chery)" });
 
       await mutate(
         (arr) => {
@@ -203,7 +203,7 @@ export default async function handler(req, res) {
 
 
           if (!nextBrand) {
-            const err = new Error("Invalid brand (subaru/kgm/jeep)");
+            const err = new Error("Invalid brand (subaru/kgm/jeep/chery)");
             err.status = 400;
             throw err;
           }

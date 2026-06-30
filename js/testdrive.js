@@ -1,13 +1,14 @@
 // Testovacia jazda – logika sekcie #jazda
 (function () {
   function isKnownBrand(b) {
-    return b === 'subaru' || b === 'kgm' || b === 'jeep';
+    return b === 'subaru' || b === 'kgm' || b === 'jeep' || b === 'chery';
   }
 
   function brandLabel(b) {
     if (b === 'subaru') return 'Subaru';
     if (b === 'kgm') return 'KGM';
     if (b === 'jeep') return 'Jeep';
+    if (b === 'chery') return 'Chery';
     return b || '';
   }
 

@@ -1,13 +1,27 @@
 // ==============================
-// Ponuka áut + filtrovanie + brand kontext (pamätá si výber)
-// + Modely áut pás (Subaru/KGM/Jeep) + filter podľa modelu
+// Ponuka áut + filtrovanie + brand kontext z URL
+// + Modely áut pás (Subaru/KGM/Jeep/Chery) + filter podľa modelu
 // ==============================
 
 const BRAND_STORAGE_KEY = 'ppauto.brand';
 
-const BRAND_FILTERS = new Set(['subaru', 'kgm', 'jeep']);
+const BRAND_FILTERS = new Set(['subaru', 'kgm', 'jeep', 'chery']);
+const CLEAN_BRAND_PATHS = {
+  all: '/ponuka',
+  subaru: '/subaru',
+  kgm: '/kgm',
+  jeep: '/jeep',
+  chery: '/chery',
+};
 
-let BRAND_CTX = null;        // 'subaru' | 'kgm' | 'jeep' | null (len brand režim z vyber-znacky/storage)
+function isLocalRouteHost() {
+  return location.protocol === 'file:' ||
+    location.hostname === 'localhost' ||
+    location.hostname === '127.0.0.1' ||
+    location.hostname === '::1';
+}
+
+let BRAND_CTX = null;        // 'subaru' | 'kgm' | 'jeep' | 'chery' | null (len brand režim z vyber-znacky/URL)
 let ACTIVE_FILTER = 'all';   // aktuálne kliknutý filter v lište
 let ACTIVE_MODEL = null;     // slug modelu (napr. "forester", "grand-cherokee")
 let MODELS_BRAND = null;     // pre ktorý brand je práve vykreslený pás modelov
@@ -39,6 +53,50 @@ const MODEL_STRIP_CONFIG = {
     { key: 'wrangler',        name: 'WRANGLER',       img: 'img/wrangler.png',       alt: 'Jeep Wrangler' },
     { key: 'grand-cherokee',  name: 'GRAND CHEROKEE', img: 'img/grand-cherokee.png', alt: 'Jeep Grand Cherokee' },
   ],
+  chery: [
+  {
+    key: 'tiggo-9-plug-in-hybrid',
+    name: 'TIGGO 9 Plug-in Hybrid',
+    img: 'img/tiggo_9_series.avif',
+    alt: 'Chery TIGGO 9 Plug-in Hybrid'
+  },
+  {
+    key: 'tiggo-8-plug-in-hybrid',
+    name: 'TIGGO 8 Plug-in Hybrid',
+    img: 'img/tiggo_8_plug_in_hybrid.png',
+    alt: 'Chery TIGGO 8 Plug-in Hybrid'
+  },
+  {
+    key: 'tiggo-8',
+    name: 'TIGGO 8',
+    img: 'img/tiggo_8_series.png',
+    alt: 'Chery TIGGO 8'
+  },
+  {
+    key: 'tiggo-7-plug-in-hybrid',
+    name: 'TIGGO 7 Plug-in Hybrid',
+    img: 'img/tiggo_7_plug_in_hybrid.png',
+    alt: 'Chery TIGGO 7 Plug-in Hybrid'
+  },
+  {
+    key: 'tiggo-7-hybrid',
+    name: 'TIGGO 7 Hybrid',
+    img: 'img/tiggo_7_hybrid.png',
+    alt: 'Chery TIGGO 7 Hybrid'
+  },
+  {
+    key: 'tiggo-7',
+    name: 'TIGGO 7',
+    img: 'img/tiggo_7_series.png',
+    alt: 'Chery TIGGO 7'
+  },
+  {
+    key: 'tiggo-4-hybrid',
+    name: 'TIGGO 4 Hybrid',
+    img: 'img/tiggo_4_hybrid.png',
+    alt: 'Chery TIGGO 4 Hybrid'
+  }
+],
 };
 
 
@@ -46,6 +104,34 @@ const BRAND_LABEL = {
   subaru: 'Subaru',
   kgm: 'KGM',
   jeep: 'Jeep',
+  chery: 'Chery',
+};
+
+const BRAND_VISIBLE_TEXT = {
+  subaru: {
+    heroReserve: 'Zažite Subaru naživo na cestách.',
+    heroBrandsCta: 'Subaru a demo jazdy',
+    service: 'Profesionálna starostlivosť pre Subaru. Originálne diely, moderná diagnostika, zázemie a procesy, ktoré chránia hodnotu vášho auta.',
+    footer: 'Autorizovaný predaj a servis Subaru v Poprade od roku 2011.',
+  },
+  kgm: {
+    heroReserve: 'Zažite KGM naživo na cestách.',
+    heroBrandsCta: 'KGM a demo jazdy',
+    service: 'Profesionálna starostlivosť pre KGM. Originálne diely, moderná diagnostika, zázemie a procesy, ktoré chránia hodnotu vášho auta.',
+    footer: 'Autorizovaný predaj a servis KGM v Poprade od roku 2011.',
+  },
+  jeep: {
+    heroReserve: 'Zažite Jeep naživo na cestách.',
+    heroBrandsCta: 'Jeep a demo jazdy',
+    service: 'Profesionálna starostlivosť pre Jeep. Originálne diely, moderná diagnostika, zázemie a procesy, ktoré chránia hodnotu vášho auta.',
+    footer: 'Autorizovaný predaj a servis Jeep v Poprade od roku 2011.',
+  },
+  chery: {
+    heroReserve: 'Zažite Chery naživo na cestách.',
+    heroBrandsCta: 'Chery a demo jazdy',
+    service: 'Profesionálna starostlivosť pre Chery. Originálne diely, moderná diagnostika, zázemie a procesy, ktoré chránia hodnotu vášho auta.',
+    footer: 'Autorizovaný predaj a servis Chery v Poprade od roku 2011.',
+  },
 };
 
 const BRAND_CONFIG = {
@@ -108,11 +194,31 @@ const BRAND_CONFIG = {
       },
     ],
   },
+
+  chery: {
+    tileText:
+      'Chery prináša moderné SUV s dôrazom na technológie, komfort a výbornú hodnotu. Rodina modelov Tiggo kombinuje priestranný interiér, bohatú výbavu, pokročilé asistenčné systémy a efektívne benzínové, hybridné alebo plug-in hybridné pohony. Je to značka pre vodičov, ktorí chcú veľa výbavy, moderný dizajn a praktické rodinné auto bez zbytočných kompromisov.',
+    testiTitle: 'Skúsenosti našich zákazníkov',
+    quotes: [
+      {
+        text: '„Zaujali ma technológie, priestor a výbava. V PP AUTO mi všetko vysvetlili jasne a bez tlaku.“',
+        by: '— zákazník z Popradu',
+      },
+      {
+        text: '„Chery pôsobí moderne a prakticky. Testovacia jazda mi pomohla rýchlo si urobiť obraz o aute aj výbave.“',
+        by: '— P. J., Kežmarok',
+      },
+      {
+        text: '„Ocenil som pokojný prístup, porovnanie možností a pomoc s financovaním. Dobrá skúsenosť od začiatku.“',
+        by: '— M. K., Svit',
+      },
+    ],
+  },
 };
 
 
 function isKnownBrand(b) {
-  return b === 'subaru' || b === 'kgm' || b === 'jeep';
+  return b === 'subaru' || b === 'kgm' || b === 'jeep' || b === 'chery';
 }
 
 function setStoredBrand(brand) {
@@ -147,18 +253,20 @@ function getStoredBrand() {
 
 function getBrandFromURLRaw() {
   const raw = new URLSearchParams(location.search).get('brand');
-  return raw ? raw.toLowerCase().trim() : null;
+  if (raw) return raw.toLowerCase().trim();
+  return getBrandFromPathnameRaw();
+}
+
+function getBrandFromPathnameRaw() {
+  const slug = location.pathname.replace(/\/+$/, '').split('/').pop().toLowerCase();
+  if (slug === 'ponuka') return 'all';
+  return isKnownBrand(slug) ? slug : null;
 }
 
 /**
- * - ak je v URL ?brand=... → nastav BRAND_CTX + ulož do storage
- * - ak je ?brand=all → vymaž storage a BRAND_CTX = null
- * - ak v URL nič nie je → zober zo storage (aby fungoval refresh)
- */
-/**
- * Brand kontext berieme len z URL (vyber-znacky → index.html?brand=...).
+ * Brand kontext berieme z čistej URL alebo zo starého ?brand=... fallbacku.
  * Nič neukladáme do localStorage/sessionStorage.
- * - ?brand=subaru|kgm|jeep → BRAND_CTX
+ * - ?brand=subaru|kgm|jeep|chery → BRAND_CTX
  * - ?brand=all → null
  */
 function resolveBrandContext() {
@@ -173,6 +281,15 @@ function cleanBrandParamFromURL() {
   const url = new URL(location.href);
   if (!url.searchParams.has('brand')) return;
   if (url.searchParams.has('lang')) return;
+  if (isLocalRouteHost()) return;
+
+  const brand = (url.searchParams.get('brand') || '').toLowerCase().trim();
+
+  if (CLEAN_BRAND_PATHS[brand]) {
+    history.replaceState({}, '', CLEAN_BRAND_PATHS[brand] + (url.hash || ''));
+    return;
+  }
+
   url.searchParams.delete('brand');
   history.replaceState({}, '', url.pathname + (url.search || '') + (url.hash || ''));
 }
@@ -260,7 +377,7 @@ function applyFilters(filter) {
     // 1️⃣ globálny brand režim
     const brandOK = !brandView || make === brandView;
 
-    // 2️⃣ filter v ponuke (Subaru/KGM/Jeep)
+    // 2️⃣ filter v ponuke (Subaru/KGM/Jeep/Chery)
     const filterOK = !isBrandFilter || make === f;
 
     // 3️⃣ kategórie (novinky/skladom)
@@ -292,12 +409,13 @@ function applyFilters(filter) {
 
 /**
  * Upraví len to, čo chceš:
- * - #znacky: nadpis = Jeep/Subaru/KGM, nechá len 1 tile + jeho text
+ * - #znacky: nadpis = Jeep/Subaru/KGM/Chery, nechá len 1 tile + jeho text
  * - testimonials: nadpis = "Čo o nás hovoria zákazníci" + zmení 3 quote (aby nesedeli na inú značku)
  */
 function applyBrandSections() {
   const brand = getBrandView(ACTIVE_FILTER);
   applyPromoBrandFilter(brand);
+  applyVisibleBrandText(brand);
   // --- ZNAČKY ---
   const znacky = document.getElementById('znacky');
   if (znacky) {
@@ -351,6 +469,21 @@ function applyBrandSections() {
       if (by) by.textContent = q.by;
     });
   }
+}
+
+function applyVisibleBrandText(brand) {
+  document.querySelectorAll('[data-brand-text]').forEach((el) => {
+    if (!el.dataset.defaultHtml) el.dataset.defaultHtml = el.innerHTML;
+
+    const key = el.dataset.brandText;
+    const text = brand ? BRAND_VISIBLE_TEXT[brand]?.[key] : '';
+
+    if (text) {
+      el.textContent = window.ppI18n?.isEnglish?.() ? window.ppI18n.t(text) : text;
+    } else {
+      el.innerHTML = el.dataset.defaultHtml;
+    }
+  });
 }
 
 
@@ -465,7 +598,9 @@ function vykresliKartu(auto) {
 
   // --- ID + link na detail ---
   const carId = auto.__resolvedId || (auto.id || '').toString().trim();
-  const rawDetailHref = carId ? `auto.html?id=${encodeURIComponent(carId)}` : '#kontakt';
+  const rawDetailHref = carId
+    ? (isLocalRouteHost() ? `auto.html?id=${encodeURIComponent(carId)}` : `/auta/${encodeURIComponent(carId)}`)
+    : '#kontakt';
   const detailHref = window.ppI18n ? window.ppI18n.withLang(rawDetailHref) : rawDetailHref;
 
   // --- titulka / galéria fallback ---
@@ -543,7 +678,7 @@ function vykresliKartu(auto) {
   if (tags.includes('skladom')) status.push('Skladom');
   if (tags.includes('predvadzacie')) status.push('Predvádzacie');
 
-  const blacklist = new Set(['subaru', 'kgm', 'jeep', 'all', 'novinky', 'skladom', 'predvadzacie']);
+  const blacklist = new Set(['subaru', 'kgm', 'jeep', 'chery', 'all', 'novinky', 'skladom', 'predvadzacie']);
   for (const t of tags) {
     if (status.length >= 3) break;
     if (blacklist.has(t)) continue;
@@ -766,7 +901,7 @@ function renderModelsStrip(brand) {
   row.innerHTML = list.map(m => `
     <a class="model-tile" href="#" data-model="${m.key}">
       <div class="model-tile__img">
-        <img src="${m.img}" alt="${m.alt || m.name}" loading="lazy" />
+        <img src="${m.img}" alt="${m.alt || m.name}" loading="lazy" onerror="this.onerror=null;this.src='img/logo.svg'" />
       </div>
       <div class="model-tile__name">${m.name}</div>
     </a>
@@ -900,7 +1035,7 @@ function initModelsStrip() {
   function normalizeBrand(b) {
   // neznámy/nezadaný brand NEMÁ byť univerzálny (univerzálne je len explicitné "all")
   const v = String(b || '').toLowerCase().trim();
-  return (v === 'subaru' || v === 'kgm' || v === 'jeep' || v === 'all') ? v : '';
+  return (v === 'subaru' || v === 'kgm' || v === 'jeep' || v === 'chery' || v === 'all') ? v : '';
   }
 
   async function loadPromosIntoPromo2() {
@@ -1005,7 +1140,7 @@ function initModelsStrip() {
   };
 
   function safe(v){ return String(v || '').toLowerCase().trim(); }
-  function isBrand(b){ return b === 'subaru' || b === 'kgm' || b === 'jeep'; }
+  function isBrand(b){ return b === 'subaru' || b === 'kgm' || b === 'jeep' || b === 'chery'; }
 
   function getCurrentBrand(){
     // 1) DOM atribút (téma)
@@ -1019,7 +1154,12 @@ function initModelsStrip() {
       if (isBrand(q)) return q;
     } catch(e){}
 
-    // 3) storage fallback
+    // 3) čistá URL (/subaru, /kgm, /jeep, /chery)
+    const pathBrand = safe(getBrandFromPathnameRaw());
+    if (pathBrand === 'all') return null;
+    if (isBrand(pathBrand)) return pathBrand;
+
+    // 4) storage fallback
     
 
     return null;
@@ -1244,7 +1384,7 @@ function initModelsStrip() {
   });
 
   function isKnownBrandSafe(b){
-    return b === 'subaru' || b === 'kgm' || b === 'jeep';
+    return b === 'subaru' || b === 'kgm' || b === 'jeep' || b === 'chery';
   }
 
   function currentBrand(){

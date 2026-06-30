@@ -1,13 +1,19 @@
 // ==============================
 // Detail auta (auto.html)
-// - načíta auto podľa ?id=... z /api/cars
+// - načíta auto podľa /auta/{id} alebo ?id=... z /api/cars
 // - zobrazí galériu + údaje + výbavu
 // ==============================
 
 (function () {
   const mount = document.getElementById('carDetail');
   const qs = new URLSearchParams(location.search);
-  const wantedId = (qs.get('id') || '').trim();
+  function wantedIdFromPathname() {
+    const parts = location.pathname.split('/').filter(Boolean);
+    const idx = parts.indexOf('auta');
+    return idx >= 0 ? decodeURIComponent(parts[idx + 1] || '').trim() : '';
+  }
+
+  const wantedId = (qs.get('id') || wantedIdFromPathname()).trim();
 
   if (!mount) return;
 
@@ -45,60 +51,48 @@
 
     const el = document.createElement('div');
     el.id = 'tdModal';
-    el.style.cssText = `
-      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
-      background:rgba(0,0,0,.55); z-index:9999; padding:18px;
-    `;
+    el.className = 'td-modal';
+    el.hidden = true;
     el.innerHTML = `
-      <div style="width:720px; max-width:100%; background:#0b0f14; color:#fff; border:1px solid rgba(255,255,255,.12);
-                  border-radius:16px; overflow:hidden; box-shadow:0 30px 90px rgba(0,0,0,.65);">
-        <div style="padding:14px 16px; background:#111827; display:flex; align-items:center; justify-content:space-between; gap:12px;">
-          <div style="font-family:Arial,Helvetica,sans-serif; font-weight:900; font-size:16px;">
+      <div class="td-dialog">
+        <div class="td-head">
+          <div class="td-title">
             Žiadosť o testovaciu jazdu
           </div>
-          <button type="button" id="tdClose"
-            style="background:transparent;border:0;color:#fff;font-size:22px;cursor:pointer;line-height:1;">×</button>
+          <button type="button" id="tdClose" class="td-close" aria-label="Zavrieť">×</button>
         </div>
 
-        <div style="padding:16px;">
-          <div id="tdCarLine" style="font-family:Arial,Helvetica,sans-serif; font-size:13px; opacity:.9; margin-bottom:12px;">
+        <div class="td-body">
+          <div id="tdCarLine" class="td-car-line">
             —
           </div>
 
           <form id="tdForm">
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-              <input name="meno" required placeholder="Meno"
-                style="padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:#0f172a;color:#fff;outline:none;">
-              <input name="email" required type="email" placeholder="E-mail"
-                style="padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:#0f172a;color:#fff;outline:none;">
-              <input name="telefon" placeholder="Telefón"
-                style="padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:#0f172a;color:#fff;outline:none;">
-              <input name="datum_iso" type="date" required
-                style="padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:#0f172a;color:#fff;outline:none;">
+            <div class="td-grid">
+              <input class="td-input" name="meno" required placeholder="Meno">
+              <input class="td-input" name="email" required type="email" placeholder="E-mail">
+              <input class="td-input" name="telefon" placeholder="Telefón">
+              <input class="td-input" name="datum_iso" type="date" required>
 
-              <select name="slot_text"
-                style="padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:#0f172a;color:#fff;outline:none;">
+              <select class="td-input" name="slot_text">
                 <option value="Nezáleží">Časť dňa: Nezáleží</option>
                 <option value="Dopoludnia">Časť dňa: Dopoludnia</option>
                 <option value="Popoludní">Časť dňa: Popoludní</option>
               </select>
 
-              <input name="time_text" type="time" placeholder="Konkrétny čas"
-                style="padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:#0f172a;color:#fff;outline:none;">
+              <input class="td-input" name="time_text" type="time" placeholder="Konkrétny čas">
             </div>
 
             <!-- honeypot -->
-            <input name="website" tabindex="-1" autocomplete="off" style="display:none">
+            <input class="pp-hidden-field" name="website" tabindex="-1" autocomplete="off">
 
-            <textarea name="poznamka" rows="4" placeholder="Poznámka (voliteľné)"
-              style="margin-top:10px;width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:#0f172a;color:#fff;outline:none;resize:vertical;"></textarea>
+            <textarea class="td-note" name="poznamka" rows="4" placeholder="Poznámka (voliteľné)"></textarea>
 
-            <div style="display:flex; gap:10px; align-items:center; margin-top:12px;">
-              <button type="submit" id="tdSubmit"
-                style="background:#111827;color:#fff;border:0;border-radius:12px;padding:10px 14px;font-weight:900;cursor:pointer;">
+            <div class="td-actions">
+              <button type="submit" id="tdSubmit" class="td-submit">
                 Odoslať žiadosť
               </button>
-              <div id="tdStatus" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;opacity:.9;"></div>
+              <div id="tdStatus" class="td-status"></div>
             </div>
           </form>
         </div>
@@ -106,7 +100,7 @@
     `;
     document.body.appendChild(el);
 
-    const close = () => { el.style.display = 'none'; document.body.classList.remove('no-scroll'); };
+    const close = () => { el.hidden = true; document.body.classList.remove('no-scroll'); };
     el.addEventListener('click', (e) => { if (e.target === el) close(); });
     el.querySelector('#tdClose').addEventListener('click', close);
 
@@ -186,7 +180,7 @@
     const line = modal.querySelector('#tdCarLine');
     if (line) line.textContent = ctx?.car_title ? ctx.car_title : '—';
 
-    modal.style.display = 'flex';
+    modal.hidden = false;
     document.body.classList.add('no-scroll');
   }
 
@@ -200,6 +194,13 @@
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
       .replace(/-{2,}/g, '-');
+  }
+
+  function resolveLocalAssetUrl(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|\/|#)/i.test(raw)) return raw;
+    return '/' + raw.replace(/^\.?\//, '');
   }
 
   function resolveCarId(car, baseCounts, usedIds) {
@@ -324,9 +325,20 @@ function parseLegacyPrevodovka(raw) {
 
   function setBrandFromCar(car) {
     const make = (car?.znacka || '').toLowerCase().trim();
-    if (make === 'subaru' || make === 'kgm' || make === 'jeep') {
+    if (make === 'subaru' || make === 'kgm' || make === 'jeep' || make === 'chery') {
       document.documentElement.setAttribute('data-brand', make);
+      applyDetailBrandText(make);
     }
+  }
+
+  function applyDetailBrandText(brand) {
+    const label = brand === 'kgm' ? 'KGM' : brand ? brand.charAt(0).toUpperCase() + brand.slice(1) : '';
+    if (!label) return;
+
+    document.querySelectorAll('[data-brand-text="footer"]').forEach((el) => {
+      const text = `Autorizovaný predaj a servis ${label} v Poprade od roku 2011.`;
+      el.textContent = window.ppI18n?.isEnglish?.() ? window.ppI18n.t(text) : text;
+    });
   }
 
   function renderNotFound(message) {
@@ -334,8 +346,8 @@ function parseLegacyPrevodovka(raw) {
       <div class="car-cta">
   <a class="btn car-btn car-btn-primary" href="tel:+421903905280">Zavolať predaj</a>
   <button class="btn car-btn" type="button" id="openTestDrive">Testovacia jazda</button>
-  <a class="btn car-btn" href="mailto:predaj@ppauto.sk">Napísať predaju</a>
-  <a class="btn car-btn" href="index.html#kontakt">Navigovať / Kontakt</a>
+  <a class="btn car-btn" href="#" data-mail="sales">Napísať predaju</a>
+  <a class="btn car-btn" href="/ponuka#kontakt">Navigovať / Kontakt</a>
 </div>
     `;
   }
@@ -380,9 +392,9 @@ function parseLegacyPrevodovka(raw) {
   (Array.isArray(car.galeria) && car.galeria.length) ? car.galeria :
   (Array.isArray(car.obrazky) && car.obrazky.length) ? car.obrazky : [];
 
-let images = gallery.filter(Boolean);
+let images = gallery.map(resolveLocalAssetUrl).filter(Boolean);
 
-const cover = String(car.titulka || car.obrazok || '').trim();
+const cover = resolveLocalAssetUrl(car.titulka || car.obrazok || '');
 if (cover) {
   // titulka vždy prvá + bez duplicit
   images = [cover, ...images.filter(u => u !== cover)];
@@ -492,8 +504,8 @@ const prevodovkaText = gearboxFullLabel(typPrevodovky);
           <div class="car-cta">
   <a class="btn car-btn car-btn-primary" href="tel:+421903905280">Zavolať predaj</a>
   <a class="btn car-btn" href="#testdrive" id="openTestDrive">Testovacia jazda</a>
-  <a class="btn car-btn" href="mailto:predaj@ppauto.sk">Napísať predaju</a>
-  <a class="btn car-btn" href="index.html#kontakt">Navigovať / Kontakt</a>
+  <a class="btn car-btn" href="#" data-mail="sales">Napísať predaju</a>
+  <a class="btn car-btn" href="/ponuka#kontakt">Navigovať / Kontakt</a>
 </div>
         </aside>
       </div>
@@ -590,10 +602,10 @@ const prevodovkaText = gearboxFullLabel(typPrevodovky);
         </label>
 
         <!-- anti-spam honeypot -->
-        <input name="website" tabindex="-1" autocomplete="off" style="display:none">
+        <input class="pp-hidden-field" name="website" tabindex="-1" autocomplete="off">
 
         <!-- EmailJS template field -->
-        <textarea name="sprava" id="carTdMessage" style="display:none"></textarea>
+        <textarea class="pp-hidden-field" name="sprava" id="carTdMessage"></textarea>
 
               <!-- AUTO info pre EmailJS template (pekne rozdelené sekcie) -->
 <input type="hidden" name="auto_nazov" id="carTdAutoNazov">
@@ -634,7 +646,7 @@ const prevodovkaText = gearboxFullLabel(typPrevodovky);
       'Cena na vyžiadanie';
 
     const carUrlForMail = carIdForMail
-      ? new URL(`auto.html?id=${encodeURIComponent(carIdForMail)}`, location.origin).href
+      ? new URL(`/auta/${encodeURIComponent(carIdForMail)}`, location.origin).href
       : location.href;
 
     const ctx = {
@@ -835,7 +847,7 @@ document.addEventListener('keydown', (e) => {
 
   async function boot() {
     if (!wantedId) {
-      renderNotFound('Chýba parameter id (napr. auto.html?id=jeep-compass-2021).');
+      renderNotFound('Chýba ID vozidla v adrese (napr. /auta/jeep-compass-2021).');
       return;
     }
 

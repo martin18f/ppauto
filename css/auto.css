@@ -24,9 +24,14 @@
   --gallery-h: clamp(320px, 42vw, 560px);
 }
 
+.pp-hidden-field{
+  display: none !important;
+}
+
 html[data-brand="subaru"]{ --car-accent: var(--accent);   --car-accent-rgb: 59,130,246; }
 html[data-brand="kgm"]   { --car-accent: var(--accent-2); --car-accent-rgb: 34,197,94; }
 html[data-brand="jeep"]  { --car-accent: var(--accent-3); --car-accent-rgb: 245,158,11; }
+html[data-brand="chery"] { --car-accent: var(--accent-4); --car-accent-rgb: 225,29,72; }
 
 @media (max-width: 1000px){
   :root{ --gallery-h: clamp(260px, 58vw, 480px); }
@@ -45,6 +50,122 @@ html[data-brand="jeep"]  { --car-accent: var(--accent-3); --car-accent-rgb: 245,
 .car-page{
   padding: 32px 0 48px;
   position: relative;
+}
+
+.brand-location{
+  color: var(--muted);
+  margin-left: 5px;
+}
+
+.td-modal{
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(0,0,0,.55);
+  z-index: 9999;
+}
+
+.td-modal[hidden]{
+  display: none;
+}
+
+.td-dialog{
+  width: 720px;
+  max-width: 100%;
+  overflow: hidden;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+  background: #0b0f14;
+  box-shadow: 0 30px 90px rgba(0,0,0,.65);
+}
+
+.td-head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #111827;
+}
+
+.td-title{
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.td-close{
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.td-body{
+  padding: 16px;
+}
+
+.td-car-line{
+  margin-bottom: 12px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  opacity: .9;
+}
+
+.td-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.td-input,
+.td-note{
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #0f172a;
+  color: #fff;
+  outline: none;
+}
+
+.td-note{
+  width: 100%;
+  margin-top: 10px;
+  resize: vertical;
+}
+
+.td-actions{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.td-submit{
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: #111827;
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.td-status{
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  opacity: .9;
+}
+
+@media (max-width: 640px){
+  .td-grid{ grid-template-columns: 1fr; }
+  .td-actions{ align-items: flex-start; flex-direction: column; }
 }
 
 /* jemný overlay v duchu ostatných sekcií (service-hero, cards, …) */

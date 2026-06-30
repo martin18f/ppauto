@@ -184,11 +184,18 @@
       <div class="row">
         <div>
           <label>Značka</label>
-          <input type="text" id="znacka" name="znacka" placeholder="Subaru" />
+          <input type="text" id="znacka" name="znacka" list="brandOptions" placeholder="Subaru / KGM / Jeep / Chery" autocomplete="off" />
+          <datalist id="brandOptions">
+            <option value="Subaru"></option>
+            <option value="KGM"></option>
+            <option value="Jeep"></option>
+            <option value="Chery"></option>
+          </datalist>
         </div>
         <div>
           <label>Model</label>
-          <input type="text" id="model" name="model" placeholder="BRZ" />
+          <input type="text" id="model" name="model" list="modelOptions" placeholder="BRZ" autocomplete="off" />
+          <datalist id="modelOptions"></datalist>
         </div>
       </div>
 
@@ -294,7 +301,7 @@
 
       <div>
         <label>Tagy (čiarkou oddelené)</label>
-        <input type="text" id="tagy" name="tagy" placeholder="subaru, skladom"/>
+        <input type="text" id="tagy" name="tagy" placeholder="chery, skladom"/>
       </div>
 
       <div>
@@ -329,6 +336,9 @@
   </button>
   <button type="button" class="brand-tab" data-brand="jeep" role="tab" aria-selected="false">
     Jeep
+  </button>
+  <button type="button" class="brand-tab" data-brand="chery" role="tab" aria-selected="false">
+    Chery
   </button>
 </div>
 
@@ -540,6 +550,47 @@
   <label><input type="checkbox" data-brand="jeep" value="USB A-C vpredu a 2x USB-C vzadu"> USB A-C vpredu a 2x USB-C vzadu</label>
   <label><input type="checkbox" data-brand="jeep" value="Služby pripojenia"> Služby pripojenia</label>
 
+  <!-- ===== CHERY ===== -->
+  <div class="vybava-section vybava-brand">Chery</div>
+
+  <div class="vybava-section">Bezpečnosť a asistenti</div>
+  <label><input type="checkbox" data-brand="chery" value="Adaptívny tempomat"> Adaptívny tempomat</label>
+  <label><input type="checkbox" data-brand="chery" value="Asistent jazdy v jazdnom pruhu"> Asistent jazdy v jazdnom pruhu</label>
+  <label><input type="checkbox" data-brand="chery" value="Sledovanie mŕtveho uhla"> Sledovanie mŕtveho uhla</label>
+  <label><input type="checkbox" data-brand="chery" value="Autonómne núdzové brzdenie"> Autonómne núdzové brzdenie</label>
+  <label><input type="checkbox" data-brand="chery" value="Rozpoznávanie dopravných značiek"> Rozpoznávanie dopravných značiek</label>
+  <label><input type="checkbox" data-brand="chery" value="Monitorovanie únavy vodiča"> Monitorovanie únavy vodiča</label>
+  <label><input type="checkbox" data-brand="chery" value="360° parkovacia kamera"> 360° parkovacia kamera</label>
+  <label><input type="checkbox" data-brand="chery" value="Predné a zadné parkovacie senzory"> Predné a zadné parkovacie senzory</label>
+  <label><input type="checkbox" data-brand="chery" value="ISOFIX"> ISOFIX</label>
+
+  <div class="vybava-section">Komfort</div>
+  <label><input type="checkbox" data-brand="chery" value="Dvojzónová automatická klimatizácia"> Dvojzónová automatická klimatizácia</label>
+  <label><input type="checkbox" data-brand="chery" value="Vyhrievané predné sedadlá"> Vyhrievané predné sedadlá</label>
+  <label><input type="checkbox" data-brand="chery" value="Ventilované predné sedadlá"> Ventilované predné sedadlá</label>
+  <label><input type="checkbox" data-brand="chery" value="Elektricky nastaviteľné sedadlo vodiča"> Elektricky nastaviteľné sedadlo vodiča</label>
+  <label><input type="checkbox" data-brand="chery" value="Bezkľúčový vstup a štartovanie"> Bezkľúčový vstup a štartovanie</label>
+  <label><input type="checkbox" data-brand="chery" value="Elektrické ovládanie batožinového priestoru"> Elektrické ovládanie batožinového priestoru</label>
+  <label><input type="checkbox" data-brand="chery" value="Panoramatické strešné okno"> Panoramatické strešné okno</label>
+  <label><input type="checkbox" data-brand="chery" value="Ambientné osvetlenie interiéru"> Ambientné osvetlenie interiéru</label>
+
+  <div class="vybava-section">Multimédiá a konektivita</div>
+  <label><input type="checkbox" data-brand="chery" value="Digitálny prístrojový panel"> Digitálny prístrojový panel</label>
+  <label><input type="checkbox" data-brand="chery" value="Dotykový infotainment displej"> Dotykový infotainment displej</label>
+  <label><input type="checkbox" data-brand="chery" value="Apple CarPlay a Android Auto"> Apple CarPlay a Android Auto</label>
+  <label><input type="checkbox" data-brand="chery" value="Bezdrôtové nabíjanie telefónu"> Bezdrôtové nabíjanie telefónu</label>
+  <label><input type="checkbox" data-brand="chery" value="Bluetooth"> Bluetooth</label>
+  <label><input type="checkbox" data-brand="chery" value="USB konektory vpredu a vzadu"> USB konektory vpredu a vzadu</label>
+
+  <div class="vybava-section">Exteriér a pohon</div>
+  <label><input type="checkbox" data-brand="chery" value="LED svetlomety"> LED svetlomety</label>
+  <label><input type="checkbox" data-brand="chery" value="LED denné svietenie"> LED denné svietenie</label>
+  <label><input type="checkbox" data-brand="chery" value="Elektricky sklopné a vyhrievané spätné zrkadlá"> Elektricky sklopné a vyhrievané spätné zrkadlá</label>
+  <label><input type="checkbox" data-brand="chery" value="Strešné lyžiny"> Strešné lyžiny</label>
+  <label><input type="checkbox" data-brand="chery" value="Zliatinové disky"> Zliatinové disky</label>
+  <label><input type="checkbox" data-brand="chery" value="Hybridný pohon"> Hybridný pohon</label>
+  <label><input type="checkbox" data-brand="chery" value="Plug-in hybridný pohon"> Plug-in hybridný pohon</label>
+
 
 
 
@@ -564,6 +615,7 @@
             <option value="Subaru">Subaru</option>
             <option value="Jeep">Jeep</option>
             <option value="KGM">KGM</option>
+            <option value="Chery">Chery</option>
           </select>
 
           <!-- Rok -->
@@ -648,6 +700,7 @@
           <option value="subaru">Subaru</option>
           <option value="kgm">KGM</option>
           <option value="jeep">Jeep</option>
+          <option value="chery">Chery</option>
         </select>
       </div>
 
@@ -871,14 +924,67 @@ const vybavaSelectAll = document.getElementById('vybavaSelectAll');
 
 let activeBrand = 'subaru';
 
+const ADMIN_BRANDS = {
+  subaru: {
+    label: 'Subaru',
+    modelPlaceholder: 'Forester / Outback / Crosstrek...',
+    models: ['FORESTER', 'OUTBACK', 'SOLTERRA', 'CROSSTREK', 'BRZ'],
+  },
+  kgm: {
+    label: 'KGM',
+    modelPlaceholder: 'Torres / Korando / Rexton...',
+    models: ['TORRES', 'TORRES EVX', 'KORANDO', 'TIVOLI', 'REXTON', 'MUSSO GRAND', 'ACTYON'],
+  },
+  jeep: {
+    label: 'Jeep',
+    modelPlaceholder: 'Avenger / Compass / Wrangler...',
+    models: ['AVENGER', 'RENEGADE', 'COMPASS', 'WRANGLER', 'GRAND CHEROKEE'],
+  },
+  chery: {
+    label: 'Chery',
+    modelPlaceholder: 'TIGGO 7 PHEV / TIGGO 8 / TIGGO 9 PHEV...',
+    models: [
+      'TIGGO 9 Plug-in Hybrid',
+      'TIGGO 8 Plug-in Hybrid',
+      'TIGGO 8',
+      'TIGGO 7 Plug-in Hybrid',
+      'TIGGO 7 Hybrid',
+      'TIGGO 7',
+      'TIGGO 4 Hybrid'
+    ],
+  },
+};
+
+const modelOptions = document.getElementById('modelOptions');
+
 function normalizePromoBrand(b){
-  return String(b || '').toLowerCase().trim();
+  return normalizeBrand(b);
 }
 
 function getBrandFromForm(){
-  const b = normalizePromoBrand(form.elements['znacka']?.value);
-  if (b === 'subaru' || b === 'kgm' || b === 'jeep') return b;
-  return null;
+  return normalizePromoBrand(form.elements['znacka']?.value);
+}
+
+function syncBrandInputs(brand) {
+  const normalized = normalizeBrand(brand);
+  const cfg = normalized ? ADMIN_BRANDS[normalized] : null;
+
+  if (modelOptions) {
+    modelOptions.innerHTML = cfg
+      ? cfg.models.map(model => `<option value="${escHtml(model)}"></option>`).join('')
+      : '';
+  }
+
+  if (form.elements['model']) {
+    form.elements['model'].placeholder = cfg ? cfg.modelPlaceholder : 'Model';
+  }
+}
+
+function normalizeModelForBrand(brand, model) {
+  const raw = String(model || '').trim();
+  const cfg = ADMIN_BRANDS[normalizeBrand(brand)];
+  if (!cfg) return raw;
+  return cfg.models.find(m => m.toLowerCase() === raw.toLowerCase()) || raw;
 }
 
 function vybavaCheckboxesForBrand(brand){
@@ -1021,6 +1127,10 @@ function hideProgress() {
       return key === DEMO_TAG || key === 'predvadzacie-vozidlo' || key === 'demo';
     }
 
+    function isBrandTag(tag) {
+      return !!normalizeBrand(tag) || Object.keys(ADMIN_BRANDS).includes(normalizeTagKey(tag));
+    }
+
     function carIsDemo(car) {
       return Array.isArray(car?.tagy) && car.tagy.some(isDemoTag);
     }
@@ -1035,6 +1145,7 @@ function hideProgress() {
         .filter(Boolean)
         .forEach(t => {
           if (isDemoTag(t)) return;
+          if (isBrandTag(t)) return;
           const key = normalizeTagKey(t);
           if (seen.has(key)) return;
           seen.add(key);
@@ -1044,8 +1155,10 @@ function hideProgress() {
       return tags;
     }
 
-    function getTagsForSave() {
+    function getTagsForSave(brand) {
       const tags = getManualTagsFromInput();
+      const brandTag = normalizeBrand(brand);
+      if (brandTag) tags.unshift(brandTag);
       if (predvadzacie.checked) tags.push(DEMO_TAG);
       return tags;
     }
@@ -1053,6 +1166,7 @@ function hideProgress() {
     function formatTagInputValue(tags) {
       return (Array.isArray(tags) ? tags : [])
         .filter(t => !isDemoTag(t))
+        .filter(t => !isBrandTag(t))
         .join(', ');
     }
 
@@ -1094,6 +1208,7 @@ function hideProgress() {
         predvadzacie.checked = false;
         skryte.checked = false;
         toggleZlavaUI();
+        syncBrandInputs(activeBrand || 'subaru');
 
         resetImagePreviews();
       } else if (mode === 'edit') {
@@ -1304,17 +1419,29 @@ function hideProgress() {
   const isEdit = Number.isInteger(idx) && idx >= 0;
 
   const rokRaw = (form.elements['rok']?.value || '').trim();
-  const znackaVal = (form.elements['znacka']?.value || '').trim();
-  const modelVal = (form.elements['model']?.value || '').trim();
+  const znackaRaw = (form.elements['znacka']?.value || '').trim();
+  const brandForSave = getBrandFromForm();
+  const znackaVal = brandForSave ? brandLabel(brandForSave) : znackaRaw;
+  const modelRaw = (form.elements['model']?.value || '').trim();
+  const modelVal = normalizeModelForBrand(brandForSave, modelRaw);
 
-  if (!znackaVal || !modelVal) {
+  if (!znackaRaw || !modelRaw) {
     alert('Vyplň značku a model.');
+    return;
+  }
+  if (!brandForSave) {
+    alert('Vyber platnú značku (Subaru/KGM/Jeep/Chery).');
     return;
   }
   if (!rokRaw) {
     alert('Vyplň rok.');
     return;
   }
+
+  form.elements['znacka'].value = znackaVal;
+  form.elements['model'].value = modelVal;
+  syncBrandInputs(brandForSave);
+  applyVybavaBrandFilter(brandForSave);
 
   // Progress počítame až po validácii (aby sa overlay nezasekol na returne)
   const willUploadTitle = !!(titulkaInput?.files && titulkaInput.files[0]);
@@ -1383,7 +1510,6 @@ const prevodovkaLegacy = buildLegacyPrevodovka(typPrevodovky, vybavaPaket);
 
 // ✅ toto je extrémne dôležité: pri editácii zachováme existujúce polia (napr. galéria, id…)
 const base = isEdit ? (cars[idx] || {}) : {};
-const brandForSave = getBrandFromForm() || activeBrand;
 
 
     const data = {
@@ -1406,7 +1532,7 @@ galeria: galeria,
 obrazky: galeria,   // detail stránky si to vie hneď zobrať
 obrazok: titulkaUrl, // karta v ponuke (starý script.js)
 
-      tagy: getTagsForSave(),
+      tagy: getTagsForSave(brandForSave),
 
       skryte: !!skryte.checked,
       objem: form.elements['objem']?.value ? Number(form.elements['objem'].value) : null,
@@ -1467,8 +1593,11 @@ obrazok: titulkaUrl, // karta v ponuke (starý script.js)
 
       form.dataset.carId = (a.id || '').toString().trim();
 
-      form.elements['znacka'].value = a.znacka || '';
+      const editBrand = normalizeBrand(a.znacka) || 'subaru';
+
+      form.elements['znacka'].value = normalizeBrand(a.znacka) ? brandLabel(editBrand) : (a.znacka || '');
       form.elements['model'].value = a.model || '';
+      syncBrandInputs(editBrand);
       form.elements['rok'].value = a.rok ?? '';
       form.elements['palivo'].value = a.palivo || '';
       const parsed = parseLegacyPrevodovka(a.prevodovka || '');
@@ -1497,7 +1626,7 @@ form.elements['vybava_paket'].value = a.vybava_paket || parsed.paket || '';
         cb.checked = vybavaSet.has(cb.value);
       });
 
-      applyVybavaBrandFilter(normalizeBrand(a.znacka) || 'subaru');
+      applyVybavaBrandFilter(editBrand);
       updateSelectAllForActiveBrand();
 
 
@@ -1743,7 +1872,7 @@ function escHtml(s) {
 
 function normalizeBrand(b) {
   const v = String(b || '').toLowerCase().trim();
-  return (v === 'subaru' || v === 'kgm' || v === 'jeep') ? v : null;
+  return (v === 'subaru' || v === 'kgm' || v === 'jeep' || v === 'chery') ? v : null;
 }
 
 function brandLabel(b) {
@@ -1751,6 +1880,7 @@ function brandLabel(b) {
   if (raw === 'subaru') return 'Subaru';
   if (raw === 'kgm') return 'KGM';
   if (raw === 'jeep') return 'Jeep';
+  if (raw === 'chery') return 'Chery';
   if (raw === 'all') return 'LEGACY: all';
   return 'NEPLATNÁ';
 }
@@ -1870,7 +2000,7 @@ function getPromoPayloadFromForm() {
   const skryte = !!promoHidden.checked;
 
   if (!brand) {
-    alert('Vyber značku (Subaru/KGM/Jeep).');
+    alert('Vyber značku (Subaru/KGM/Jeep/Chery).');
     return null;
   }
 
@@ -2025,7 +2155,8 @@ loadFromApi();
 const brandTabs = document.querySelectorAll('.vybava-brand-switch .brand-tab');
 
 function applyVybavaBrandFilter(brand) {
-  activeBrand = normalizeBrand(brand);
+  activeBrand = normalizeBrand(brand) || 'subaru';
+  syncBrandInputs(activeBrand);
 
   // 1) show/hide labely podľa data-brand
   document.querySelectorAll('.vybava-grid label').forEach(label => {
@@ -2066,13 +2197,19 @@ function applyVybavaBrandFilter(brand) {
 }
 
 brandTabs.forEach(btn => {
-  btn.addEventListener('click', () => applyVybavaBrandFilter(btn.dataset.brand));
+  btn.addEventListener('click', () => {
+    const brand = normalizeBrand(btn.dataset.brand);
+    if (!brand) return;
+    form.elements['znacka'].value = brandLabel(brand);
+    applyVybavaBrandFilter(brand);
+  });
 });
 
-// auto-sync, keď user zmení "Značka" input (Subaru/KGM/Jeep)
+// auto-sync, keď user zmení "Značka" input (Subaru/KGM/Jeep/Chery)
 form.elements['znacka']?.addEventListener('input', () => {
   const b = getBrandFromForm();
   if (b) applyVybavaBrandFilter(b);
+  else syncBrandInputs(null);
 });
 
 // inicializácia: podľa formu, inak subaru

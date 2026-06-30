@@ -1,0 +1,32 @@
+{
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/vyber-znacky.html"
+    },
+    {
+      "source": "/ponuka",
+      "destination": "/index.html?brand=all"
+    },
+    {
+      "source": "/subaru",
+      "destination": "/index.html?brand=subaru"
+    },
+    {
+      "source": "/kgm",
+      "destination": "/index.html?brand=kgm"
+    },
+    {
+      "source": "/jeep",
+      "destination": "/index.html?brand=jeep"
+    },
+    {
+      "source": "/chery",
+      "destination": "/index.html?brand=chery"
+    },
+    {
+      "source": "/auta/:id",
+      "destination": "/auto.html?id=:id"
+    }
+  ]
+}
