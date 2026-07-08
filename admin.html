@@ -284,7 +284,8 @@
       <!-- TITULNÁ FOTKA -->
       <div class="form-group">
         <label>Titulná fotka (pre ponuku áut)</label>
-        <input type="file" id="titulkaInput" accept="image/*">
+        <input type="file" id="titulkaInput" accept="image/jpeg,image/png,image/webp,image/avif">
+        <div class="hint">Limit: 3 MB. Podporované formáty: JPG, JPEG, PNG, WebP, AVIF.</div>
         <div id="titulkaPreview" class="preview">
           <small class="hint">Titulná fotka pre ponuku áut</small>
         </div>
@@ -293,7 +294,8 @@
       <!-- GALÉRIA -->
       <div class="form-group">
         <label>Fotky vozidla (galéria)</label>
-        <input type="file" id="galeriaInput" accept="image/*" multiple>
+        <input type="file" id="galeriaInput" accept="image/jpeg,image/png,image/webp,image/avif" multiple>
+        <div class="hint">Limit: 3 MB na fotku. Podporované formáty: JPG, JPEG, PNG, WebP, AVIF.</div>
         <div id="galeriaPreview" class="preview">
           <small class="hint">Prvá fotka bude titulná</small>
         </div>
@@ -725,9 +727,10 @@
         <label>Obrázok</label>
 
         <div class="upload-inline">
-          <input type="file" id="promoImageFile" accept="image/*">
+          <input type="file" id="promoImageFile" accept="image/jpeg,image/png,image/webp,image/avif">
           <button class="btnx" id="promoUploadBtn" type="button">Nahrať</button>
         </div>
+        <div class="hint">Limit: 3 MB. Podporované formáty: JPG, JPEG, PNG, WebP, AVIF.</div>
 
         <input type="text" id="promoImageUrl" placeholder="URL obrázka (doplní sa po nahratí)…" />
 
@@ -895,11 +898,13 @@
     titulkaInput?.addEventListener('change', () => {
       const f = titulkaInput.files?.[0];
       if (!f) return;
+      if (!validateImageSelection(titulkaInput, titulkaPreview, '<small class="hint">Titulná fotka pre ponuku áut</small>')) return;
       titulkaPreview.innerHTML = `<img src="${URL.createObjectURL(f)}" alt="titulka">`;
     });
 
     // náhľad galérie
     galeriaInput?.addEventListener('change', () => {
+      if (!validateImageSelection(galeriaInput, galeriaPreview, '<small class="hint">Prvá fotka bude titulná</small>')) return;
       galeriaPreview.innerHTML = '';
       [...(galeriaInput.files || [])].forEach(f => {
         const img = document.createElement('img');
@@ -1486,14 +1491,22 @@ function hideProgress() {
     const hasNewGallery = galeriaInput.files && galeriaInput.files.length > 0;
 
     if (hasNewGallery) {
-      galeria = [];
-      if (titulkaUrl) galeria.push(titulkaUrl); // titulka vždy prvá
+      const uploadedGallery = [];
 
       for (const f of galeriaInput.files) {
         const url = await uploadImage(f);
-        if (url) galeria.push(url);
+        if (url) uploadedGallery.push(url);
         stepProgress('Nahrávam fotky…');
       }
+
+      // Ak nie je vybraná samostatná titulka, prvá nová fotka z galérie sa stane titulnou.
+      if (!willUploadTitle && uploadedGallery.length) {
+        titulkaUrl = uploadedGallery[0];
+      }
+
+      galeria = willUploadTitle && titulkaUrl
+        ? [titulkaUrl, ...uploadedGallery]
+        : uploadedGallery;
     } else {
       // bez novej galérie len zabezpeč, že prvá fotka je titulka
       if (titulkaUrl) {
@@ -1580,7 +1593,7 @@ obrazok: titulkaUrl, // karta v ponuke (starý script.js)
 
   } catch (err) {
     console.error(err);
-    alert('Uloženie zlyhalo (chyba siete alebo servera).');
+    alert(err?.message ? `Uloženie zlyhalo: ${err.message}` : 'Uloženie zlyhalo (chyba siete alebo servera).');
   } finally {
     hideProgress();
   }
@@ -1660,7 +1673,6 @@ if (gallery.length) {
 }
 
       setFormMode('edit', index);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     async function onDelete(index) {
@@ -1795,6 +1807,62 @@ updateSelectAllForActiveBrand();
     // =============================
     // UTILS
     // =============================
+    const MAX_UPLOAD_IMAGE_BYTES = 3 * 1024 * 1024;
+    const SUPPORTED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'avif'];
+    const SUPPORTED_IMAGE_TYPES = new Set([
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+      'image/avif'
+    ]);
+    const SUPPORTED_IMAGE_FORMATS_LABEL = 'JPG, JPEG, PNG, WebP, AVIF';
+
+    function formatBytes(bytes) {
+      const value = Number(bytes) || 0;
+      if (value >= 1024 * 1024) return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+      if (value >= 1024) return `${Math.round(value / 1024)} KB`;
+      return `${value} B`;
+    }
+
+    function getFileExtension(filename) {
+      const match = String(filename || '').toLowerCase().match(/\.([^.\\/]+)$/);
+      return match ? match[1] : '';
+    }
+
+    function validateImageFile(file) {
+      if (!file) return;
+
+      const type = String(file.type || '').toLowerCase();
+      const extension = getFileExtension(file.name);
+      const hasSupportedType = SUPPORTED_IMAGE_TYPES.has(type);
+      const hasSupportedExtension = SUPPORTED_IMAGE_EXTENSIONS.includes(extension);
+
+      if (!hasSupportedType && !hasSupportedExtension) {
+        throw new Error(
+          `Súbor ${file.name} nie je podporovaný formát. Podporované formáty: ${SUPPORTED_IMAGE_FORMATS_LABEL}.`
+        );
+      }
+
+      if (file.size > MAX_UPLOAD_IMAGE_BYTES) {
+        throw new Error(
+          `Súbor ${file.name} má ${formatBytes(file.size)}. Limit je ${formatBytes(MAX_UPLOAD_IMAGE_BYTES)}. ` +
+          'Prosím zmenši ho alebo exportuj do ľahšieho formátu a nahraj znova.'
+        );
+      }
+    }
+
+    function validateImageSelection(input, previewEl, emptyHtml) {
+      try {
+        [...(input?.files || [])].forEach(validateImageFile);
+        return true;
+      } catch (err) {
+        alert(err?.message || 'Vybraný obrázok sa nedá nahrať.');
+        if (input) input.value = '';
+        if (previewEl) previewEl.innerHTML = emptyHtml || '';
+        return false;
+      }
+    }
+
     function fileToBase64(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -1811,10 +1879,7 @@ updateSelectAllForActiveBrand();
     async function uploadImage(file) {
       if (!file) return '';
 
-      if (file.size > 10 * 1024 * 1024) {
-        throw new Error('Súbor je príliš veľký (max 10 MB).');
-      }
-
+      validateImageFile(file);
       const base64 = await fileToBase64(file);
 
       const up = await fetch(apiUrl('/api/upload-image'), {
@@ -1860,6 +1925,10 @@ const promoShowHidden = document.getElementById('promoShowHidden');
 const promoReloadBtn = document.getElementById('promoReloadBtn');
 const promoTable = document.getElementById('promoTable');
 const promoTbody = promoTable?.querySelector('tbody');
+
+promoImageFile?.addEventListener('change', () => {
+  validateImageSelection(promoImageFile, promoPreview, '<small class="hint">Zatiaľ nie je nahraný obrázok</small>');
+});
 
 function escHtml(s) {
   return String(s ?? '')

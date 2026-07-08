@@ -7,6 +7,15 @@ function encodeGithubPath(path) {
     .join("/");
 }
 
+const MAX_UPLOAD_BYTES = 3 * 1024 * 1024;
+const MAX_UPLOAD_BASE64_CHARS = Math.ceil(MAX_UPLOAD_BYTES / 3) * 4;
+const ALLOWED_IMAGE_EXTENSIONS = new Set(["jpg", "jpeg", "png", "webp", "avif"]);
+
+function getFileExtension(filename) {
+  const match = String(filename || "").toLowerCase().match(/\.([^.\\/]+)$/);
+  return match ? match[1] : "";
+}
+
 export default async function handler(req, res) {
   if (!req.headers.cookie?.includes("admin=1")) {
     return res.status(401).end();
@@ -26,8 +35,18 @@ export default async function handler(req, res) {
     }
 
     const { filename, contentBase64 } = req.body || {};
-    if (!filename || !contentBase64) {
+    if (!filename || typeof contentBase64 !== "string" || !contentBase64) {
       return res.status(400).json({ error: "Missing filename or contentBase64" });
+    }
+    if (!ALLOWED_IMAGE_EXTENSIONS.has(getFileExtension(filename))) {
+      return res.status(400).json({
+        error: "Unsupported image format. Supported formats: JPG, JPEG, PNG, WebP, AVIF.",
+      });
+    }
+    if (contentBase64.length > MAX_UPLOAD_BASE64_CHARS) {
+      return res.status(413).json({
+        error: "Image is too large. Maximum upload size is 3 MB.",
+      });
     }
 
     const safeName = String(filename).replace(/[^\w.\-]+/g, "_");
