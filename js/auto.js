@@ -46,7 +46,7 @@
         slug === 'kgm' ||
         slug === 'jeep' ||
         slug === 'chery' ||
-        slug === 'index.html';
+        slug === 'ponuka.html';
 
       if (!isInventoryRoute) return '';
 
@@ -71,7 +71,7 @@
       const params = new URLSearchParams();
       params.set('brand', knownBrand ? normalized : 'all');
       if (english) params.set('lang', 'en');
-      return `index.html?${params.toString()}#ponuka`;
+      return `ponuka.html?${params.toString()}#ponuka`;
     }
 
     const path = knownBrand ? `/${normalized}` : '/ponuka';

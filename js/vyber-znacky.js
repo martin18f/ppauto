@@ -34,7 +34,7 @@
 
   // Navigácia cez čitateľné URL na produkcii, cez reálne súbory lokálne.
   function cleanBrandHref(brand) {
-    if (isLocalRouteHost()) return 'index.html?brand=' + encodeURIComponent(brand);
+    if (isLocalRouteHost()) return 'ponuka.html?brand=' + encodeURIComponent(brand);
     return '/' + encodeURIComponent(brand);
   }
 
@@ -69,7 +69,7 @@
 
   // „Zobraziť všetko“
   document.getElementById('skipOnce')?.addEventListener('click', () => {
-    const href = isLocalRouteHost() ? 'index.html?brand=all' : '/ponuka';
+    const href = isLocalRouteHost() ? 'ponuka.html?brand=all' : '/ponuka';
     location.href = withLang(href);
   });
 

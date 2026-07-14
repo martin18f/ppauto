@@ -624,7 +624,7 @@
     if (!path || (!/\.html$/i.test(path) && !isCleanLocalPath)) return raw;
 
     const params = new URLSearchParams(query);
-    if (/^index\.html$/i.test(path) && !params.has('brand')) {
+    if (/^ponuka\.html$/i.test(path) && !params.has('brand')) {
       params.set('brand', 'all');
     }
 
@@ -642,7 +642,7 @@
     } catch (e) {}
 
     const url = new URL(location.href);
-    if (/\/index\.html$/i.test(url.pathname) && !url.searchParams.has('brand')) {
+    if (/\/ponuka\.html$/i.test(url.pathname) && !url.searchParams.has('brand')) {
       const brand = normalize(document.documentElement.getAttribute('data-brand')).toLowerCase();
       url.searchParams.set('brand', ['subaru', 'kgm', 'jeep', 'chery'].includes(brand) ? brand : 'all');
     }

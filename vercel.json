@@ -1,28 +1,25 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
-      "source": "/",
-      "destination": "/vyber-znacky.html"
-    },
-    {
       "source": "/ponuka",
-      "destination": "/index.html?brand=all"
+      "destination": "/ponuka.html?brand=all"
     },
     {
       "source": "/subaru",
-      "destination": "/index.html?brand=subaru"
+      "destination": "/ponuka.html?brand=subaru"
     },
     {
       "source": "/kgm",
-      "destination": "/index.html?brand=kgm"
+      "destination": "/ponuka.html?brand=kgm"
     },
     {
       "source": "/jeep",
-      "destination": "/index.html?brand=jeep"
+      "destination": "/ponuka.html?brand=jeep"
     },
     {
       "source": "/chery",
-      "destination": "/index.html?brand=chery"
+      "destination": "/ponuka.html?brand=chery"
     },
     {
       "source": "/auta/:id",
