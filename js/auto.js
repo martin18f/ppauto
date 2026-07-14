@@ -14,8 +14,79 @@
   }
 
   const wantedId = (qs.get('id') || wantedIdFromPathname()).trim();
+  const INVENTORY_RETURN_KEY = 'ppauto.inventoryReturn';
+  const backToInventory = document.querySelector('.car-breadcrumb a');
+
+  function isLocalRouteHost() {
+    return location.protocol === 'file:' ||
+      location.hostname === 'localhost' ||
+      location.hostname === '127.0.0.1' ||
+      location.hostname === '::1';
+  }
+
+  function getStoredInventoryReturnHref() {
+    if (!wantedId) return '';
+
+    try {
+      const stored = JSON.parse(sessionStorage.getItem(INVENTORY_RETURN_KEY) || 'null');
+      if (!stored || String(stored.carId || '') !== wantedId || !stored.href) return '';
+
+      const url = new URL(stored.href, location.href);
+      const sameSite =
+        location.protocol === 'file:'
+          ? url.protocol === 'file:'
+          : url.origin === location.origin;
+
+      if (!sameSite) return '';
+
+      const slug = url.pathname.replace(/\/+$/, '').split('/').pop().toLowerCase();
+      const isInventoryRoute =
+        slug === 'ponuka' ||
+        slug === 'subaru' ||
+        slug === 'kgm' ||
+        slug === 'jeep' ||
+        slug === 'chery' ||
+        slug === 'index.html';
+
+      if (!isInventoryRoute) return '';
+
+      url.hash = 'ponuka';
+      return url.href;
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function getDefaultInventoryHref(brand) {
+    const normalized = String(brand || '').toLowerCase().trim();
+    const knownBrand =
+      normalized === 'subaru' ||
+      normalized === 'kgm' ||
+      normalized === 'jeep' ||
+      normalized === 'chery';
+
+    const english = (qs.get('lang') || '').toLowerCase() === 'en';
+
+    if (isLocalRouteHost()) {
+      const params = new URLSearchParams();
+      params.set('brand', knownBrand ? normalized : 'all');
+      if (english) params.set('lang', 'en');
+      return `index.html?${params.toString()}#ponuka`;
+    }
+
+    const path = knownBrand ? `/${normalized}` : '/ponuka';
+    return path + (english ? '?lang=en' : '') + '#ponuka';
+  }
+
+  function setBackToInventoryHref(fallbackBrand) {
+    const href = getStoredInventoryReturnHref() || getDefaultInventoryHref(fallbackBrand);
+    if (backToInventory) backToInventory.setAttribute('href', href);
+    return href;
+  }
 
   if (!mount) return;
+
+  setBackToInventoryHref();
 
     // ==============================
   // TEST DRIVE (EmailJS)
@@ -328,6 +399,7 @@ function parseLegacyPrevodovka(raw) {
     if (make === 'subaru' || make === 'kgm' || make === 'jeep' || make === 'chery') {
       document.documentElement.setAttribute('data-brand', make);
       applyDetailBrandText(make);
+      setBackToInventoryHref(make);
     }
   }
 
@@ -342,13 +414,46 @@ function parseLegacyPrevodovka(raw) {
   }
 
   function renderNotFound(message) {
+    const english =
+      (qs.get('lang') || '').toLowerCase() === 'en' ||
+      document.documentElement.lang === 'en';
+    const title = english ? 'Vehicle not found' : 'Vozidlo sa nenašlo';
+    const description = english
+      ? 'This vehicle is no longer available, is hidden, or the address is invalid.'
+      : (message || 'Toto vozidlo už nie je v ponuke alebo je adresa neplatná.');
+    const backLabel = english ? '← Back to the vehicle offer' : '← Späť na ponuku';
+    const backHref = setBackToInventoryHref();
+
+    const escapeHtml = (value) =>
+      String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+
+    document.title = `${title} | PP AUTO s.r.o.`;
+
+    let robots = document.querySelector('meta[name="robots"]');
+    if (!robots) {
+      robots = document.createElement('meta');
+      robots.setAttribute('name', 'robots');
+      document.head.appendChild(robots);
+    }
+    robots.setAttribute('content', 'noindex,follow');
+
     mount.innerHTML = `
-      <div class="car-cta">
-  <a class="btn car-btn car-btn-primary" href="tel:+421903905280">Zavolať predaj</a>
-  <button class="btn car-btn" type="button" id="openTestDrive">Testovacia jazda</button>
-  <a class="btn car-btn" href="#" data-mail="sales">Napísať predaju</a>
-  <a class="btn car-btn" href="/ponuka#kontakt">Navigovať / Kontakt</a>
-</div>
+      <section class="car-card">
+        <div class="section-title"><h2>${escapeHtml(title)}</h2></div>
+        <div class="section-body">
+          <p class="empty-note">${escapeHtml(description)}</p>
+          <div class="car-cta">
+            <a class="btn car-btn car-btn-primary" href="${escapeHtml(backHref)}">${escapeHtml(backLabel)}</a>
+            <a class="btn car-btn" href="tel:+421903905280">${english ? 'Call sales' : 'Zavolať predaj'}</a>
+            <a class="btn car-btn" href="#" data-mail="sales">${english ? 'Email sales' : 'Napísať predaju'}</a>
+          </div>
+        </div>
+      </section>
     `;
   }
 
