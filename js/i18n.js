@@ -534,7 +534,21 @@
     'Admin portál': 'Admin Portal',
     'PP AUTO · interný prístup': 'PP AUTO · internal access',
     'Admin kľúč': 'Admin Key',
-    'Neplatný prístupový kľúč': 'Invalid Access Key'
+    'Neplatný prístupový kľúč': 'Invalid Access Key',
+    'PP AUTO s.r.o.': 'PP AUTO s.r.o.',
+    'Autorizovaný predaj a servis áut v Poprade': 'Authorized Vehicle Sales and Service in Poprad',
+    'V PP AUTO sa postaráme o celý životný cyklus vozidla: od výberu modelu a testovacej jazdy, cez individuálne financovanie a poistenie, až po pravidelný servis, diagnostiku, sezónne prehliadky a originálne diely.': 'At PP AUTO, we take care of the entire vehicle lifecycle: from choosing a model and taking a test drive, through tailored financing and insurance, to regular servicing, diagnostics, seasonal inspections and genuine parts.',
+
+    'Skladové vozidlá a nové autá': 'Stock Vehicles and New Cars',
+    'Ponuka zahŕňa modely Subaru, KGM, Jeep a Chery, dostupné vozidlá na sklade aj autá pripravené na objednávku. Pri výbere pomôžeme porovnať výbavy, pohon, prevádzkové náklady a možnosti financovania.': 'Our offer includes Subaru, KGM, Jeep and Chery models, vehicles available in stock as well as cars available to order. We will help you compare equipment levels, powertrains, running costs and financing options.',
+
+    'Servis Subaru, KGM, Jeep a Chery': 'Subaru, KGM, Jeep and Chery Service',
+    'Servisné oddelenie v Poprade rieši záručný aj pozáručný servis, pravidelné prehliadky, diagnostiku, pneumatiky a náhradné diely. Pracujeme so zázemím autorizovaného predajcu a so skúsenosťami od roku 2011.': 'Our service department in Poprad provides warranty and post-warranty service, regular inspections, diagnostics, tire services and spare parts. We operate with the facilities of an authorized dealer and experience dating back to 2011.',
+
+    'Testovacie jazdy v regióne Tatry': 'Test Drives in the Tatras Region',
+    'Vozidlá si môžete vyskúšať na cestách okolo Popradu, Svitu, Kežmarku alebo Vysokých Tatier. Pri testovacej jazde vysvetlíme rozdiely medzi výbavami, bezpečnostnými systémami, pohonom 4x4 a hybridnými technológiami.': 'You can test our vehicles on roads around Poprad, Svit, Kežmarok or the High Tatras. During the test drive, we will explain the differences between equipment levels, safety systems, 4x4 drivetrains and hybrid technologies.',
+    'Robustné SUV, moderné technológie a poctivý výkon. Auto pripravené na každý deň.': 'Robust SUVs, modern technology and solid performance. A vehicle ready for every day.',
+    'Autorizovaný predaj a servis vozidiel Subaru, KGM, Jeep a Chery v Poprade.': 'Authorized sales and service of Subaru, KGM, Jeep and Chery vehicles in Poprad.',
   };
 
   const inlineTranslations = [

@@ -1,6 +1,30 @@
 <!DOCTYPE html>
 <html lang="sk">
 <head>
+  <script>
+  (function() {
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    let brand = urlParams.get('brand');
+
+    
+    if (brand) {
+      sessionStorage.setItem('selected_brand', brand);
+      return;
+    }
+
+    
+    const savedBrand = sessionStorage.getItem('selected_brand');
+
+    if (savedBrand) {
+      
+      window.location.replace(window.location.pathname + '?brand=' + savedBrand);
+    } else {
+      
+      window.location.replace('vyber-znacky.html');
+    }
+  })();
+</script>
 
 <link rel="stylesheet" href="css/cookie-consent.css">
 
@@ -197,10 +221,7 @@
     const lang = (params.get('lang') || '').toLowerCase().trim();
     const langQuery = lang === 'en' ? '?lang=en' : '';
 
-    if (wasReload()) {
-      redirectToChooser(langQuery);
-      return;
-    }
+    
 
     // Bez platnej značky v query alebo v čistej URL sa ide na výber značky.
     if (!isAllowed(brand)) {
