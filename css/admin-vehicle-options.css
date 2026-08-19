@@ -1,0 +1,48 @@
+/* Scoped only to the new vehicle option behaviour and promo image input. */
+
+form.admin-form .choice-control[data-choice-field="vybava_paket"] .choice-label::after {
+  content: "viac možností";
+  margin-left: 8px;
+  padding: 3px 7px;
+  border: 1px solid rgba(59,130,246,.28);
+  border-radius: 999px;
+  color: #a9c4ff;
+  background: rgba(59,130,246,.08);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+form.admin-form .choice-control[data-choice-field="vybava_paket"] .choice-option-wrap:has(.choice-option.is-selected),
+form.admin-form .choice-control[data-choice-field="vybava_paket"] .choice-option-wrap:has(.choice-option[aria-pressed="true"]) {
+  border-color: rgba(59,130,246,.95);
+  background: rgba(59,130,246,.18);
+  box-shadow: 0 0 0 1px rgba(59,130,246,.18);
+}
+
+form.admin-form .choice-control[data-choice-field="vybava_paket"] .choice-option.is-selected::before,
+form.admin-form .choice-control[data-choice-field="vybava_paket"] .choice-option[aria-pressed="true"]::before {
+  content: "✓";
+  margin-right: 6px;
+  font-size: 11px;
+}
+
+form.admin-form .choice-control[data-choice-field="farba"] .choice-label::after {
+  content: "podľa značky";
+  margin-left: 8px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+#promoForm .upload-inline.upload-inline--auto {
+  justify-content: stretch;
+}
+
+#promoForm .upload-inline.upload-inline--auto input[type="file"] {
+  width: 100%;
+  flex: 1 1 auto;
+}
