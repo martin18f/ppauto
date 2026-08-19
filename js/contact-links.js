@@ -52,4 +52,13 @@
     if (!link) return;
     hydrateMailLink(link);
   });
+
+  // Detail vozidla si načíta samostatný modul pre PDF dokumenty.
+  // Na ostatných stránkach sa nič navyše nenačítava.
+  if (document.getElementById('carDetail') && !document.querySelector('script[data-auto-documents-script]')) {
+    const script = document.createElement('script');
+    script.src = '/js/auto-documents.js';
+    script.dataset.autoDocumentsScript = '1';
+    document.head.appendChild(script);
+  }
 })();

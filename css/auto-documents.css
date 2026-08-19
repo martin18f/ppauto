@@ -1,0 +1,129 @@
+/* PP AUTO detail vozidla – kompaktná PDF sekcia pod technickými údajmi */
+.car-documents-strip {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255,255,255,.025);
+}
+
+.car-documents-strip__label {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 0 12px 0 2px;
+  border-right: 1px solid var(--line);
+}
+
+.car-documents-strip__label span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+}
+
+.car-documents-strip__items {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.car-document-link {
+  flex: 1 1 260px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 9px;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 10px;
+  background: rgba(255,255,255,.025);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color .15s ease, background-color .15s ease, transform .12s ease;
+}
+
+.car-document-link:hover {
+  border-color: rgba(85, 139, 245, .55);
+  background: rgba(59, 130, 246, .07);
+  transform: translateY(-1px);
+}
+
+.car-document-link__icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, .13);
+  color: #ff9494;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .04em;
+}
+
+.car-document-link__copy {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.car-document-link__copy strong,
+.car-document-link__copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.car-document-link__copy strong {
+  font-size: 12.5px;
+  line-height: 1.25;
+}
+
+.car-document-link__copy small {
+  color: var(--muted);
+  font-size: 10.5px;
+}
+
+.car-document-link__download {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 7px;
+  background: rgba(255,255,255,.04);
+  color: var(--muted);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.car-document-link:hover .car-document-link__download {
+  color: #fff;
+  background: rgba(59, 130, 246, .15);
+}
+
+@media (max-width: 700px) {
+  .car-documents-strip {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .car-documents-strip__label {
+    padding: 0 0 7px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .car-document-link {
+    flex-basis: 100%;
+  }
+}

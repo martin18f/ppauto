@@ -1,7 +1,6 @@
 .vercel
 .env.local
 .env
-
 .env*
-
+node_modules
 guide.txt
