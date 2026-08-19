@@ -1,3 +1,5 @@
+@import url('/css/admin-cennik-only.css');
+
 /* Scoped only to the new vehicle option behaviour and promo image input. */
 
 form.admin-form .choice-control[data-choice-field="vybava_paket"] .choice-label::after {
