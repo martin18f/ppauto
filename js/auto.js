@@ -46,6 +46,27 @@
     return d.toLocaleDateString('sk-SK');
   }
 
+  function parseEuroAmount(value) {
+    if (typeof value === 'number') {
+      return Number.isSafeInteger(value) && value >= 0 ? value : null;
+    }
+
+    const normalized = String(value ?? '')
+      .replace(/[\u00a0\u202f]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (!normalized || !/^(?:\d+|\d{1,3}(?: \d{3})+)\s*€?$/.test(normalized)) return null;
+
+    const amount = Number(normalized.replace(/[ €]/g, ''));
+    return Number.isSafeInteger(amount) ? amount : null;
+  }
+
+  function formatEuroPrice(value) {
+    const amount = parseEuroAmount(value);
+    if (amount === null) return '';
+    return `${String(amount).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €`;
+  }
+
   function ensureTestDriveModal() {
     if (_tdModalReady) return;
 
@@ -346,21 +367,23 @@ function parseLegacyPrevodovka(raw) {
       <div class="car-cta">
   <a class="btn car-btn car-btn-primary" href="tel:+421903905280">Zavolať predaj</a>
   <button class="btn car-btn" type="button" id="openTestDrive">Testovacia jazda</button>
-  <a class="btn car-btn" href="#" data-mail="sales">Napísať predaju</a>
+  <a class="btn car-btn" href="mailto:predaj@ppauto.sk" data-mail="sales">predaj@ppauto.sk</a>
   <a class="btn car-btn" href="/ponuka#kontakt">Navigovať / Kontakt</a>
 </div>
     `;
   }
 
   function priceHtml(car) {
-    const hasDiscount = !!(car?.nova_cena && String(car.nova_cena).trim() !== '');
+    const oldPrice = formatEuroPrice(car?.stara_cena);
+    const newPrice = formatEuroPrice(car?.nova_cena);
+    const hasDiscount = !!newPrice;
     if (hasDiscount) {
       return `
-        <div class="price-big">${car.nova_cena}</div>
-        <div class="price-old">${car.stara_cena || ''}</div>
+        <div class="price-big">${newPrice}</div>
+        ${oldPrice ? `<div class="price-old">${oldPrice}</div>` : ''}
       `;
     }
-    const p = (car?.stara_cena && String(car.stara_cena).trim() !== '') ? car.stara_cena : 'Cena na vyžiadanie';
+    const p = oldPrice || 'Cena na vyžiadanie';
     return `<div class="price-big">${p}</div>`;
   }
 
@@ -504,7 +527,7 @@ const prevodovkaText = gearboxFullLabel(typPrevodovky);
           <div class="car-cta">
   <a class="btn car-btn car-btn-primary" href="tel:+421903905280">Zavolať predaj</a>
   <a class="btn car-btn" href="#testdrive" id="openTestDrive">Testovacia jazda</a>
-  <a class="btn car-btn" href="#" data-mail="sales">Napísať predaju</a>
+  <a class="btn car-btn" href="mailto:predaj@ppauto.sk" data-mail="sales">predaj@ppauto.sk</a>
   <a class="btn car-btn" href="/ponuka#kontakt">Navigovať / Kontakt</a>
 </div>
         </aside>
@@ -641,8 +664,8 @@ const prevodovkaText = gearboxFullLabel(typPrevodovky);
       .trim();
 
     const carPriceForMail =
-      (car.nova_cena && String(car.nova_cena).trim()) ||
-      (car.stara_cena && String(car.stara_cena).trim()) ||
+      formatEuroPrice(car.nova_cena) ||
+      formatEuroPrice(car.stara_cena) ||
       'Cena na vyžiadanie';
 
     const carUrlForMail = carIdForMail
@@ -677,8 +700,8 @@ const tdSubmitBtn = document.getElementById('carTdSubmit');
 const tdStatus = document.getElementById('carTdStatus');
 
 function getPriceText(c) {
-  const n = (c?.nova_cena && String(c.nova_cena).trim() !== '') ? String(c.nova_cena).trim() : '';
-  const s = (c?.stara_cena && String(c.stara_cena).trim() !== '') ? String(c.stara_cena).trim() : '';
+  const n = formatEuroPrice(c?.nova_cena);
+  const s = formatEuroPrice(c?.stara_cena);
   if (n) return n;
   if (s) return s;
   return 'Cena na vyžiadanie';

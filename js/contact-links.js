@@ -11,15 +11,45 @@
     return parts ? parts[0] + '@' + parts[1] : '';
   }
 
+  function mailboxHref(link) {
+    const address = mailboxAddress(link?.dataset?.mail);
+    if (!address) return '';
+
+    const subject = link.dataset.mailSubject
+      ? '?subject=' + encodeURIComponent(link.dataset.mailSubject)
+      : '';
+    return 'mailto:' + address + subject;
+  }
+
+  function hydrateMailLink(link) {
+    const address = mailboxAddress(link?.dataset?.mail);
+    const href = mailboxHref(link);
+    if (!address || !href) return;
+
+    if (link.textContent.trim() !== address) link.textContent = address;
+    if (link.getAttribute('href') !== href) link.setAttribute('href', href);
+  }
+
+  function hydrateMailLinks(root) {
+    if (!root) return;
+    if (root.nodeType === Node.ELEMENT_NODE && root.matches('a[data-mail]')) {
+      hydrateMailLink(root);
+    }
+    root.querySelectorAll?.('a[data-mail]').forEach(hydrateMailLink);
+  }
+
+  hydrateMailLinks(document);
+
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach(mutation => {
+      mutation.addedNodes.forEach(hydrateMailLinks);
+    });
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+
   document.addEventListener('click', (event) => {
     const link = event.target.closest('a[data-mail]');
     if (!link) return;
-
-    const address = mailboxAddress(link.dataset.mail);
-    if (!address) return;
-
-    const subject = link.dataset.mailSubject ? '?subject=' + encodeURIComponent(link.dataset.mailSubject) : '';
-    event.preventDefault();
-    window.location.href = 'mai' + 'lto:' + address + subject;
+    hydrateMailLink(link);
   });
 })();

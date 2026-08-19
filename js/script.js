@@ -14,6 +14,30 @@ const CLEAN_BRAND_PATHS = {
   chery: '/chery',
 };
 
+function parseEuroAmount(value) {
+  if (typeof value === 'number') {
+    return Number.isSafeInteger(value) && value >= 0 ? value : null;
+  }
+
+  const normalized = String(value ?? '')
+    .replace(/[\u00a0\u202f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!normalized || !/^(?:\d+|\d{1,3}(?: \d{3})+)\s*€?$/.test(normalized)) return null;
+
+  const amount = Number(normalized.replace(/[ €]/g, ''));
+  return Number.isSafeInteger(amount) ? amount : null;
+}
+
+function groupIntegerDigits(value) {
+  return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
+function formatEuroAmount(value) {
+  const amount = parseEuroAmount(value);
+  return amount === null ? '' : `${groupIntegerDigits(amount)} €`;
+}
+
 function isLocalRouteHost() {
   return location.protocol === 'file:' ||
     location.hostname === 'localhost' ||
@@ -30,70 +54,58 @@ let MODELS_BRAND = null;     // pre ktorý brand je práve vykreslený pás mode
 
 const MODEL_STRIP_CONFIG = {
   subaru: [
-    { key: 'forester',   name: 'FORESTER',   img: 'img/forester.png',   alt: 'Subaru Forester' },
-    { key: 'outback',    name: 'OUTBACK',    img: 'img/outback.png',    alt: 'Subaru Outback' },
-    { key: 'solterra',   name: 'SOLTERRA',   img: 'img/solterra.png',   alt: 'Subaru Solterra' },
-    { key: 'crosstrek',  name: 'CROSSTREK',  img: 'img/crosstrek.png',  alt: 'Subaru Crosstrek' },
-    { key: 'brz',        name: 'BRZ',        img: 'img/brz.png',        alt: 'Subaru BRZ' },
+    { key: 'forester',   name: 'FORESTER',   img: 'img/preview_modely/Subaru/forester.png',   alt: 'Subaru Forester' },
+    { key: 'outback',    name: 'OUTBACK',    img: 'img/preview_modely/Subaru/outback.png',    alt: 'Subaru Outback' },
+    { key: 'solterra',   name: 'SOLTERRA',   img: 'img/preview_modely/Subaru/solterra.png',   alt: 'Subaru Solterra' },
+    { key: 'crosstrek',  name: 'CROSSTREK',  img: 'img/preview_modely/Subaru/crosstrek.png',  alt: 'Subaru Crosstrek' },
+    { key: 'brz',        name: 'BRZ',        img: 'img/preview_modely/Subaru/brz.png',        alt: 'Subaru BRZ' },
   ],
   kgm: [
-    { key: 'torres',     name: 'TORRES',     img: 'img/torres.png',        alt: 'KGM Torres' },
-    { key: 'torres-evx',  name: 'TORRES EVX',  img: 'img/torres-evx.png',   alt: 'KGM Torres EVX' },
-    { key: 'korando',    name: 'KORANDO',    img: 'img/korando.png',       alt: 'KGM Korando' },
-    { key: 'tivoli',     name: 'TIVOLI',     img: 'img/tivoli.png',        alt: 'KGM Tivoli' },
-    { key: 'rexton',     name: 'REXTON',     img: 'img/rexton.png',        alt: 'KGM Rexton' },
-    { key: 'musso',       name: 'MUSSO GRAND', img: 'img/musso.png',        alt: 'KGM Musso Grand' },
-    { key: 'actyon',      name: 'ACTYON',      img: 'img/actyon.png',       alt: 'KGM Actyon' },
+    { key: 'torres',     name: 'TORRES',     img: 'img/preview_modely/KGM/torres.png',        alt: 'KGM Torres' },
+    { key: 'torres-evx',  name: 'TORRES EVX',  img: 'img/preview_modely/KGM/torres-evx.png',   alt: 'KGM Torres EVX' },
+    { key: 'korando',    name: 'KORANDO',    img: 'img/preview_modely/KGM/korando.png',       alt: 'KGM Korando' },
+    { key: 'tivoli',     name: 'TIVOLI',     img: 'img/preview_modely/KGM/tivoli.png',        alt: 'KGM Tivoli' },
+    { key: 'rexton',     name: 'REXTON',     img: 'img/preview_modely/KGM/rexton.png',        alt: 'KGM Rexton' },
+    { key: 'musso',       name: 'MUSSO GRAND', img: 'img/preview_modely/KGM/musso.png',        alt: 'KGM Musso Grand' },
+    { key: 'actyon',      name: 'ACTYON',      img: 'img/preview_modely/KGM/actyon.png',       alt: 'KGM Actyon' },
     
   ],
   jeep: [
-    { key: 'avenger',         name: 'AVENGER',        img: 'img/avenger.png',        alt: 'Jeep Avenger' },
-    { key: 'renegade',        name: 'RENEGADE',       img: 'img/renegade.png',       alt: 'Jeep Renegade' },
-    { key: 'compass',         name: 'COMPASS',        img: 'img/compass.png',        alt: 'Jeep Compass' },
-    { key: 'wrangler',        name: 'WRANGLER',       img: 'img/wrangler.png',       alt: 'Jeep Wrangler' },
-    { key: 'grand-cherokee',  name: 'GRAND CHEROKEE', img: 'img/grand-cherokee.png', alt: 'Jeep Grand Cherokee' },
+    { key: 'avenger',         name: 'AVENGER',        img: 'img/preview_modely/Jeep/avenger.png',        alt: 'Jeep Avenger' },
+    { key: 'renegade',        name: 'RENEGADE',       img: 'img/preview_modely/Jeep/renegade.png',       alt: 'Jeep Renegade' },
+    { key: 'compass',         name: 'COMPASS',        img: 'img/preview_modely/Jeep/compass.png',        alt: 'Jeep Compass' },
+    { key: 'wrangler',        name: 'WRANGLER',       img: 'img/preview_modely/Jeep/wrangler.png',       alt: 'Jeep Wrangler' },
+    { key: 'grand-cherokee',  name: 'GRAND CHEROKEE', img: 'img/preview_modely/Jeep/grand-cherokee.png', alt: 'Jeep Grand Cherokee' },
   ],
   chery: [
   {
     key: 'tiggo-9-plug-in-hybrid',
     name: 'TIGGO 9 Plug-in Hybrid',
-    img: 'img/tiggo_9_series.avif',
+    img: 'img/preview_modely/Chery/tiggo_9_series.avif',
     alt: 'Chery TIGGO 9 Plug-in Hybrid'
   },
   {
     key: 'tiggo-8-plug-in-hybrid',
     name: 'TIGGO 8 Plug-in Hybrid',
-    img: 'img/tiggo_8_plug_in_hybrid.png',
+    img: 'img/preview_modely/Chery/tiggo_8_plug_in_hybrid.png',
     alt: 'Chery TIGGO 8 Plug-in Hybrid'
-  },
-  {
-    key: 'tiggo-8',
-    name: 'TIGGO 8',
-    img: 'img/tiggo_8_series.png',
-    alt: 'Chery TIGGO 8'
   },
   {
     key: 'tiggo-7-plug-in-hybrid',
     name: 'TIGGO 7 Plug-in Hybrid',
-    img: 'img/tiggo_7_plug_in_hybrid.png',
+    img: 'img/preview_modely/Chery/tiggo_7_plug_in_hybrid.png',
     alt: 'Chery TIGGO 7 Plug-in Hybrid'
   },
   {
     key: 'tiggo-7-hybrid',
     name: 'TIGGO 7 Hybrid',
-    img: 'img/tiggo_7_hybrid.png',
+    img: 'img/preview_modely/Chery/tiggo_7_hybrid.png',
     alt: 'Chery TIGGO 7 Hybrid'
-  },
-  {
-    key: 'tiggo-7',
-    name: 'TIGGO 7',
-    img: 'img/tiggo_7_series.png',
-    alt: 'Chery TIGGO 7'
   },
   {
     key: 'tiggo-4-hybrid',
     name: 'TIGGO 4 Hybrid',
-    img: 'img/tiggo_4_hybrid.png',
+    img: 'img/preview_modely/Chery/tiggo_4_hybrid.png',
     alt: 'Chery TIGGO 4 Hybrid'
   }
 ],
@@ -587,14 +599,7 @@ function vykresliKartu(auto) {
     return `${new Intl.NumberFormat('sk-SK').format(num)} cm³`;
   };
 
-  const parsePriceNumber = (s) => {
-    const str = String(s || '');
-    const digits = str.replace(/[^\d]/g, '');
-    const n = Number(digits);
-    return Number.isFinite(n) ? n : 0;
-  };
-
-  const formatEur = (n) => `${new Intl.NumberFormat('sk-SK').format(n)} €`;
+  const parsePriceNumber = (s) => parseEuroAmount(s) || 0;
 
   // --- ID + link na detail ---
   const carId = auto.__resolvedId || (auto.id || '').toString().trim();
@@ -614,12 +619,14 @@ function vykresliKartu(auto) {
     ).trim();
 
   // --- cena ---
-  const maZlavu = !!(auto.nova_cena && String(auto.nova_cena).trim() !== '');
+  const formattedOldPrice = formatEuroAmount(auto.stara_cena);
+  const formattedNewPrice = formatEuroAmount(auto.nova_cena);
+  const maZlavu = !!formattedNewPrice;
   const priceNew = maZlavu
-    ? String(auto.nova_cena || '').trim()
-    : (auto.stara_cena && String(auto.stara_cena).trim() !== '' ? String(auto.stara_cena).trim() : 'Cena na vyžiadanie');
+    ? formattedNewPrice
+    : (formattedOldPrice || 'Cena na vyžiadanie');
 
-  const priceOld = maZlavu ? String(auto.stara_cena || '').trim() : '';
+  const priceOld = maZlavu ? formattedOldPrice : '';
 
   // --- prevodovka + paket (nové polia, fallback na legacy) ---
   const legacy = String(auto.prevodovka || '').trim();
@@ -663,7 +670,7 @@ function vykresliKartu(auto) {
     const newN = parsePriceNumber(priceNew);
 
     let dealAmount = '';
-    if (oldN > 0 && newN > 0 && oldN > newN) dealAmount = formatEur(oldN - newN);
+    if (oldN > 0 && newN > 0 && oldN > newN) dealAmount = formatEuroAmount(oldN - newN);
 
     metaItems.push({
       cls: 'meta-item--deal',
@@ -1377,12 +1384,6 @@ function initModelsStrip() {
   const calcRoot = document.querySelector('[data-finance-calc]');
   const form = document.getElementById('financeForm');
 
-  const fmtEUR = new Intl.NumberFormat('sk-SK', {
-    style: 'currency',
-    currency: 'EUR',
-    maximumFractionDigits: 0,
-  });
-
   function isKnownBrandSafe(b){
     return b === 'subaru' || b === 'kgm' || b === 'jeep' || b === 'chery';
   }
@@ -1394,7 +1395,70 @@ function initModelsStrip() {
 
   function formatMoney(n){
     if (!isFinite(n)) return '—';
-    return fmtEUR.format(Math.round(n));
+    return formatEuroAmount(Math.round(n)) || '—';
+  }
+
+  function caretAfterDigitCount(formattedDigits, digitCount) {
+    if (digitCount <= 0) return 0;
+    let seen = 0;
+    for (let i = 0; i < formattedDigits.length; i += 1) {
+      if (/\d/.test(formattedDigits[i])) seen += 1;
+      if (seen >= digitCount) return i + 1;
+    }
+    return formattedDigits.length;
+  }
+
+  function setFinanceMoneyInputLocked(input, locked) {
+    if (!input) return;
+    if (locked) {
+      input.dataset.priceInputLocked = 'true';
+      input.setAttribute('aria-invalid', 'true');
+      input.setCustomValidity('Suma musí byť celé číslo bez desatinných miest.');
+    } else {
+      delete input.dataset.priceInputLocked;
+      input.removeAttribute('aria-invalid');
+      input.setCustomValidity('');
+    }
+  }
+
+  function formatFinanceMoneyInput(input, preserveCaret = true) {
+    if (!input) return;
+
+    if (input.dataset.priceInputLocked === 'true') {
+      input.value = input.dataset.lastValidPrice || '';
+      return;
+    }
+
+    const raw = input.value;
+    const invalidCharacters = /[^\d\s\u00a0\u202f€]/u.test(raw);
+    const euroCount = (raw.match(/€/g) || []).length;
+    if (invalidCharacters || euroCount > 1) {
+      input.value = input.dataset.lastValidPrice || '';
+      setFinanceMoneyInputLocked(input, true);
+      return;
+    }
+
+    const rawCaret = input.selectionStart ?? raw.length;
+    const rawDigits = raw.replace(/\D/g, '');
+    const digits = rawDigits.replace(/^0+(?=\d)/, '');
+
+    if (!digits) {
+      input.value = '';
+      input.dataset.lastValidPrice = '';
+      return;
+    }
+
+    const grouped = groupIntegerDigits(digits);
+    input.value = `${grouped} €`;
+    input.dataset.lastValidPrice = input.value;
+
+    if (preserveCaret && document.activeElement === input) {
+      const removedLeadingZeros = rawDigits.length - digits.length;
+      const digitsBeforeCaret = raw.slice(0, rawCaret).replace(/\D/g, '').length;
+      const normalizedDigitCount = Math.max(0, digitsBeforeCaret - removedLeadingZeros);
+      const nextCaret = caretAfterDigitCount(grouped, normalizedDigitCount);
+      input.setSelectionRange(nextCaret, nextCaret);
+    }
   }
 
   function computePayment(principal, months, annualRatePct){
@@ -1417,8 +1481,8 @@ function initModelsStrip() {
     const rateEl  = calcRoot.querySelector('#finRate');
     if (!priceEl || !downEl || !monEl || !rateEl) return null;
 
-    const price = Math.max(0, Number(priceEl.value) || 0);
-    const down  = Math.max(0, Number(downEl.value) || 0);
+    const price = parseEuroAmount(priceEl.value) ?? 0;
+    const down  = parseEuroAmount(downEl.value) ?? 0;
     const months = Math.max(0, Number(monEl.value) || 0);
     const rate = Math.max(0, Number(rateEl.value) || 0);
 
@@ -1465,10 +1529,49 @@ function initModelsStrip() {
   }
 
   if (calcRoot) {
+    const moneyInputs = [
+      calcRoot.querySelector('#finPrice'),
+      calcRoot.querySelector('#finDown'),
+    ].filter(Boolean);
+
+    moneyInputs.forEach(input => {
+      setFinanceMoneyInputLocked(input, false);
+      formatFinanceMoneyInput(input, false);
+      input.addEventListener('beforeinput', event => {
+        const isDelete = event.inputType.startsWith('delete');
+        const isInsert = event.inputType.startsWith('insert');
+
+        if (input.dataset.priceInputLocked === 'true') {
+          if (isDelete) setFinanceMoneyInputLocked(input, false);
+          else if (isInsert) event.preventDefault();
+          return;
+        }
+
+        if (event.inputType === 'insertText' && event.data && /[^\d]/u.test(event.data)) {
+          event.preventDefault();
+          if (/[^\s€]/u.test(event.data)) setFinanceMoneyInputLocked(input, true);
+        }
+      });
+      input.addEventListener('blur', () => {
+        setFinanceMoneyInputLocked(input, false);
+        formatFinanceMoneyInput(input, false);
+        renderCalc();
+      });
+      input.addEventListener('focus', () => {
+        if (input.selectionStart === input.value.length && input.value.endsWith(' €')) {
+          const nextCaret = input.value.length - 2;
+          input.setSelectionRange(nextCaret, nextCaret);
+        }
+      });
+    });
+
     ['input', 'change'].forEach(ev => {
       calcRoot.addEventListener(ev, (e) => {
         if (!e.target) return;
         const id = e.target.id;
+        if (id === 'finPrice' || id === 'finDown') {
+          formatFinanceMoneyInput(e.target, ev === 'input');
+        }
         if (id === 'finPrice' || id === 'finDown' || id === 'finMonths' || id === 'finRate') renderCalc();
       });
     });

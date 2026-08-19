@@ -182,20 +182,15 @@
       </label>
 
       <div class="row">
-        <div>
-          <label>Značka</label>
-          <input type="text" id="znacka" name="znacka" list="brandOptions" placeholder="Subaru / KGM / Jeep / Chery" autocomplete="off" />
-          <datalist id="brandOptions">
-            <option value="Subaru"></option>
-            <option value="KGM"></option>
-            <option value="Jeep"></option>
-            <option value="Chery"></option>
-          </datalist>
+        <div class="choice-control" data-choice-field="znacka">
+          <span class="choice-label" id="znackaLabel">Značka</span>
+          <input type="hidden" id="znacka" name="znacka" />
+          <div class="choice-buttons" role="group" aria-labelledby="znackaLabel"></div>
         </div>
-        <div>
-          <label>Model</label>
-          <input type="text" id="model" name="model" list="modelOptions" placeholder="BRZ" autocomplete="off" />
-          <datalist id="modelOptions"></datalist>
+        <div class="choice-control" data-choice-field="model">
+          <span class="choice-label" id="modelLabel">Model</span>
+          <input type="hidden" id="model" name="model" />
+          <div class="choice-buttons" role="group" aria-labelledby="modelLabel"></div>
         </div>
       </div>
 
@@ -204,23 +199,24 @@
           <label>Rok</label>
           <input type="number" id="rok" name="rok" placeholder="2024" />
         </div>
-        <div>
-          <label>Palivo</label>
-          <input type="text" id="palivo" name="palivo" placeholder="Benzín"/>
+        <div class="choice-control" data-choice-field="palivo">
+          <span class="choice-label" id="palivoLabel">Palivo</span>
+          <input type="hidden" id="palivo" name="palivo" />
+          <div class="choice-buttons" role="group" aria-labelledby="palivoLabel"></div>
         </div>
       </div>
 
       <div class="row">
-  <div>
-    <label>Prevodovka</label>
-    <input type="text" id="typ_prevodovky" name="typ_prevodovky" placeholder="AT/MT/Hybrid" />
-   
+  <div class="choice-control" data-choice-field="typ_prevodovky">
+    <span class="choice-label" id="prevodovkaLabel">Prevodovka</span>
+    <input type="hidden" id="typ_prevodovky" name="typ_prevodovky" />
+    <div class="choice-buttons" role="group" aria-labelledby="prevodovkaLabel"></div>
   </div>
 
-  <div>
-    <label>Výbava</label>
-    <input type="text" id="vybava_paket" name="vybava_paket" placeholder="Premium / Limited / Sport..." />
-    
+  <div class="choice-control" data-choice-field="vybava_paket">
+    <span class="choice-label" id="vybavaPaketLabel">Výbava</span>
+    <input type="hidden" id="vybava_paket" name="vybava_paket" />
+    <div class="choice-buttons" role="group" aria-labelledby="vybavaPaketLabel"></div>
   </div>
 </div>
 
@@ -243,21 +239,24 @@
           <input type="number" id="najazdene" name="najazdene" placeholder="10" />
         </div>
 
-        <div>
-          <label>Karoséria</label>
-          <input type="text" id="karoseria" name="karoseria" placeholder="SUV" />
+        <div class="choice-control" data-choice-field="karoseria">
+          <span class="choice-label" id="karoseriaLabel">Karoséria</span>
+          <input type="hidden" id="karoseria" name="karoseria" />
+          <div class="choice-buttons" role="group" aria-labelledby="karoseriaLabel"></div>
         </div>
       </div>
 
       <div class="row">
-        <div>
-          <label>Pohon</label>
-          <input type="text" id="pohon" name="pohon" placeholder="4x4" />
+        <div class="choice-control" data-choice-field="pohon">
+          <span class="choice-label" id="pohonLabel">Pohon</span>
+          <input type="hidden" id="pohon" name="pohon" />
+          <div class="choice-buttons" role="group" aria-labelledby="pohonLabel"></div>
         </div>
 
-        <div>
-          <label>Farba</label>
-          <input type="text" id="farba" name="farba" placeholder="Modrá" />
+        <div class="choice-control" data-choice-field="farba">
+          <span class="choice-label" id="farbaLabel">Farba</span>
+          <input type="hidden" id="farba" name="farba" />
+          <div class="choice-buttons" role="group" aria-labelledby="farbaLabel"></div>
         </div>
       </div>
 
@@ -272,12 +271,12 @@
 
       <div id="povodnaCenaWrap">
         <label>Pôvodná cena (alebo aktuálna, ak zľava NIE JE)</label>
-        <input type="text" id="stara_cena" name="stara_cena" placeholder="43 840 €"/>
+        <input class="price-input" type="text" id="stara_cena" name="stara_cena" inputmode="numeric" autocomplete="off" placeholder="43 840 €"/>
       </div>
 
       <div id="novaCenaWrap" style="display:none">
         <label>Aktuálna cena po zľave</label>
-        <input type="text" id="nova_cena" name="nova_cena" placeholder="39 900 €"/>
+        <input class="price-input" type="text" id="nova_cena" name="nova_cena" inputmode="numeric" autocomplete="off" placeholder="39 900 €"/>
         <div class="hint">Zobrazí sa zelenou, „Pôvodná cena“ bude prečiarknutá.</div>
       </div>
 
@@ -650,10 +649,10 @@
             </svg>
             <span class="pp-check__text">Zobraziť skryté</span>
           </label>
-          <button class="btnx" id="exportBtn" type="button">Exportovať auta.json</button>
-          <button class="btnx" id="reloadBtn" type="button">Načítať zo súboru</button>
         </div>
       </div>
+
+      <p id="carsStatus" class="sr-only" role="status" aria-live="polite"></p>
 
       <table id="carsTable">
         <thead>
@@ -796,10 +795,17 @@
 
     const apiUrl = (path) => `${API_BASE}${path}`;
 
+    const normalizeRevision = (value) => String(value || '')
+      .trim()
+      .replace(/^W\//i, '')
+      .replace(/^"|"$/g, '');
+
     // =============================
     // STATE + ELEMENTS
     // =============================
     let cars = [];
+    let carsRevision = '';
+    let duplicateInFlight = false;
 
     const filterBrand = document.getElementById('filterBrand');
     const filterYear = document.getElementById('filterYear');
@@ -819,6 +825,7 @@
     const novaCenaWrap = document.getElementById('novaCenaWrap');
 
     const tableBody = document.querySelector('#carsTable tbody');
+    const carsStatus = document.getElementById('carsStatus');
     const searchInput = document.getElementById('search');
     const checkAll = document.getElementById('checkAll');
     const showHidden = document.getElementById('showHidden');
@@ -829,6 +836,134 @@
     const titulkaPreview = document.getElementById('titulkaPreview');
     const galeriaPreview = document.getElementById('galeriaPreview');
 
+    const parseEuroAmount = (value) => {
+      if (typeof value === 'number') {
+        return Number.isSafeInteger(value) && value >= 0 ? value : null;
+      }
+
+      const normalized = String(value ?? '')
+        .replace(/[\u00a0\u202f]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (!normalized || !/^(?:\d+|\d{1,3}(?: \d{3})+)\s*€?$/.test(normalized)) return null;
+
+      const amount = Number(normalized.replace(/[ €]/g, ''));
+      return Number.isSafeInteger(amount) ? amount : null;
+    };
+
+    const groupIntegerDigits = (value) => String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+    function formatEuroPrice(value) {
+      const amount = parseEuroAmount(value);
+      return amount === null ? '' : `${groupIntegerDigits(amount)} €`;
+    }
+
+    function normalizeCarPriceFields(car) {
+      if (!car || typeof car !== 'object' || Array.isArray(car)) return car;
+      return {
+        ...car,
+        stara_cena: formatEuroPrice(car.stara_cena),
+        nova_cena: formatEuroPrice(car.nova_cena),
+      };
+    }
+
+    function caretAfterDigitCount(formattedDigits, digitCount) {
+      if (digitCount <= 0) return 0;
+      let seen = 0;
+      for (let i = 0; i < formattedDigits.length; i += 1) {
+        if (/\d/.test(formattedDigits[i])) seen += 1;
+        if (seen >= digitCount) return i + 1;
+      }
+      return formattedDigits.length;
+    }
+
+    function setPriceInputLocked(input, locked) {
+      if (!input) return;
+      if (locked) {
+        input.dataset.priceInputLocked = 'true';
+        input.setAttribute('aria-invalid', 'true');
+        input.setCustomValidity('Cena musí byť celé číslo bez desatinných miest.');
+      } else {
+        delete input.dataset.priceInputLocked;
+        input.removeAttribute('aria-invalid');
+        input.setCustomValidity('');
+      }
+    }
+
+    function formatPriceInput(input, preserveCaret = true) {
+      if (!input) return;
+
+      if (input.dataset.priceInputLocked === 'true') {
+        input.value = input.dataset.lastValidPrice || '';
+        return;
+      }
+
+      const raw = input.value;
+      const invalidCharacters = /[^\d\s\u00a0\u202f€]/u.test(raw);
+      const euroCount = (raw.match(/€/g) || []).length;
+      if (invalidCharacters || euroCount > 1) {
+        input.value = input.dataset.lastValidPrice || '';
+        setPriceInputLocked(input, true);
+        return;
+      }
+
+      const rawCaret = input.selectionStart ?? raw.length;
+      const rawDigits = raw.replace(/\D/g, '');
+      const digits = rawDigits.replace(/^0+(?=\d)/, '');
+
+      if (!digits) {
+        input.value = '';
+        input.dataset.lastValidPrice = '';
+        return;
+      }
+
+      const grouped = groupIntegerDigits(digits);
+      input.value = `${grouped} €`;
+      input.dataset.lastValidPrice = input.value;
+
+      if (preserveCaret && document.activeElement === input) {
+        const removedLeadingZeros = rawDigits.length - digits.length;
+        const digitsBeforeCaret = raw
+          .slice(0, rawCaret)
+          .replace(/\D/g, '')
+          .length;
+        const normalizedDigitCount = Math.max(0, digitsBeforeCaret - removedLeadingZeros);
+        const nextCaret = caretAfterDigitCount(grouped, normalizedDigitCount);
+        input.setSelectionRange(nextCaret, nextCaret);
+      }
+    }
+
+    document.querySelectorAll('.price-input').forEach(input => {
+      setPriceInputLocked(input, false);
+      formatPriceInput(input, false);
+      input.addEventListener('beforeinput', event => {
+        const isDelete = event.inputType.startsWith('delete');
+        const isInsert = event.inputType.startsWith('insert');
+
+        if (input.dataset.priceInputLocked === 'true') {
+          if (isDelete) setPriceInputLocked(input, false);
+          else if (isInsert) event.preventDefault();
+          return;
+        }
+
+        if (event.inputType === 'insertText' && event.data && /[^\d]/u.test(event.data)) {
+          event.preventDefault();
+          if (/[^\s€]/u.test(event.data)) setPriceInputLocked(input, true);
+        }
+      });
+      input.addEventListener('input', () => formatPriceInput(input));
+      input.addEventListener('blur', () => {
+        setPriceInputLocked(input, false);
+        formatPriceInput(input, false);
+      });
+      input.addEventListener('focus', () => {
+        if (input.selectionStart === input.value.length && input.value.endsWith(' €')) {
+          const nextCaret = input.value.length - 2;
+          input.setSelectionRange(nextCaret, nextCaret);
+        }
+      });
+    });
+
     // =============================
     // INIT
     // =============================
@@ -836,6 +971,14 @@
       tableBody.addEventListener('click', (e) => {
         const el = (e.target instanceof Element) ? e.target : e.target?.parentElement;
         if (!el) return;
+
+        const duplicateBtn = el.closest('[data-duplicate]');
+        if (duplicateBtn) {
+          e.preventDefault();
+          const idx = parseInt(duplicateBtn.dataset.duplicate, 10);
+          if (!Number.isNaN(idx)) onDuplicate(idx, duplicateBtn);
+          return;
+        }
 
         const editBtn = el.closest('[data-edit]');
         if (editBtn) {
@@ -877,8 +1020,6 @@
     filterYear && filterYear.addEventListener('change', renderTable);
     filterPrice && filterPrice.addEventListener('change', renderTable);
 
-    document.getElementById('reloadBtn').addEventListener('click', loadFromApi);
-    document.getElementById('exportBtn').addEventListener('click', exportJSON);
     document.getElementById('resetBtn').addEventListener('click', () => setFormMode('create'));
 
     deleteBtn.addEventListener('click', onDeleteSelected);
@@ -960,7 +1101,169 @@ const ADMIN_BRANDS = {
   },
 };
 
-const modelOptions = document.getElementById('modelOptions');
+const CHOICE_DEFAULTS = {
+  znacka: Object.values(ADMIN_BRANDS).map(brand => brand.label),
+  model: [],
+  palivo: ['Benzín', 'Diesel', 'Hybrid', 'Plug-in hybrid', 'MHEV', 'Elektromotor'],
+  typ_prevodovky: ['AT', 'MT', 'CVT', 'DCT', 'DSG'],
+  vybava_paket: ['Comfort', 'Style', 'Premium', 'Limited', 'Adventure', 'Sport'],
+  karoseria: ['SUV', 'Crossover', 'Hatchback', 'Sedan', 'Kombi', 'Coupé', 'Cabrio', 'Pick-up', 'MPV'],
+  pohon: ['Predný', 'Zadný', 'AWD', '4x4'],
+  farba: ['Biela', 'Čierna', 'Sivá', 'Strieborná', 'Modrá', 'Červená', 'Zelená', 'Žltá', 'Hnedá', 'Oranžová', 'Béžová'],
+};
+
+const CHOICE_SETTINGS = {
+  znacka: { allowCustom: false, allowEmpty: false },
+  model: { allowCustom: true, allowEmpty: false },
+  palivo: { allowCustom: true, allowEmpty: true },
+  typ_prevodovky: { allowCustom: true, allowEmpty: true },
+  vybava_paket: { allowCustom: true, allowEmpty: true },
+  karoseria: { allowCustom: true, allowEmpty: true },
+  pohon: { allowCustom: true, allowEmpty: true },
+  farba: { allowCustom: true, allowEmpty: true },
+};
+
+const choiceOptions = new Map();
+
+function uniqueChoiceValues(values) {
+  const seen = new Set();
+  return (values || []).reduce((result, value) => {
+    const clean = String(value ?? '').trim();
+    const key = clean.toLocaleLowerCase('sk');
+    if (!clean || seen.has(key)) return result;
+    seen.add(key);
+    result.push(clean);
+    return result;
+  }, []);
+}
+
+function choiceFieldElement(name) {
+  return form.querySelector(`[data-choice-field="${name}"]`);
+}
+
+function renderChoiceField(name) {
+  const field = choiceFieldElement(name);
+  const input = form.elements[name];
+  const buttons = field?.querySelector('.choice-buttons');
+  if (!field || !input || !buttons) return;
+
+  const settings = CHOICE_SETTINGS[name] || {};
+  const values = choiceOptions.get(name) || [];
+  const selected = String(input.value || '').trim();
+  buttons.innerHTML = '';
+
+  const addButton = (label, value, extraClass = '') => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `choice-option ${extraClass}`.trim();
+    button.textContent = label;
+    button.dataset.choiceValue = value;
+    const isSelected = selected.toLocaleLowerCase('sk') === value.toLocaleLowerCase('sk');
+    button.classList.toggle('is-selected', isSelected);
+    button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    button.addEventListener('click', () => setChoiceValue(name, value, { emit: true }));
+    buttons.appendChild(button);
+  };
+
+  if (settings.allowEmpty) addButton('Neuvedené', '', 'choice-option--empty');
+  values.forEach(value => addButton(value, value));
+
+  if (!values.length && name === 'model') {
+    const note = document.createElement('span');
+    note.className = 'choice-empty-note';
+    note.textContent = 'Najprv vyber značku.';
+    buttons.appendChild(note);
+  }
+
+  if (settings.allowCustom) {
+    const customButton = document.createElement('button');
+    customButton.type = 'button';
+    customButton.className = 'choice-option choice-option--custom';
+    customButton.textContent = 'Iné…';
+    customButton.addEventListener('click', () => {
+      const label = field.querySelector('.choice-label')?.textContent || name;
+      const customValue = window.prompt(`Zadaj vlastnú hodnotu pre „${label}“:`, selected);
+      if (customValue === null || !customValue.trim()) return;
+      setChoiceOptions(name, [...values, customValue]);
+      setChoiceValue(name, customValue, { emit: true });
+    });
+    buttons.appendChild(customButton);
+  }
+}
+
+function setChoiceOptions(name, values) {
+  const input = form.elements[name];
+  const selected = String(input?.value || '').trim();
+  const nextValues = uniqueChoiceValues([
+    ...(values || []),
+    ...(selected ? [selected] : []),
+  ]);
+  choiceOptions.set(name, nextValues);
+  renderChoiceField(name);
+}
+
+function setChoiceValue(name, value, { emit = false } = {}) {
+  const input = form.elements[name];
+  if (!input) return;
+
+  const clean = String(value ?? '').trim();
+  const values = choiceOptions.get(name) || [];
+  const canonical = values.find(option => option.toLocaleLowerCase('sk') === clean.toLocaleLowerCase('sk')) || clean;
+  const previous = String(input.value || '').trim();
+
+  if (
+    name === 'znacka' &&
+    emit &&
+    previous.toLocaleLowerCase('sk') !== canonical.toLocaleLowerCase('sk')
+  ) {
+    setChoiceValue('model', '');
+  }
+
+  if (canonical && !values.some(option => option.toLocaleLowerCase('sk') === canonical.toLocaleLowerCase('sk'))) {
+    choiceOptions.set(name, uniqueChoiceValues([...values, canonical]));
+  }
+
+  input.value = canonical;
+  renderChoiceField(name);
+
+  if (emit) {
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+}
+
+function resetChoiceFields() {
+  Object.keys(CHOICE_DEFAULTS).forEach(name => setChoiceValue(name, ''));
+}
+
+function refreshChoiceOptionsFromCars() {
+  const fromCars = {
+    palivo: [],
+    typ_prevodovky: [],
+    vybava_paket: [],
+    karoseria: [],
+    pohon: [],
+    farba: [],
+  };
+
+  cars.forEach(car => {
+    const parsedGearbox = parseLegacyPrevodovka(car?.prevodovka || '');
+    fromCars.palivo.push(car?.palivo);
+    fromCars.typ_prevodovky.push(car?.typ_prevodovky || parsedGearbox.typ);
+    fromCars.vybava_paket.push(car?.vybava_paket || parsedGearbox.paket);
+    fromCars.karoseria.push(car?.karoseria);
+    fromCars.pohon.push(car?.pohon);
+    fromCars.farba.push(car?.farba);
+  });
+
+  Object.keys(fromCars).forEach(name => {
+    setChoiceOptions(name, [...CHOICE_DEFAULTS[name], ...fromCars[name]]);
+  });
+
+  syncBrandInputs(getBrandFromForm());
+}
+
+Object.keys(CHOICE_DEFAULTS).forEach(name => setChoiceOptions(name, CHOICE_DEFAULTS[name]));
 
 function normalizePromoBrand(b){
   return normalizeBrand(b);
@@ -973,16 +1276,12 @@ function getBrandFromForm(){
 function syncBrandInputs(brand) {
   const normalized = normalizeBrand(brand);
   const cfg = normalized ? ADMIN_BRANDS[normalized] : null;
-
-  if (modelOptions) {
-    modelOptions.innerHTML = cfg
-      ? cfg.models.map(model => `<option value="${escHtml(model)}"></option>`).join('')
-      : '';
-  }
-
-  if (form.elements['model']) {
-    form.elements['model'].placeholder = cfg ? cfg.modelPlaceholder : 'Model';
-  }
+  const existingModels = normalized
+    ? cars
+        .filter(car => normalizeBrand(car?.znacka) === normalized)
+        .map(car => car?.model)
+    : [];
+  setChoiceOptions('model', cfg ? [...cfg.models, ...existingModels] : []);
 }
 
 function normalizeModelForBrand(brand, model) {
@@ -1108,8 +1407,7 @@ function hideProgress() {
 
 
     function getEffectivePrice(car) {
-      const raw = (car.nova_cena || car.stara_cena || '').replace(/[^\d]/g, '');
-      return raw ? Number(raw) : null;
+      return parseEuroAmount(car?.nova_cena || car?.stara_cena || '');
     }
 
     function isHidden(car) {
@@ -1181,7 +1479,11 @@ function hideProgress() {
       } else {
         novaCenaWrap.style.display = 'none';
         const novaCenaEl = form.elements['nova_cena'];
-        if (novaCenaEl) novaCenaEl.value = '';
+        if (novaCenaEl) {
+          novaCenaEl.value = '';
+          setPriceInputLocked(novaCenaEl, false);
+          formatPriceInput(novaCenaEl, false);
+        }
       }
     }
 
@@ -1195,6 +1497,11 @@ function hideProgress() {
     function setFormMode(mode, index = -1) {
       if (mode === 'create') {
         form.reset();
+        form.querySelectorAll('.price-input').forEach(input => {
+          setPriceInputLocked(input, false);
+          formatPriceInput(input, false);
+        });
+        resetChoiceFields();
         delete form.dataset.carId;
 
         form.querySelectorAll('.vybava-grid input[type="checkbox"]').forEach(cb => cb.checked = false);
@@ -1213,7 +1520,7 @@ function hideProgress() {
         predvadzacie.checked = false;
         skryte.checked = false;
         toggleZlavaUI();
-        syncBrandInputs(activeBrand || 'subaru');
+        syncBrandInputs(getBrandFromForm());
 
         resetImagePreviews();
       } else if (mode === 'edit') {
@@ -1263,7 +1570,7 @@ function hideProgress() {
     // =============================
     // DATA IO
     // =============================
-    async function loadFromApi({ withProgress = true } = {}) {
+    async function loadFromApi({ withProgress = true, preserveFilters = false } = {}) {
   if (withProgress) showProgress(1, 'Načítavam autá…');
 
   try {
@@ -1273,12 +1580,18 @@ function hideProgress() {
       throw new Error(`GET /api/cars failed: ${res.status} ${t}`);
     }
 
-    cars = await res.json();
+    cars = (await res.json()).map(normalizeCarPriceFields);
+    carsRevision = normalizeRevision(
+      res.headers.get('X-Cars-Revision') || res.headers.get('ETag')
+    );
+    refreshChoiceOptionsFromCars();
 
-    if (filterBrand) filterBrand.value = '';
-    if (filterYear) filterYear.value = '';
-    if (filterPrice) filterPrice.value = '';
-    searchInput.value = '';
+    if (!preserveFilters) {
+      if (filterBrand) filterBrand.value = '';
+      if (filterYear) filterYear.value = '';
+      if (filterPrice) filterPrice.value = '';
+      searchInput.value = '';
+    }
 
     renderTable();
 
@@ -1286,6 +1599,8 @@ function hideProgress() {
   } catch (e) {
     console.error('Nepodarilo sa načítať /api/cars', e);
     cars = [];
+    carsRevision = '';
+    refreshChoiceOptionsFromCars();
     renderTable();
   } finally {
     if (withProgress) hideProgress();
@@ -1308,7 +1623,11 @@ function hideProgress() {
     // =============================
     // TABLE RENDER
     // =============================
-    function renderTable() {
+    function renderTable(options = {}) {
+      const highlightIndex = Number.isInteger(options?.highlightIndex)
+        ? options.highlightIndex
+        : -1;
+
       checkAll.checked = false;
       deleteBtn.style.display = 'none';
       hideBtn.style.display = 'none';
@@ -1351,13 +1670,18 @@ function hideProgress() {
         }
 
         const tr = document.createElement('tr');
+        const shouldHighlight = i === highlightIndex;
+        tr.dataset.carIndex = String(i);
+        if (shouldHighlight) tr.classList.add('is-just-duplicated');
+
         const hidden = isHidden(c);
         if (hidden) tr.style.opacity = '0.55';
 
-        const cenaLabel =
-          c.nova_cena && String(c.nova_cena).trim() !== ''
-            ? `${c.stara_cena || ''} → ${c.nova_cena}`
-            : (c.stara_cena || '—');
+        const oldPrice = formatEuroPrice(c.stara_cena);
+        const newPrice = formatEuroPrice(c.nova_cena);
+        const cenaLabel = newPrice
+          ? (oldPrice ? `${oldPrice} → ${newPrice}` : newPrice)
+          : (oldPrice || '—');
 
         tr.innerHTML = `
           <td>
@@ -1377,6 +1701,7 @@ function hideProgress() {
           <td>${hidden ? '<span class="pill-mini">SKRYTÉ</span>' : ''}</td>
           <td>${(c.tagy || []).join(', ')}</td>
           <td class="cell-actions">
+            <button class="btnx btnx--duplicate" type="button" data-duplicate="${i}">Duplikovať</button>
             <button class="btnx" type="button" data-edit="${i}">Upraviť</button>
             ${
               hidden
@@ -1389,6 +1714,14 @@ function hideProgress() {
 
         tableBody.appendChild(tr);
         tr.querySelector('.row-check').addEventListener('change', updateBulkActionUI);
+
+        if (shouldHighlight) {
+          requestAnimationFrame(() => {
+            tr.scrollIntoView({ block: 'nearest' });
+            tr.querySelector('[data-edit]')?.focus({ preventScroll: true });
+          });
+          window.setTimeout(() => tr.classList.remove('is-just-duplicated'), 1600);
+        }
       });
     }
 
@@ -1429,6 +1762,11 @@ function hideProgress() {
   const znackaVal = brandForSave ? brandLabel(brandForSave) : znackaRaw;
   const modelRaw = (form.elements['model']?.value || '').trim();
   const modelVal = normalizeModelForBrand(brandForSave, modelRaw);
+  const maZlavu = zlava.checked;
+  const staraCenaRaw = (form.elements['stara_cena']?.value || '').trim();
+  const novaCenaRaw = (form.elements['nova_cena']?.value || '').trim();
+  const staraCena = formatEuroPrice(staraCenaRaw);
+  const novaCena = maZlavu ? formatEuroPrice(novaCenaRaw) : '';
 
   if (!znackaRaw || !modelRaw) {
     alert('Vyplň značku a model.');
@@ -1442,9 +1780,19 @@ function hideProgress() {
     alert('Vyplň rok.');
     return;
   }
+  if (staraCenaRaw && !staraCena) {
+    alert('Pôvodná cena musí obsahovať platné číslo.');
+    return;
+  }
+  if (maZlavu && novaCenaRaw && !novaCena) {
+    alert('Aktuálna cena po zľave musí obsahovať platné číslo.');
+    return;
+  }
 
-  form.elements['znacka'].value = znackaVal;
-  form.elements['model'].value = modelVal;
+  setChoiceValue('znacka', znackaVal);
+  setChoiceValue('model', modelVal);
+  form.elements['stara_cena'].value = staraCena;
+  form.elements['nova_cena'].value = novaCena;
   syncBrandInputs(brandForSave);
   applyVybavaBrandFilter(brandForSave);
 
@@ -1460,8 +1808,6 @@ function hideProgress() {
   showProgress(totalSteps, uploadsCount ? 'Nahrávam fotky…' : 'Ukladám…');
 
   try {
-    const maZlavu = zlava.checked;
-
     // ID: pri editácii nechaj existujúce, pri vytvorení vygeneruj
     const currentId = (form.dataset.carId || '').toString().trim();
     const usedIds = new Set(
@@ -1534,8 +1880,8 @@ const base = isEdit ? (cars[idx] || {}) : {};
       typ_prevodovky: typPrevodovky,
   vybava_paket: vybavaPaket,
     prevodovka: prevodovkaLegacy,
-      stara_cena: (form.elements['stara_cena']?.value || '').trim(),
-      nova_cena: maZlavu ? (form.elements['nova_cena']?.value || '').trim() : '',
+      stara_cena: staraCena,
+      nova_cena: novaCena,
 
       // obrázky
 titulka: titulkaUrl,
@@ -1600,6 +1946,118 @@ obrazok: titulkaUrl, // karta v ponuke (starý script.js)
 });
 
 
+    function announceCarsStatus(message) {
+      if (!carsStatus) return;
+      carsStatus.textContent = '';
+      requestAnimationFrame(() => {
+        carsStatus.textContent = message;
+      });
+    }
+
+    async function onDuplicate(index, triggerButton) {
+      if (duplicateInFlight) return;
+
+      let source = cars[index];
+      if (!source) return;
+
+      duplicateInFlight = true;
+      if (triggerButton) {
+        triggerButton.disabled = true;
+        triggerButton.setAttribute('aria-busy', 'true');
+      }
+      showProgress(1, 'Duplikujem auto…');
+
+      try {
+        if (!carsRevision) {
+          const sourceSnapshot = JSON.stringify(source);
+          await loadFromApi({ withProgress: false, preserveFilters: true });
+          setFormMode('create');
+          const refreshedSource = cars[index];
+
+          if (
+            !refreshedSource ||
+            !carsRevision ||
+            JSON.stringify(refreshedSource) !== sourceSnapshot
+          ) {
+            alert('Zoznam áut sa zmenil alebo sa ho nepodarilo pripraviť na duplikovanie. Skús ho načítať znova.');
+            return;
+          }
+
+          source = refreshedSource;
+        }
+
+        const r = await fetch(apiUrl(`/api/cars?action=duplicate&index=${index}`), {
+          method: 'POST',
+          headers: {
+            'If-Match': `"${carsRevision}"`,
+            'X-Cars-Revision': carsRevision,
+          },
+        });
+        const payload = await r.json().catch(() => ({}));
+
+        if (r.status === 409 || r.status === 412 || r.status === 428) {
+          await loadFromApi({ withProgress: false, preserveFilters: true });
+          setFormMode('create');
+          alert('Zoznam áut sa medzičasom zmenil. Obnovil som ho; skús duplikovanie znova.');
+          return;
+        }
+
+        if (!r.ok) {
+          console.error('Duplicate failed:', r.status, payload);
+          alert('Duplikovanie zlyhalo (' + r.status + '). Pozri konzolu.');
+          return;
+        }
+
+        const insertedIndex = Number(payload.insertedIndex);
+        const duplicate = normalizeCarPriceFields(payload.car);
+        if (
+          !Number.isInteger(insertedIndex) ||
+          insertedIndex < 0 ||
+          insertedIndex > cars.length ||
+          !duplicate ||
+          typeof duplicate !== 'object' ||
+          Array.isArray(duplicate)
+        ) {
+          throw new Error('Server vrátil neplatný duplikát vozidla.');
+        }
+
+        cars.splice(insertedIndex, 0, duplicate);
+        carsRevision = normalizeRevision(
+          payload.revision ||
+          r.headers.get('X-Cars-Revision') ||
+          r.headers.get('ETag')
+        );
+
+        const editedIndex = parseInt(editIndexInput.value, 10);
+        if (Number.isInteger(editedIndex) && editedIndex >= insertedIndex) {
+          editIndexInput.value = String(editedIndex + 1);
+        }
+
+        setProgress(1, 'Auto bolo duplikované');
+        renderTable({ highlightIndex: insertedIndex });
+
+        const vehicleName = [source.znacka, source.model]
+          .map(value => String(value || '').trim())
+          .filter(Boolean)
+          .join(' ');
+        announceCarsStatus(
+          vehicleName
+            ? `Auto ${vehicleName} bolo duplikované.`
+            : 'Auto bolo duplikované.'
+        );
+      } catch (err) {
+        console.error('Duplicate failed:', err);
+        alert(err?.message || 'Duplikovanie zlyhalo (chyba siete alebo servera).');
+      } finally {
+        duplicateInFlight = false;
+        if (triggerButton?.isConnected) {
+          triggerButton.disabled = false;
+          triggerButton.removeAttribute('aria-busy');
+        }
+        hideProgress();
+      }
+    }
+
     function onEdit(index) {
       const a = cars[index];
       if (!a) return;
@@ -1608,25 +2066,29 @@ obrazok: titulkaUrl, // karta v ponuke (starý script.js)
 
       const editBrand = normalizeBrand(a.znacka) || 'subaru';
 
-      form.elements['znacka'].value = normalizeBrand(a.znacka) ? brandLabel(editBrand) : (a.znacka || '');
-      form.elements['model'].value = a.model || '';
+      setChoiceValue('znacka', normalizeBrand(a.znacka) ? brandLabel(editBrand) : (a.znacka || ''));
       syncBrandInputs(editBrand);
+      setChoiceValue('model', a.model || '');
       form.elements['rok'].value = a.rok ?? '';
-      form.elements['palivo'].value = a.palivo || '';
+      setChoiceValue('palivo', a.palivo || '');
       const parsed = parseLegacyPrevodovka(a.prevodovka || '');
-form.elements['typ_prevodovky'].value = a.typ_prevodovky || parsed.typ || '';
-form.elements['vybava_paket'].value = a.vybava_paket || parsed.paket || '';
+setChoiceValue('typ_prevodovky', a.typ_prevodovky || parsed.typ || '');
+setChoiceValue('vybava_paket', a.vybava_paket || parsed.paket || '');
 
-      form.elements['stara_cena'].value = a.stara_cena || '';
-      form.elements['nova_cena'].value = a.nova_cena || '';
+      form.elements['stara_cena'].value = formatEuroPrice(a.stara_cena);
+      form.elements['nova_cena'].value = formatEuroPrice(a.nova_cena);
+      setPriceInputLocked(form.elements['stara_cena'], false);
+      setPriceInputLocked(form.elements['nova_cena'], false);
+      formatPriceInput(form.elements['stara_cena'], false);
+      formatPriceInput(form.elements['nova_cena'], false);
       form.elements['tagy'].value = formatTagInputValue(a.tagy);
 
       form.elements['objem'].value = a.objem ?? '';
       form.elements['vykon'].value = a.vykon ?? '';
       form.elements['najazdene'].value = a.najazdene ?? '';
-      form.elements['karoseria'].value = a.karoseria || '';
-      form.elements['pohon'].value = a.pohon || '';
-      form.elements['farba'].value = a.farba || '';
+      setChoiceValue('karoseria', a.karoseria || '');
+      setChoiceValue('pohon', a.pohon || '');
+      setChoiceValue('farba', a.farba || '');
       form.elements['metaliza'].checked = a.metaliza === true;
 
       // Výbava – reset
@@ -2269,8 +2731,7 @@ brandTabs.forEach(btn => {
   btn.addEventListener('click', () => {
     const brand = normalizeBrand(btn.dataset.brand);
     if (!brand) return;
-    form.elements['znacka'].value = brandLabel(brand);
-    applyVybavaBrandFilter(brand);
+    setChoiceValue('znacka', brandLabel(brand), { emit: true });
   });
 });
 

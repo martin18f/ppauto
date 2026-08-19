@@ -1661,6 +1661,10 @@ html[data-brand] #jazda #tdBrandRow{ display: none !important; }
   border-color: var(--fin-accent);
   box-shadow: 0 0 6px rgba(59,130,246,.35);
 }
+.finance-field input[aria-invalid="true"]{
+  border-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239,68,68,.18);
+}
 
 
 .finance-result{

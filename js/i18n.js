@@ -180,7 +180,6 @@
     'Objednať servis': 'Book Service',
     'Zavolajte alebo napíšte – termín dohodneme rýchlo.': 'Call or write to us - we will arrange a time quickly.',
     'Zavolať technikovi': 'Call the Service Advisor',
-    'Napísať e-mail': 'Write an Email',
     'Servis e-mail': 'Service Email',
     'Príjmací technik': 'Service Advisor',
 
@@ -252,7 +251,6 @@
     '← Späť na ponuku': '← Back to Offer',
     'Zavolať predaj': 'Call Sales',
     'Testovacia jazda': 'Test Drive',
-    'Napísať predaju': 'Write to Sales',
     'Navigovať / Kontakt': 'Directions / Contact',
     'Cena na vyžiadanie': 'Price on Request',
     'Údaje zatiaľ nie sú doplnené.': 'The data has not been added yet.',

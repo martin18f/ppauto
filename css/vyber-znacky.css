@@ -31,7 +31,7 @@ a{color:inherit}
   display: grid;
   place-items: center;
   gap: 8px;
-  margin: -24px 0 22px; /* ⬅️ POSUN NAHOR */
+  margin: -100px 0 22px; /* ⬅️ POSUN NAHOR */
   text-align: center;
 }
 .top h1{

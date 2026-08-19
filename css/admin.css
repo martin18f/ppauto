@@ -193,6 +193,76 @@ form.admin-form .row{
   gap: 22px;
 }
 
+/* Kategorické údaje auta sa vyberajú priamo tlačidlami. */
+.choice-control{
+  min-width: 0;
+}
+
+.choice-label{
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.choice-buttons{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
+  min-height: 42px;
+}
+
+.choice-option{
+  min-height: 36px;
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg-elev);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.15;
+  cursor: pointer;
+  transition: border-color .16s ease, background-color .16s ease, color .16s ease;
+}
+
+.choice-option:hover{
+  border-color: rgba(59, 130, 246, .72);
+}
+
+.choice-option.is-selected,
+.choice-option[aria-pressed="true"]{
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.choice-option--custom{
+  border-style: dashed;
+  color: var(--muted);
+}
+
+.choice-option--empty{
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.choice-empty-note{
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.choice-option:focus-visible{
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.price-input[aria-invalid="true"]{
+  border-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, .18);
+}
+
 /* každá sekcia formulára */
 form.admin-form > div:not(.row):not(.actions){
   display: flex;
@@ -214,6 +284,64 @@ form.admin-form .actions{
   flex-wrap: wrap;
   gap: 14px;
   margin: 10px 0 10px;
+}
+
+.cell-actions{
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btnx.btnx--duplicate{
+  border-color: rgba(59, 130, 246, .55);
+  background: rgba(59, 130, 246, .12);
+  color: #dbeafe;
+}
+
+.btnx.btnx--duplicate:hover{
+  background: rgba(59, 130, 246, .22);
+}
+
+.btnx:disabled{
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.btnx:focus-visible{
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.sr-only{
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+#carsTable tbody tr.is-just-duplicated > td{
+  animation: duplicate-row-added 1.4s ease-out;
+}
+
+#carsTable tbody tr.is-just-duplicated > td:first-child{
+  box-shadow: inset 4px 0 var(--accent);
+}
+
+@keyframes duplicate-row-added{
+  0%{ background-color: rgba(59, 130, 246, .30); }
+  45%{ background-color: rgba(59, 130, 246, .16); }
+  100%{ background-color: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  #carsTable tbody tr.is-just-duplicated > td{
+    animation: none;
+    background-color: rgba(59, 130, 246, .16);
+  }
 }
 
 
