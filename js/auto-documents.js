@@ -7,6 +7,7 @@
 
   let documentsPromise = null;
   let scheduled = false;
+  let observer = null;
 
   function clean(value) {
     return String(value ?? '').trim();
@@ -115,7 +116,6 @@
 
   async function enhance() {
     scheduled = false;
-    removeLegacyEquipmentSection();
 
     const technical = sectionByTitle('Technické údaje');
     if (!technical) return;
@@ -125,8 +125,15 @@
     if (!brand || !model) return;
 
     const all = await loadDocuments();
-    removeLegacyEquipmentSection();
-    renderStrip(matchingDocuments(all, brand, model), sectionByTitle('Technické údaje'));
+
+    // Vlastné DOM zmeny nesmú znovu spúšťať observer.
+    observer?.disconnect();
+    try {
+      removeLegacyEquipmentSection();
+      renderStrip(matchingDocuments(all, brand, model), sectionByTitle('Technické údaje'));
+    } finally {
+      observer?.observe(mount, { childList: true, subtree: true });
+    }
   }
 
   function scheduleEnhance() {
@@ -136,7 +143,7 @@
   }
 
   ensureStyles();
-  const observer = new MutationObserver(scheduleEnhance);
+  observer = new MutationObserver(scheduleEnhance);
   observer.observe(mount, { childList: true, subtree: true });
   scheduleEnhance();
 })();
