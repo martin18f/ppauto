@@ -1,0 +1,363 @@
+/* PP AUTO admin – iba sekcia Cenníky / Výbavy */
+.documents-admin {
+  margin-top: 24px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+}
+
+.documents-admin__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.documents-admin__head h2 {
+  margin: 0 0 4px;
+  font-size: 19px;
+  line-height: 1.2;
+}
+
+.documents-admin__head p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.documents-admin__limit {
+  flex: 0 0 auto;
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255,255,255,.03);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+
+.documents-admin__editor {
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 13px;
+  background: rgba(255,255,255,.02);
+}
+
+.documents-admin__editor.is-busy {
+  opacity: .72;
+}
+
+.documents-admin__editor-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.documents-admin__editor-head > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.documents-admin__editor-head strong {
+  font-size: 14px;
+}
+
+.documents-admin__editor-head span {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.documents-admin__cancel {
+  padding: 5px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.documents-admin__cancel:hover {
+  color: var(--text);
+}
+
+.documents-admin__fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.documents-admin__fields label {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.documents-admin__fields label > span {
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+
+.documents-admin__fields select,
+.documents-admin__fields input {
+  width: 100%;
+  height: 40px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--bg-elev);
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+}
+
+.documents-admin__drop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 76px;
+  padding: 12px 14px;
+  border: 1px dashed rgba(112, 150, 226, .45);
+  border-radius: 11px;
+  background: rgba(59, 130, 246, .045);
+  cursor: pointer;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+
+.documents-admin__drop:hover {
+  border-color: rgba(95, 151, 255, .85);
+  background: rgba(59, 130, 246, .09);
+}
+
+.documents-admin__drop input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.documents-admin__drop-icon,
+.documents-admin__pdf-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 7px;
+  background: rgba(239, 68, 68, .13);
+  color: #ff8d8d;
+  font-weight: 900;
+  letter-spacing: .04em;
+}
+
+.documents-admin__drop-icon {
+  width: 43px;
+  height: 43px;
+  font-size: 11px;
+}
+
+.documents-admin__drop-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.documents-admin__drop-copy strong {
+  font-size: 13px;
+}
+
+.documents-admin__drop-copy small {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.documents-admin__edit-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.documents-admin__edit-actions > span {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.documents-admin__status {
+  min-height: 18px;
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.documents-admin__status[data-kind="success"] { color: #7ee2a8; }
+.documents-admin__status[data-kind="error"] { color: #ff8d8d; }
+.documents-admin__status[data-kind="working"] { color: #a9c5ff; }
+
+.documents-admin__table-wrap {
+  margin-top: 14px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.documents-admin__table {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+}
+
+.documents-admin__table th,
+.documents-admin__table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+  font-size: 12.5px;
+}
+
+.documents-admin__table th {
+  background: rgba(255,255,255,.025);
+  color: var(--muted);
+  font-size: 10.5px;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+
+.documents-admin__table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.documents-admin__brand-row td {
+  padding-top: 11px;
+  padding-bottom: 8px;
+  background: rgba(255,255,255,.04);
+  color: var(--text-strong);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .065em;
+  text-transform: uppercase;
+}
+
+.documents-admin__type {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.09);
+  font-size: 10.5px;
+  font-weight: 800;
+}
+
+.documents-admin__type--cennik {
+  background: rgba(59, 130, 246, .09);
+  color: #b6ceff;
+}
+
+.documents-admin__type--vybava {
+  background: rgba(139, 92, 246, .10);
+  color: #d4c4ff;
+}
+
+.documents-admin__all-models {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.documents-admin__file {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  max-width: 360px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.documents-admin__pdf-icon {
+  width: 31px;
+  height: 31px;
+  font-size: 9px;
+}
+
+.documents-admin__file > span:last-child {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.documents-admin__file strong,
+.documents-admin__file small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.documents-admin__file strong {
+  font-size: 12.5px;
+}
+
+.documents-admin__file small {
+  color: var(--muted);
+  font-size: 10.5px;
+}
+
+.documents-admin__file:hover strong {
+  text-decoration: underline;
+}
+
+.documents-admin__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.documents-admin__actions .btnx {
+  height: 32px;
+  padding: 6px 9px;
+  font-size: 11px;
+  text-decoration: none;
+}
+
+.documents-admin__empty td {
+  padding: 22px;
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (max-width: 980px) {
+  .documents-admin__fields {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .documents-admin {
+    padding: 14px;
+  }
+
+  .documents-admin__head {
+    flex-direction: column;
+  }
+
+  .documents-admin__fields {
+    grid-template-columns: 1fr;
+  }
+
+  .documents-admin__edit-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
