@@ -1,82 +1,151 @@
 /*
   Dynamic vehicle parameters only.
-  This file intentionally touches only .choice-control / .choice-* UI in the car form.
+  Scope is intentionally limited to the vehicle parameter panel and rows
+  from which those controls were moved.
 */
 
-form.admin-form .choice-control {
+form.admin-form .vehicle-parameters-panel {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  min-width: 0;
-  align-self: stretch;
-  padding: 12px;
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 14px;
+  gap: 12px;
+  margin: 2px 0 4px;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,.085);
+  border-radius: 16px;
   background:
-    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.015)),
-    var(--bg-elev);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+    linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,.008)),
+    rgba(10,14,20,.34);
 }
 
-form.admin-form .choice-control .choice-label {
+form.admin-form .vehicle-parameters-header {
   display: flex;
-  align-items: center;
-  min-height: 18px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 2px 2px;
+}
+
+form.admin-form .vehicle-parameters-header h3 {
   margin: 0;
   color: var(--text-strong);
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 800;
   line-height: 1.2;
-  letter-spacing: .055em;
+}
+
+form.admin-form .vehicle-parameters-header p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+
+form.admin-form .vehicle-parameter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,.065);
+}
+
+form.admin-form .vehicle-parameter-group:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+
+form.admin-form .vehicle-parameter-group__title {
+  padding: 0 2px;
+  color: #aab4c5;
+  font-size: 10.5px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: .075em;
   text-transform: uppercase;
 }
 
-form.admin-form .choice-control .choice-buttons {
+form.admin-form .vehicle-parameter-group__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  align-items: stretch;
+}
+
+/* Tretie pole v trojici ide na celú šírku, aby nevznikol osamelý polovičný blok. */
+form.admin-form .vehicle-parameter-group[data-group="powertrain"] .choice-control[data-choice-field="pohon"],
+form.admin-form .vehicle-parameter-group[data-group="configuration"] .choice-control[data-choice-field="farba"] {
+  grid-column: 1 / -1;
+}
+
+form.admin-form .vehicle-parameters-panel .choice-control {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  align-self: stretch;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 12px;
+  background: rgba(255,255,255,.025);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.018);
+}
+
+form.admin-form .vehicle-parameters-panel .choice-control .choice-label {
+  display: flex;
+  align-items: center;
+  min-height: 16px;
+  margin: 0;
+  color: #dce3ed;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+form.admin-form .vehicle-parameters-panel .choice-control .choice-buttons {
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
-  gap: 7px;
+  align-content: flex-start;
+  gap: 6px;
   min-height: 0;
   width: 100%;
 }
 
-form.admin-form .choice-option-wrap {
+form.admin-form .vehicle-parameters-panel .choice-option-wrap {
   display: inline-flex;
   align-items: stretch;
   max-width: 100%;
-  min-height: 35px;
+  min-height: 33px;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 10px;
-  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(255,255,255,.095);
+  border-radius: 9px;
+  background: rgba(255,255,255,.032);
   transition:
-    border-color .16s ease,
-    background-color .16s ease,
-    box-shadow .16s ease,
-    transform .12s ease;
+    border-color .14s ease,
+    background-color .14s ease,
+    box-shadow .14s ease;
 }
 
-form.admin-form .choice-option-wrap:hover {
-  border-color: rgba(93, 148, 255, .48);
-  background: rgba(255,255,255,.055);
+form.admin-form .vehicle-parameters-panel .choice-option-wrap:hover {
+  border-color: rgba(93,148,255,.46);
+  background: rgba(255,255,255,.05);
 }
 
-form.admin-form .choice-option-wrap:has(.choice-option.is-selected),
-form.admin-form .choice-option-wrap:has(.choice-option[aria-pressed="true"]) {
-  border-color: rgba(75, 132, 255, .92);
-  background: rgba(59, 130, 246, .15);
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, .16);
+form.admin-form .vehicle-parameters-panel .choice-option-wrap:has(.choice-option.is-selected),
+form.admin-form .vehicle-parameters-panel .choice-option-wrap:has(.choice-option[aria-pressed="true"]) {
+  border-color: rgba(75,132,255,.88);
+  background: rgba(59,130,246,.145);
+  box-shadow: 0 0 0 1px rgba(59,130,246,.13);
 }
 
-form.admin-form .choice-option-wrap .choice-option {
-  min-height: 35px;
+form.admin-form .vehicle-parameters-panel .choice-option-wrap .choice-option {
+  min-height: 33px;
   max-width: 100%;
-  padding: 7px 10px;
+  padding: 6px 9px;
   border: 0;
   border-radius: 0;
   background: transparent;
   color: var(--text);
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1.2;
   text-align: left;
@@ -85,115 +154,126 @@ form.admin-form .choice-option-wrap .choice-option {
   cursor: pointer;
 }
 
-form.admin-form .choice-option-wrap .choice-option:hover {
+form.admin-form .vehicle-parameters-panel .choice-option-wrap .choice-option:hover {
   border: 0;
-  background: rgba(255,255,255,.035);
+  background: rgba(255,255,255,.028);
 }
 
-form.admin-form .choice-option-wrap .choice-option.is-selected,
-form.admin-form .choice-option-wrap .choice-option[aria-pressed="true"] {
+form.admin-form .vehicle-parameters-panel .choice-option-wrap .choice-option.is-selected,
+form.admin-form .vehicle-parameters-panel .choice-option-wrap .choice-option[aria-pressed="true"] {
   border: 0;
   background: transparent;
   color: #fff;
 }
 
-form.admin-form .choice-option-wrap .choice-option-delete {
-  flex: 0 0 29px;
-  width: 29px;
-  min-height: 35px;
+form.admin-form .vehicle-parameters-panel .choice-option-wrap .choice-option-delete {
+  flex: 0 0 27px;
+  width: 27px;
+  min-height: 33px;
   padding: 0;
   border: 0;
-  border-left: 1px solid rgba(255,255,255,.08);
+  border-left: 1px solid rgba(255,255,255,.07);
   background: rgba(0,0,0,.08);
-  color: #8f99aa;
+  color: #8994a5;
   cursor: pointer;
   font: inherit;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   line-height: 1;
   display: grid;
   place-items: center;
-  transition: background-color .14s ease, color .14s ease;
+  transition: background-color .12s ease, color .12s ease;
 }
 
-form.admin-form .choice-option-wrap .choice-option-delete:hover,
-form.admin-form .choice-option-wrap .choice-option-delete:focus-visible {
-  background: rgba(239, 68, 68, .16);
-  color: #ff8181;
+form.admin-form .vehicle-parameters-panel .choice-option-wrap .choice-option-delete:hover,
+form.admin-form .vehicle-parameters-panel .choice-option-wrap .choice-option-delete:focus-visible {
+  background: rgba(239,68,68,.17);
+  color: #ff8585;
   outline: none;
 }
 
-form.admin-form .choice-option-wrap.is-legacy {
+form.admin-form .vehicle-parameters-panel .choice-option-wrap.is-legacy {
   border-style: dashed;
-  border-color: rgba(245, 158, 11, .36);
-  background: rgba(245, 158, 11, .055);
+  border-color: rgba(245,158,11,.34);
+  background: rgba(245,158,11,.05);
 }
 
-form.admin-form .choice-option-wrap.is-legacy .choice-option-delete:hover,
-form.admin-form .choice-option-wrap.is-legacy .choice-option-delete:focus-visible {
-  background: rgba(245, 158, 11, .16);
+form.admin-form .vehicle-parameters-panel .choice-option-wrap.is-legacy .choice-option-delete:hover,
+form.admin-form .vehicle-parameters-panel .choice-option-wrap.is-legacy .choice-option-delete:focus-visible {
+  background: rgba(245,158,11,.15);
   color: #fbbf24;
 }
 
-form.admin-form .choice-option--add {
+form.admin-form .vehicle-parameters-panel .choice-option--add {
   flex: 1 0 100%;
   width: 100%;
-  min-height: 34px;
+  min-height: 31px;
   margin-top: 1px;
-  padding: 7px 10px;
-  border: 1px dashed rgba(116, 155, 230, .38) !important;
-  border-radius: 10px;
-  background: rgba(59, 130, 246, .045);
-  color: #aebbd1;
-  font-size: 12px;
+  padding: 6px 9px;
+  border: 1px dashed rgba(116,155,230,.34) !important;
+  border-radius: 9px;
+  background: rgba(59,130,246,.038);
+  color: #9facc1;
+  font-size: 11.5px;
   font-weight: 800;
+  line-height: 1.2;
   letter-spacing: .01em;
   text-align: center;
   cursor: pointer;
 }
 
-form.admin-form .choice-option--add:hover,
-form.admin-form .choice-option--add:focus-visible {
-  border-color: rgba(91, 145, 255, .78) !important;
-  background: rgba(59, 130, 246, .11);
+form.admin-form .vehicle-parameters-panel .choice-option--add:hover,
+form.admin-form .vehicle-parameters-panel .choice-option--add:focus-visible {
+  border-color: rgba(91,145,255,.74) !important;
+  background: rgba(59,130,246,.095);
   color: #dbe8ff;
 }
 
-form.admin-form .choice-empty-note {
+form.admin-form .vehicle-parameters-panel .choice-empty-note {
   flex: 1 0 100%;
-  padding: 7px 9px;
-  border: 1px dashed rgba(255,255,255,.08);
-  border-radius: 9px;
+  padding: 7px 8px;
+  border: 1px dashed rgba(255,255,255,.075);
+  border-radius: 8px;
   color: var(--muted);
-  font-size: 11.5px;
-  line-height: 1.35;
+  font-size: 11px;
+  line-height: 1.3;
   text-align: center;
 }
 
-form.admin-form .choice-control.is-busy {
-  opacity: .7;
+form.admin-form .vehicle-parameters-panel .choice-control.is-busy {
+  opacity: .68;
 }
 
-form.admin-form .choice-control.is-busy .choice-buttons {
+form.admin-form .vehicle-parameters-panel .choice-control.is-busy .choice-buttons {
   cursor: progress;
 }
 
-form.admin-form .choice-control button:disabled {
+form.admin-form .vehicle-parameters-panel .choice-control button:disabled {
   cursor: progress;
 }
 
-form.admin-form .choice-control .choice-option:focus-visible,
-form.admin-form .choice-control .choice-option-delete:focus-visible {
-  outline: 2px solid rgba(255,255,255,.82);
+form.admin-form .vehicle-parameters-panel .choice-option:focus-visible,
+form.admin-form .vehicle-parameters-panel .choice-option-delete:focus-visible {
+  outline: 2px solid rgba(255,255,255,.78);
   outline-offset: -2px;
 }
 
+/* Iba riadky, z ktorých sa presunuli parameter controls. */
+form.admin-form .row.vehicle-parameter-source-row--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 @media (max-width: 560px) {
-  form.admin-form .choice-control {
-    padding: 10px;
+  form.admin-form .vehicle-parameters-panel {
+    padding: 11px;
   }
 
-  form.admin-form .choice-option-wrap {
-    max-width: 100%;
+  form.admin-form .vehicle-parameter-group__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  form.admin-form .vehicle-parameter-group[data-group="powertrain"] .choice-control[data-choice-field="pohon"],
+  form.admin-form .vehicle-parameter-group[data-group="configuration"] .choice-control[data-choice-field="farba"] {
+    grid-column: auto;
   }
 }
