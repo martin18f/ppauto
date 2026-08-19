@@ -18,6 +18,10 @@ function isConflictError(err) {
   return msg.includes(' 409 ') || msg.includes('409 Conflict');
 }
 
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 const FIELD_NAMES = new Set([
   'znacka',
   'palivo',
@@ -67,7 +71,6 @@ function normalizeOptions(data) {
     normalizedModels[cleanBrand] = uniqueValues(values);
   });
 
-  // Každá uložená značka má vlastný modelový zoznam, aj keby bol prázdny.
   normalizedFields.znacka.forEach(brand => {
     const existingKey = Object.keys(normalizedModels).find(key => sameValue(key, brand));
     if (!existingKey) normalizedModels[brand] = [];
@@ -103,7 +106,7 @@ export default async function handler(req, res) {
     async function getFile() {
       const safePath = encodeGithubPath(OPTIONS_PATH);
       const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${safePath}?ref=${encodeURIComponent(GITHUB_BRANCH)}`;
-      const r = await fetch(url, { headers });
+      const r = await fetch(url, { headers, cache: 'no-store' });
 
       if (r.status === 404) {
         return {
@@ -152,17 +155,24 @@ export default async function handler(req, res) {
     }
 
     async function mutate(mutator, message) {
-      for (let attempt = 1; attempt <= 2; attempt++) {
+      const maxAttempts = 4;
+
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         const { options, sha } = await getFile();
         const next = normalizeOptions(mutator(options));
+
         try {
           await putFile(next, sha, message);
           return next;
         } catch (err) {
-          if (attempt < 2 && isConflictError(err)) continue;
+          if (attempt < maxAttempts && isConflictError(err)) {
+            await wait(120 * attempt);
+            continue;
+          }
           throw err;
         }
       }
+
       throw new Error('Nepodarilo sa uložiť parametre');
     }
 
@@ -245,8 +255,6 @@ export default async function handler(req, res) {
 
         options.fields[field] = (options.fields[field] || []).filter(item => !sameValue(item, value));
 
-        // Zmazanie značky odstráni iba jej admin zoznam modelov.
-        // Existujúce autá sa týmto API nikdy nemenia.
         if (field === 'znacka') {
           const modelKey = Object.keys(options.models).find(key => sameValue(key, value));
           if (modelKey) delete options.models[modelKey];
