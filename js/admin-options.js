@@ -14,6 +14,24 @@
     'farba',
   ];
 
+  const PARAMETER_GROUPS = [
+    {
+      key: 'identity',
+      title: 'Základné údaje',
+      fields: ['znacka', 'model'],
+    },
+    {
+      key: 'powertrain',
+      title: 'Pohon',
+      fields: ['palivo', 'typ_prevodovky', 'pohon'],
+    },
+    {
+      key: 'configuration',
+      title: 'Vyhotovenie',
+      fields: ['karoseria', 'vybava_paket', 'farba'],
+    },
+  ];
+
   let adminOptions = {
     version: 1,
     fields: {},
@@ -76,6 +94,75 @@
     const persisted = persistedValuesFor(name);
     const selected = clean(form.elements[name]?.value);
     return unique([...persisted, ...(selected ? [selected] : [])]);
+  }
+
+  function organizeParameterLayout() {
+    if (form.querySelector('.vehicle-parameters-panel')) return;
+
+    const firstField = choiceFieldElement('znacka');
+    const anchorRow = firstField?.closest('.row');
+    if (!firstField || !anchorRow) return;
+
+    const sourceRows = new Set();
+    MANAGED_FIELDS.forEach(name => {
+      const field = choiceFieldElement(name);
+      const row = field?.closest('.row');
+      if (row) sourceRows.add(row);
+    });
+
+    const panel = document.createElement('section');
+    panel.className = 'vehicle-parameters-panel';
+    panel.setAttribute('aria-labelledby', 'vehicleParametersTitle');
+
+    const header = document.createElement('div');
+    header.className = 'vehicle-parameters-header';
+    header.innerHTML = `
+      <div>
+        <h3 id="vehicleParametersTitle">Parametre vozidla</h3>
+        <p>Vyber hodnotu alebo uprav dostupné možnosti.</p>
+      </div>
+    `;
+    panel.appendChild(header);
+
+    PARAMETER_GROUPS.forEach(group => {
+      const groupEl = document.createElement('div');
+      groupEl.className = 'vehicle-parameter-group';
+      groupEl.dataset.group = group.key;
+
+      const title = document.createElement('div');
+      title.className = 'vehicle-parameter-group__title';
+      title.textContent = group.title;
+      groupEl.appendChild(title);
+
+      const grid = document.createElement('div');
+      grid.className = 'vehicle-parameter-group__grid';
+
+      group.fields.forEach(name => {
+        const field = choiceFieldElement(name);
+        if (field) grid.appendChild(field);
+      });
+
+      groupEl.appendChild(grid);
+      panel.appendChild(groupEl);
+    });
+
+    form.insertBefore(panel, anchorRow);
+
+    // Po presunutí výberových polí odstránime prázdne riadky.
+    // Riadky, v ktorých zostalo napr. iba „Rok“ alebo „Najazdené“,
+    // zmeníme na jeden stĺpec, aby nevznikali prázdne polovice formulára.
+    sourceRows.forEach(row => {
+      if (!row.children.length) {
+        row.remove();
+        return;
+      }
+      if (!row.querySelector('.choice-control')) {
+        row.classList.add('vehicle-parameter-source-row');
+        if (row.children.length === 1) {
+          row.classList.add('vehicle-parameter-source-row--single');
+        }
+      }
+    });
   }
 
   function applyBusyState(name) {
@@ -196,7 +283,6 @@
     const previousOptions = cloneOptions();
     const previousValue = clean(form.elements[name]?.value);
 
-    // Optimisticky zobrazíme novú možnosť okamžite po prvom kliknutí.
     addLocalOption(name, trimmed, brand);
     refreshAllChoiceFields();
     if (name === 'znacka') syncBrandInputs(trimmed);
@@ -226,19 +312,13 @@
   async function deleteOption(name, value) {
     if (busyFields.has(name)) return;
 
-    const label = fieldLabel(name);
     const brand = name === 'model' ? currentBrandLabel() : '';
-    const message = name === 'model'
-      ? `Odstrániť „${value}“ zo zoznamu modelov značky ${brand}?\n\nExistujúce autá sa nezmenia.`
-      : `Odstrániť „${value}“ zo zoznamu „${label}“?\n\nExistujúce autá sa nezmenia.`;
-
-    if (!window.confirm(message)) return;
-
     const previousOptions = cloneOptions();
     const previousValue = clean(form.elements[name]?.value);
     const wasSelected = eq(previousValue, value);
 
-    // Lokálne odstránime tlačidlo okamžite. Ak bolo vybrané, vyčistíme aj výber.
+    // Bez potvrdzovacieho dialógu: klik na × je samotná mazacia akcia.
+    // UI reaguje okamžite a pri chybe servera sa pôvodný stav obnoví.
     deleteLocalOption(name, value, brand);
     if (wasSelected) setChoiceValue(name, '', { emit: true });
     refreshAllChoiceFields();
@@ -272,7 +352,6 @@
     refreshAllChoiceFields();
   }
 
-  // Nahradí pôvodné vykreslenie volieb. Samotná hodnota formulára a save logika zostávajú pôvodné.
   renderChoiceField = function renderDynamicChoiceField(name) {
     const field = choiceFieldElement(name);
     const input = form.elements[name];
@@ -298,7 +377,6 @@
       button.classList.toggle('is-selected', active);
       button.setAttribute('aria-pressed', active ? 'true' : 'false');
       button.addEventListener('click', () => {
-        // Bez tlačidla „Neuvedené“: pri voliteľnom poli opätovný klik hodnotu vyčistí.
         if (active && settings.allowEmpty) {
           setChoiceValue(name, '', { emit: true });
           return;
@@ -345,13 +423,11 @@
     applyBusyState(name);
   };
 
-  // Globálne možnosti už nevytvárame z hodnôt existujúcich áut.
   refreshChoiceOptionsFromCars = function refreshDynamicChoiceOptions() {
     refreshAllChoiceFields();
     syncBrandInputs(currentBrandLabel());
   };
 
-  // Modely sa berú iba z persistentného zoznamu zvolenej značky + prípadnej starej hodnoty editovaného auta.
   syncBrandInputs = function syncDynamicBrandInputs(brand) {
     const current = clean(brand || form.elements.znacka?.value);
     const modelInput = form.elements.model;
@@ -372,5 +448,6 @@
     syncBrandInputs(currentBrandLabel());
   });
 
+  organizeParameterLayout();
   loadAdminOptions();
 })();
