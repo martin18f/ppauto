@@ -16,6 +16,28 @@ function safeDownloadName(filename) {
   return name.replace(/[\r\n"]/g, '_');
 }
 
+async function getFileBytes(filePayload, headers) {
+  if (filePayload?.content) {
+    const bytes = Buffer.from(filePayload.content, 'base64');
+    if (bytes.length) return bytes;
+  }
+
+  const sha = clean(filePayload?.sha);
+  if (!sha) return Buffer.alloc(0);
+
+  // GitHub Contents API pri väčších súboroch nemusí vrátiť `content`.
+  // Blob API vráti plný base64 obsah aj pre naše PDF do 3 MB.
+  const blobResponse = await fetch(filePayload.git_url || '', {
+    headers: {
+      ...headers,
+      Accept: 'application/vnd.github+json',
+    },
+  });
+  if (!blobResponse.ok) return Buffer.alloc(0);
+  const blob = await blobResponse.json();
+  return Buffer.from(String(blob?.content || '').replace(/\s+/g, ''), 'base64');
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', ['GET']);
@@ -51,7 +73,7 @@ export default async function handler(req, res) {
     if (!fileResponse.ok) return res.status(404).json({ error: 'PDF súbor sa nenašiel.' });
 
     const filePayload = await fileResponse.json();
-    const bytes = Buffer.from(filePayload.content || '', 'base64');
+    const bytes = await getFileBytes(filePayload, headers);
     if (!bytes.length) return res.status(404).json({ error: 'PDF súbor je prázdny.' });
 
     const filename = safeDownloadName(document.filename);
