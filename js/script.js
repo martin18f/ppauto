@@ -3,8 +3,6 @@
 // + Modely áut pás (Subaru/KGM/Jeep/Chery) + filter podľa modelu
 // ==============================
 
-const BRAND_STORAGE_KEY = 'ppauto.brand';
-
 const BRAND_FILTERS = new Set(['subaru', 'kgm', 'jeep', 'chery']);
 const CLEAN_BRAND_PATHS = {
   all: '/ponuka',
@@ -13,6 +11,7 @@ const CLEAN_BRAND_PATHS = {
   jeep: '/jeep',
   chery: '/chery',
 };
+const INVENTORY_RETURN_KEY = 'ppauto.inventoryReturn';
 
 function parseEuroAmount(value) {
   if (typeof value === 'number') {
@@ -233,40 +232,12 @@ function isKnownBrand(b) {
   return b === 'subaru' || b === 'kgm' || b === 'jeep' || b === 'chery';
 }
 
-function setStoredBrand(brand) {
-  try {
-    if (!brand) {
-      localStorage.removeItem(BRAND_STORAGE_KEY);
-      return;
-    }
-    localStorage.setItem(BRAND_STORAGE_KEY, brand);
-  } catch (e) {
-    // fallback (ak je localStorage bloknutý)
-    try {
-      if (!brand) sessionStorage.removeItem(BRAND_STORAGE_KEY);
-      else sessionStorage.setItem(BRAND_STORAGE_KEY, brand);
-    } catch (e2) {}
-  }
-}
-
-function getStoredBrand() {
-  try {
-    const v = (localStorage.getItem(BRAND_STORAGE_KEY) || '').toLowerCase().trim();
-    return isKnownBrand(v) ? v : null;
-  } catch (e) {
-    try {
-      const v = (sessionStorage.getItem(BRAND_STORAGE_KEY) || '').toLowerCase().trim();
-      return isKnownBrand(v) ? v : null;
-    } catch (e2) {
-      return null;
-    }
-  }
-}
-
 function getBrandFromURLRaw() {
+  const fromPath = getBrandFromPathnameRaw();
+  if (fromPath) return fromPath;
+
   const raw = new URLSearchParams(location.search).get('brand');
-  if (raw) return raw.toLowerCase().trim();
-  return getBrandFromPathnameRaw();
+  return raw ? raw.toLowerCase().trim() : null;
 }
 
 function getBrandFromPathnameRaw() {
@@ -292,18 +263,36 @@ function resolveBrandContext() {
 function cleanBrandParamFromURL() {
   const url = new URL(location.href);
   if (!url.searchParams.has('brand')) return;
-  if (url.searchParams.has('lang')) return;
   if (isLocalRouteHost()) return;
 
   const brand = (url.searchParams.get('brand') || '').toLowerCase().trim();
-
-  if (CLEAN_BRAND_PATHS[brand]) {
-    history.replaceState({}, '', CLEAN_BRAND_PATHS[brand] + (url.hash || ''));
-    return;
-  }
+  const pathname = CLEAN_BRAND_PATHS[brand] || url.pathname;
 
   url.searchParams.delete('brand');
-  history.replaceState({}, '', url.pathname + (url.search || '') + (url.hash || ''));
+
+  const query = url.searchParams.toString();
+  history.replaceState(
+    {},
+    '',
+    pathname + (query ? `?${query}` : '') + (url.hash || '')
+  );
+}
+
+function rememberInventoryReturnRoute(carId) {
+  if (!carId) return;
+
+  try {
+    const returnUrl = new URL(location.href);
+    returnUrl.hash = 'ponuka';
+
+    sessionStorage.setItem(
+      INVENTORY_RETURN_KEY,
+      JSON.stringify({
+        carId: String(carId),
+        href: returnUrl.href,
+      })
+    );
+  } catch (e) {}
 }
 
 /**
@@ -757,6 +746,11 @@ function vykresliKartu(auto) {
     </div>
   `;
 
+  const detailLink = article.querySelector('.car-link.primary');
+  if (detailLink) {
+    detailLink.addEventListener('click', () => rememberInventoryReturnRoute(carId));
+  }
+
         // Klik na celú kartu = otvor detail (okrem kliknutia na interaktívne prvky)
   article.style.cursor = 'pointer';
   article.setAttribute('role', 'link');
@@ -764,6 +758,7 @@ function vykresliKartu(auto) {
 
   const goDetail = () => {
     if (!detailHref || detailHref === '#kontakt') return;
+    rememberInventoryReturnRoute(carId);
     window.location.assign(detailHref);
   };
 
