@@ -25,9 +25,10 @@ function normalizeBrand(value) {
   return brand;
 }
 
-function normalizeType(value) {
-  const type = clean(value).toLowerCase();
-  return type === 'vybava' ? 'vybava' : 'cennik';
+// Cenník je jediný podporovaný typ PDF dokumentu.
+// Staršie záznamy typu "vybava" sa pri načítaní automaticky správajú ako cenník.
+function normalizeType() {
+  return 'cennik';
 }
 
 function normalizeDocument(doc) {
@@ -150,6 +151,7 @@ export default async function handler(req, res) {
       const now = new Date().toISOString();
       const incoming = normalizeDocument({
         ...req.body,
+        type: 'cennik',
         id: clean(req.body?.id) || `doc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
         createdAt: now,
         updatedAt: now,
@@ -161,7 +163,7 @@ export default async function handler(req, res) {
       }
       if (!/\.pdf$/i.test(incoming.filename)) return res.status(400).json({ error: 'Neplatný PDF súbor.' });
 
-      const next = await mutate(arr => [...arr, incoming], `chore(admin): add ${incoming.type} PDF ${incoming.filename}`);
+      const next = await mutate(arr => [...arr, incoming], `chore(admin): add cennik PDF ${incoming.filename}`);
       return res.status(200).json({ ok: true, document: incoming, documents: next });
     }
 
@@ -174,6 +176,7 @@ export default async function handler(req, res) {
         updated = normalizeDocument({
           ...doc,
           ...req.body,
+          type: 'cennik',
           id: doc.id,
           createdAt: doc.createdAt,
           updatedAt: new Date().toISOString(),
@@ -191,9 +194,12 @@ export default async function handler(req, res) {
       const target = documents.find(doc => doc.id === id);
       if (!target) return res.status(404).json({ error: 'Dokument sa nenašiel.' });
 
-      // Najprv odstránime z registra, potom fyzický PDF súbor.
       const next = await mutate(arr => arr.filter(doc => doc.id !== id), `chore(admin): remove PDF ${id}`);
-      await deleteGithubFile(target.path);
+      try {
+        await deleteGithubFile(target.path);
+      } catch (error) {
+        console.warn('PDF metadata removed, physical file cleanup failed:', error?.message || error);
+      }
       return res.status(200).json({ ok: true, documents: next });
     }
 
