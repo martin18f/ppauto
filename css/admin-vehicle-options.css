@@ -1,3 +1,5 @@
+@import url('/css/admin-cennik-only.css');
+
 /* Scoped only to the new vehicle option behaviour and promo image input. */
 
 form.admin-form .choice-control[data-choice-field="vybava_paket"] .choice-label::after {
@@ -19,13 +21,6 @@ form.admin-form .choice-control[data-choice-field="vybava_paket"] .choice-option
   border-color: rgba(59,130,246,.95);
   background: rgba(59,130,246,.18);
   box-shadow: 0 0 0 1px rgba(59,130,246,.18);
-}
-
-form.admin-form .choice-control[data-choice-field="vybava_paket"] .choice-option.is-selected::before,
-form.admin-form .choice-control[data-choice-field="vybava_paket"] .choice-option[aria-pressed="true"]::before {
-  content: "✓";
-  margin-right: 6px;
-  font-size: 11px;
 }
 
 form.admin-form .choice-control[data-choice-field="farba"] .choice-label::after {
