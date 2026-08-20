@@ -1,6 +1,86 @@
 (function(){
   try { sessionStorage.removeItem('ppauto.chooserRedirectAt'); } catch (e) {}
 
+  const BRAND_SESSION_KEY = 'ppauto.brandSession';
+  const LEGACY_BRAND_KEY = 'ppauto.brand';
+  const SESSION_TTL_MS = 60 * 1000;
+  const ALLOWED_BRANDS = new Set(['subaru', 'kgm', 'jeep', 'chery', 'all']);
+
+  function readBrandSession() {
+    try {
+      const raw = localStorage.getItem(BRAND_SESSION_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      const brand = String(parsed?.brand || '').toLowerCase().trim();
+      const lastSeen = Number(parsed?.lastSeen || 0);
+      if (!ALLOWED_BRANDS.has(brand) || !Number.isFinite(lastSeen) || lastSeen <= 0) return null;
+      return { brand, lastSeen };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function writeBrandSession(brand, now = Date.now()) {
+    const normalized = String(brand || '').toLowerCase().trim();
+    if (!ALLOWED_BRANDS.has(normalized)) return false;
+
+    try {
+      localStorage.setItem(BRAND_SESSION_KEY, JSON.stringify({ brand: normalized, lastSeen: now }));
+      // Zachovanie kompatibility s existujúcou brand témou na detailoch vozidiel.
+      if (normalized === 'all') localStorage.removeItem(LEGACY_BRAND_KEY);
+      else localStorage.setItem(LEGACY_BRAND_KEY, normalized);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function clearExpiredBrandSession() {
+    try {
+      localStorage.removeItem(BRAND_SESSION_KEY);
+      localStorage.removeItem(LEGACY_BRAND_KEY);
+    } catch (e) {}
+  }
+
+  function isSessionFresh(session, now = Date.now()) {
+    return !!session && now - session.lastSeen <= SESSION_TTL_MS;
+  }
+
+  function isLocalRouteHost() {
+    return location.protocol === 'file:' ||
+      location.hostname === 'localhost' ||
+      location.hostname === '127.0.0.1' ||
+      location.hostname === '::1';
+  }
+
+  function withLang(href) {
+    return window.ppI18n ? window.ppI18n.withLang(href) : href;
+  }
+
+  // Navigácia cez čitateľné URL na produkcii, cez reálne súbory lokálne.
+  function cleanBrandHref(brand) {
+    if (isLocalRouteHost()) return 'index.html?brand=' + encodeURIComponent(brand);
+    if (brand === 'all') return '/ponuka';
+    return '/' + encodeURIComponent(brand);
+  }
+
+  function forcedChooser() {
+    return new URLSearchParams(location.search).get('choose') === '1';
+  }
+
+  // Ak sa používateľ vráti na ppauto.sk počas stále platnej session,
+  // výberová stránka ho pošle rovno späť do jeho poslednej voľby.
+  // Parameter ?choose=1 je vedomé kliknutie na „Zmeniť značku“ a výber vždy zobrazí.
+  const existingSession = readBrandSession();
+  if (!forcedChooser() && existingSession) {
+    if (isSessionFresh(existingSession)) {
+      writeBrandSession(existingSession.brand);
+      location.replace(withLang(cleanBrandHref(existingSession.brand)));
+      return;
+    }
+    clearExpiredBrandSession();
+  }
+
   const cards = document.querySelectorAll('.card');
 
   // Tilt + svetelný lesk
@@ -21,33 +101,23 @@
     card.addEventListener('mouseleave', () => { card.style.transform = ''; });
   });
 
-  function isLocalRouteHost() {
-    return location.protocol === 'file:' ||
-      location.hostname === 'localhost' ||
-      location.hostname === '127.0.0.1' ||
-      location.hostname === '::1';
-  }
-
-  function withLang(href) {
-    return window.ppI18n ? window.ppI18n.withLang(href) : href;
-  }
-
-  // Navigácia cez čitateľné URL na produkcii, cez reálne súbory lokálne.
-  function cleanBrandHref(brand) {
-    if (isLocalRouteHost()) return 'index.html?brand=' + encodeURIComponent(brand);
-    return '/' + encodeURIComponent(brand);
-  }
-
   function go(brand){
+    if (!ALLOWED_BRANDS.has(String(brand || '').toLowerCase())) return;
+    writeBrandSession(brand);
     const href = cleanBrandHref(brand);
     location.href = withLang(href);
   }
 
   // Klik a klávesnica na kartách
   cards.forEach(card => {
-    const brand = card.dataset.brand;
+    const brand = String(card.dataset.brand || '').toLowerCase();
     const mainLink = card.querySelector('.card-main-link');
     if (brand && mainLink) mainLink.setAttribute('href', withLang(cleanBrandHref(brand)));
+
+    // Link samotný musí session uložiť ešte pred navigáciou.
+    mainLink?.addEventListener('click', () => {
+      if (brand) writeBrandSession(brand);
+    });
 
     card.addEventListener('click', (e) => {
       if (e.target.closest('a, button')) return;
@@ -67,8 +137,9 @@
     });
   });
 
-  // „Zobraziť všetko“
+  // „Zobraziť všetko“ je tiež platná voľba session.
   document.getElementById('skipOnce')?.addEventListener('click', () => {
+    writeBrandSession('all');
     const href = isLocalRouteHost() ? 'index.html?brand=all' : '/ponuka';
     location.href = withLang(href);
   });
