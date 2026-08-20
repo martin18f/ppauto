@@ -38,6 +38,16 @@
     root.querySelectorAll?.('a[data-mail]').forEach(hydrateMailLink);
   }
 
+  function ensureMobileNavStyles() {
+    if (document.querySelector('link[data-mobile-nav-style]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/css/mobile-nav.css';
+    link.dataset.mobileNavStyle = '1';
+    document.head.appendChild(link);
+  }
+
+  ensureMobileNavStyles();
   hydrateMailLinks(document);
 
   const observer = new MutationObserver((mutations) => {
