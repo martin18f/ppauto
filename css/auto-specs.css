@@ -1,0 +1,309 @@
+/*
+  Detail vozidla – moderný dizajn iba pre bloky
+  „Základné údaje“ a „Technické údaje“.
+  Ostatné sekcie detailu vozidla ostávajú nedotknuté.
+*/
+
+#carDetail .car-sections > .car-card:nth-of-type(1),
+#carDetail .car-sections > .car-card:nth-of-type(2) {
+  isolation: isolate;
+  overflow: hidden;
+  border-color: rgba(255,255,255,.09);
+  background:
+    radial-gradient(620px 250px at 8% -18%, rgba(var(--car-accent-rgb), .13), transparent 60%),
+    radial-gradient(520px 260px at 100% 115%, rgba(255,255,255,.045), transparent 62%),
+    linear-gradient(155deg, rgba(255,255,255,.035), rgba(255,255,255,.008) 48%, rgba(0,0,0,.035)),
+    var(--card);
+  box-shadow:
+    0 18px 52px rgba(0,0,0,.17),
+    inset 0 1px 0 rgba(255,255,255,.035);
+  transition:
+    border-color .24s ease,
+    box-shadow .24s ease,
+    transform .24s ease;
+}
+
+#carDetail .car-sections > .car-card:nth-of-type(1)::before,
+#carDetail .car-sections > .car-card:nth-of-type(2)::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--car-accent-rgb), .08),
+    rgba(var(--car-accent-rgb), .92) 20%,
+    rgba(var(--car-accent-rgb), .32) 62%,
+    transparent
+  );
+}
+
+#carDetail .car-sections > .car-card:nth-of-type(1):hover,
+#carDetail .car-sections > .car-card:nth-of-type(2):hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--car-accent-rgb), .24);
+  box-shadow:
+    0 24px 64px rgba(0,0,0,.22),
+    0 0 0 1px rgba(var(--car-accent-rgb), .035),
+    inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+/* Header */
+#carDetail .car-sections > .car-card:nth-of-type(1) > .section-title,
+#carDetail .car-sections > .car-card:nth-of-type(2) > .section-title {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  min-height: 68px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.065);
+  background: linear-gradient(180deg, rgba(255,255,255,.022), transparent);
+}
+
+#carDetail .car-sections > .car-card:nth-of-type(1) > .section-title::before,
+#carDetail .car-sections > .car-card:nth-of-type(2) > .section-title::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  margin-right: 11px;
+  border: 2px solid rgba(var(--car-accent-rgb), .9);
+  border-radius: 4px;
+  background: rgba(var(--car-accent-rgb), .13);
+  box-shadow:
+    0 0 0 5px rgba(var(--car-accent-rgb), .055),
+    0 0 22px rgba(var(--car-accent-rgb), .17);
+  transform: rotate(45deg);
+}
+
+#carDetail .car-sections > .car-card:nth-of-type(1) > .section-title h3,
+#carDetail .car-sections > .car-card:nth-of-type(2) > .section-title h3 {
+  position: relative;
+  margin: 0;
+  color: var(--text-strong);
+  font-size: 15px;
+  font-weight: 850;
+  line-height: 1.2;
+  letter-spacing: .035em;
+}
+
+#carDetail .car-sections > .car-card:nth-of-type(1) > .section-title h3::after,
+#carDetail .car-sections > .car-card:nth-of-type(2) > .section-title h3::after {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  opacity: .82;
+}
+
+#carDetail .car-sections > .car-card:nth-of-type(1) > .section-title h3::after {
+  content: "Prehľad vozidla";
+}
+
+#carDetail .car-sections > .car-card:nth-of-type(2) > .section-title h3::after {
+  content: "Technická konfigurácia";
+}
+
+/* Body */
+#carDetail .car-sections > .car-card:nth-of-type(1) > .section-body,
+#carDetail .car-sections > .car-card:nth-of-type(2) > .section-body {
+  position: relative;
+  z-index: 1;
+  padding: 13px;
+}
+
+#carDetail .car-sections > .car-card:nth-of-type(1) .kv,
+#carDetail .car-sections > .car-card:nth-of-type(2) .kv {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+/* Jednotlivé údajové riadky */
+#carDetail .car-sections > .car-card:nth-of-type(1) .kv .row,
+#carDetail .car-sections > .car-card:nth-of-type(2) .kv .row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(105px, .78fr) minmax(0, 1.22fr) 18px;
+  align-items: center;
+  gap: 12px;
+  min-height: 50px;
+  padding: 10px 11px 10px 13px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.065);
+  border-radius: 11px;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.026), rgba(255,255,255,.012)),
+    rgba(5,8,12,.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.018);
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    background-color .18s ease,
+    box-shadow .18s ease;
+}
+
+#carDetail .car-sections > .car-card:nth-of-type(1) .kv .row::before,
+#carDetail .car-sections > .car-card:nth-of-type(2) .kv .row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  border-radius: 0 2px 2px 0;
+  background: rgba(var(--car-accent-rgb), .30);
+  transform: scaleY(.4);
+  opacity: .55;
+  transition: transform .18s ease, opacity .18s ease, background-color .18s ease;
+}
+
+#carDetail .car-sections > .car-card:nth-of-type(1) .kv .row::after,
+#carDetail .car-sections > .car-card:nth-of-type(2) .kv .row::after {
+  content: "›";
+  grid-column: 3;
+  color: rgba(255,255,255,.22);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1;
+  text-align: center;
+  transform: translateX(-2px);
+  transition: color .18s ease, transform .18s ease;
+}
+
+#carDetail .car-sections > .car-card:nth-of-type(1) .kv .row:hover,
+#carDetail .car-sections > .car-card:nth-of-type(2) .kv .row:hover {
+  transform: translateX(3px);
+  border-color: rgba(var(--car-accent-rgb), .20);
+  background:
+    linear-gradient(90deg, rgba(var(--car-accent-rgb), .065), rgba(255,255,255,.018) 45%, rgba(255,255,255,.012)),
+    rgba(5,8,12,.09);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.026),
+    0 8px 22px rgba(0,0,0,.09);
+}
+
+#carDetail .car-sections > .car-card:nth-of-type(1) .kv .row:hover::before,
+#carDetail .car-sections > .car-card:nth-of-type(2) .kv .row:hover::before {
+  transform: scaleY(1);
+  opacity: 1;
+  background: rgba(var(--car-accent-rgb), .92);
+}
+
+#carDetail .car-sections > .car-card:nth-of-type(1) .kv .row:hover::after,
+#carDetail .car-sections > .car-card:nth-of-type(2) .kv .row:hover::after {
+  color: rgba(var(--car-accent-rgb), .88);
+  transform: translateX(1px);
+}
+
+#carDetail .car-sections > .car-card:nth-of-type(1) .kv .label,
+#carDetail .car-sections > .car-card:nth-of-type(2) .kv .label {
+  min-width: 0;
+  color: rgba(255,255,255,.48);
+  font-size: 10px;
+  font-weight: 760;
+  line-height: 1.25;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+
+#carDetail .car-sections > .car-card:nth-of-type(1) .kv .value,
+#carDetail .car-sections > .car-card:nth-of-type(2) .kv .value {
+  min-width: 0;
+  color: var(--text-strong);
+  font-size: 13.5px;
+  font-weight: 760;
+  line-height: 1.35;
+  letter-spacing: .005em;
+  text-align: right;
+  overflow-wrap: anywhere;
+  transition: color .18s ease, text-shadow .18s ease;
+}
+
+#carDetail .car-sections > .car-card:nth-of-type(1) .kv .row:hover .value,
+#carDetail .car-sections > .car-card:nth-of-type(2) .kv .row:hover .value {
+  color: #fff;
+  text-shadow: 0 0 18px rgba(var(--car-accent-rgb), .12);
+}
+
+/* Empty state zostáva v rovnakom vizuálnom jazyku */
+#carDetail .car-sections > .car-card:nth-of-type(1) .empty-note,
+#carDetail .car-sections > .car-card:nth-of-type(2) .empty-note {
+  margin: 0;
+  padding: 15px;
+  border: 1px dashed rgba(255,255,255,.09);
+  border-radius: 11px;
+  background: rgba(255,255,255,.015);
+  text-align: center;
+}
+
+@media (max-width: 680px) {
+  #carDetail .car-sections > .car-card:nth-of-type(1),
+  #carDetail .car-sections > .car-card:nth-of-type(2) {
+    transform: none !important;
+  }
+
+  #carDetail .car-sections > .car-card:nth-of-type(1) > .section-title,
+  #carDetail .car-sections > .car-card:nth-of-type(2) > .section-title {
+    min-height: 62px;
+    padding: 16px 15px 13px;
+  }
+
+  #carDetail .car-sections > .car-card:nth-of-type(1) > .section-body,
+  #carDetail .car-sections > .car-card:nth-of-type(2) > .section-body {
+    padding: 9px;
+  }
+
+  #carDetail .car-sections > .car-card:nth-of-type(1) .kv .row,
+  #carDetail .car-sections > .car-card:nth-of-type(2) .kv .row {
+    grid-template-columns: 1fr 18px;
+    gap: 4px 10px;
+    min-height: 58px;
+    padding: 10px 10px 10px 12px;
+  }
+
+  #carDetail .car-sections > .car-card:nth-of-type(1) .kv .label,
+  #carDetail .car-sections > .car-card:nth-of-type(2) .kv .label {
+    grid-column: 1;
+    font-size: 9.5px;
+  }
+
+  #carDetail .car-sections > .car-card:nth-of-type(1) .kv .value,
+  #carDetail .car-sections > .car-card:nth-of-type(2) .kv .value {
+    grid-column: 1;
+    text-align: left;
+    font-size: 13.5px;
+  }
+
+  #carDetail .car-sections > .car-card:nth-of-type(1) .kv .row::after,
+  #carDetail .car-sections > .car-card:nth-of-type(2) .kv .row::after {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+
+  #carDetail .car-sections > .car-card:nth-of-type(1) .kv .row:hover,
+  #carDetail .car-sections > .car-card:nth-of-type(2) .kv .row:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #carDetail .car-sections > .car-card:nth-of-type(1),
+  #carDetail .car-sections > .car-card:nth-of-type(2),
+  #carDetail .car-sections > .car-card:nth-of-type(1) .kv .row,
+  #carDetail .car-sections > .car-card:nth-of-type(2) .kv .row,
+  #carDetail .car-sections > .car-card:nth-of-type(1) .kv .row::before,
+  #carDetail .car-sections > .car-card:nth-of-type(2) .kv .row::before,
+  #carDetail .car-sections > .car-card:nth-of-type(1) .kv .row::after,
+  #carDetail .car-sections > .car-card:nth-of-type(2) .kv .row::after {
+    transition: none;
+  }
+}
