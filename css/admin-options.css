@@ -1,3 +1,9 @@
+@import url('/api/admin-auth-style');
+
+html {
+  visibility: var(--admin-auth-visibility, hidden) !important;
+}
+
 /*
   Dynamic vehicle parameters only.
   Scope is intentionally limited to the vehicle parameter panel and rows

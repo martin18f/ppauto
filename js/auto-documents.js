@@ -27,12 +27,21 @@
   }
 
   function ensureStyles() {
-    if (document.querySelector('link[data-auto-documents-style]')) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = '/css/auto-documents.css';
-    link.dataset.autoDocumentsStyle = '1';
-    document.head.appendChild(link);
+    const styles = [
+      { href: '/css/auto-documents.css', dataKey: 'autoDocumentsStyle', attr: 'data-auto-documents-style' },
+      { href: '/css/auto-specs.css', dataKey: 'autoSpecsStyle', attr: 'data-auto-specs-style' },
+      { href: '/css/auto-mobile-layout.css', dataKey: 'autoMobileLayoutStyle', attr: 'data-auto-mobile-layout-style' },
+    ];
+
+    styles.forEach(({ href, dataKey, attr }) => {
+      if (document.querySelector(`link[${attr}]`)) return;
+
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = href;
+      link.dataset[dataKey] = '1';
+      document.head.appendChild(link);
+    });
   }
 
   function sectionByTitle(title) {

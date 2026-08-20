@@ -1,0 +1,359 @@
+/*
+  PP AUTO – mobilný layout detailu vozidla.
+  Iba rozloženie/alignment pri mobilných šírkach.
+  Bez zmien farieb, typografie, komponentovej logiky alebo desktopového vzhľadu.
+*/
+
+@media (max-width: 760px) {
+  /* Jedna spoločná stredová os celej stránky detailu */
+  .car-page {
+    padding-top: 18px;
+    padding-bottom: 34px;
+    overflow-x: hidden;
+  }
+
+  .car-page > .container {
+    width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
+    padding-inline: clamp(12px, 4vw, 18px);
+  }
+
+  .car-breadcrumb {
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin: 8px auto 14px;
+    text-align: center;
+  }
+
+  .car-breadcrumb .pill {
+    max-width: 100%;
+    margin-inline: auto;
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* Hero: galéria + hlavný informačný panel */
+  .car-top {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 14px;
+    width: 100%;
+    margin-inline: auto;
+  }
+
+  .car-top > .car-card,
+  .car-top > aside.car-card {
+    width: 100%;
+    max-width: 620px;
+    margin-inline: auto;
+  }
+
+  .car-top > aside.car-card {
+    position: relative;
+    top: auto;
+  }
+
+  /* Galéria ostáva horizontálne použiteľná, ale vizuálne centrovaná */
+  .car-page .gallery-main .imgwrap {
+    width: 100%;
+    height: clamp(220px, 68vw, 390px);
+    margin-inline: auto;
+  }
+
+  .gal-btn.prev {
+    left: 10px;
+  }
+
+  .gal-btn.next {
+    right: 10px;
+  }
+
+  .thumbs {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: 10px;
+    scroll-padding-inline: 10px;
+  }
+
+  .thumb {
+    scroll-snap-align: center;
+  }
+
+  /* Pravý panel na desktope -> centrovaný mobilný panel */
+  .car-hero {
+    width: 100%;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .car-hero h2,
+  .car-hero p {
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  .chips {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .car-pricebox {
+    width: calc(100% - 28px);
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  .price-big,
+  .price-old,
+  .price-note {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  .car-cta {
+    align-items: center;
+    width: 100%;
+    margin-inline: auto;
+  }
+
+  .car-cta .btn {
+    width: 100%;
+    max-width: 520px;
+    margin-inline: auto;
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* Všetky obsahové sekcie idú po jednej stredovej osi */
+  .car-sections {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 14px;
+    width: 100%;
+    margin: 14px auto 0;
+  }
+
+  .car-sections > section,
+  .car-sections > .car-card,
+  .car-documents-strip {
+    grid-column: auto !important;
+    width: 100%;
+    max-width: 620px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .section-title {
+    width: 100%;
+    text-align: center;
+  }
+
+  .section-title h2,
+  .section-title h3 {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  .section-body {
+    width: 100%;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .empty-note {
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  /* Redizajnované Základné / Technické údaje – iba mobilné rozloženie */
+  #carDetail .car-sections > .car-card:nth-of-type(1) > .section-title,
+  #carDetail .car-sections > .car-card:nth-of-type(2) > .section-title {
+    justify-content: center;
+    text-align: center;
+  }
+
+  #carDetail .car-sections > .car-card:nth-of-type(1) > .section-title::before,
+  #carDetail .car-sections > .car-card:nth-of-type(2) > .section-title::before {
+    margin-left: 0;
+  }
+
+  #carDetail .car-sections > .car-card:nth-of-type(1) > .section-title h3,
+  #carDetail .car-sections > .car-card:nth-of-type(2) > .section-title h3,
+  #carDetail .car-sections > .car-card:nth-of-type(1) > .section-title h3::after,
+  #carDetail .car-sections > .car-card:nth-of-type(2) > .section-title h3::after {
+    text-align: center;
+  }
+
+  #carDetail .car-sections > .car-card:nth-of-type(1) .kv,
+  #carDetail .car-sections > .car-card:nth-of-type(2) .kv {
+    width: 100%;
+    margin-inline: auto;
+  }
+
+  #carDetail .car-sections > .car-card:nth-of-type(1) .kv .row,
+  #carDetail .car-sections > .car-card:nth-of-type(2) .kv .row {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    align-content: center;
+    gap: 4px;
+    width: 100%;
+    min-height: 64px;
+    padding-left: 38px;
+    padding-right: 38px;
+    text-align: center;
+  }
+
+  #carDetail .car-sections > .car-card:nth-of-type(1) .kv .label,
+  #carDetail .car-sections > .car-card:nth-of-type(2) .kv .label,
+  #carDetail .car-sections > .car-card:nth-of-type(1) .kv .value,
+  #carDetail .car-sections > .car-card:nth-of-type(2) .kv .value {
+    grid-column: 1;
+    width: 100%;
+    text-align: center;
+  }
+
+  #carDetail .car-sections > .car-card:nth-of-type(1) .kv .row::after,
+  #carDetail .car-sections > .car-card:nth-of-type(2) .kv .row::after {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    grid-column: auto;
+    grid-row: auto;
+    transform: translateY(-50%);
+  }
+
+  /* Cenník/PDF pás */
+  .car-documents-strip {
+    align-items: center;
+    text-align: center;
+  }
+
+  .car-documents-strip__label {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .car-documents-strip__items {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .car-document-link {
+    width: 100%;
+    max-width: 560px;
+    margin-inline: auto;
+  }
+
+  .car-document-link__copy {
+    text-align: center;
+  }
+
+  /* Testovacia jazda – formulár ostáva identický, iba sa centrovane skladá */
+  .car-td-picked {
+    width: 100%;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  .car-td-title,
+  .car-td-meta {
+    text-align: center;
+  }
+
+  .car-td-form {
+    width: 100%;
+    max-width: 560px;
+    margin-inline: auto;
+  }
+
+  .car-td-grid {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: stretch;
+    width: 100%;
+    margin-inline: auto;
+  }
+
+  .car-td-span {
+    grid-column: 1;
+  }
+
+  .car-td-field {
+    width: 100%;
+    justify-items: stretch;
+    text-align: center;
+  }
+
+  .car-td-field label {
+    width: 100%;
+    text-align: center;
+  }
+
+  .car-td-form input,
+  .car-td-form select,
+  .car-td-form textarea {
+    width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  .car-td-consent {
+    width: 100%;
+    max-width: 520px;
+    margin-inline: auto;
+    justify-content: center;
+  }
+
+  /* Not-found stav tiež drží tú istú stredovú os */
+  .not-found {
+    width: 100%;
+    max-width: 620px;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .not-found h2,
+  .not-found p {
+    text-align: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .car-page > .container {
+    padding-inline: 10px;
+  }
+
+  .car-page .gallery-main .imgwrap {
+    height: clamp(210px, 72vw, 320px);
+  }
+
+  .car-pricebox {
+    width: calc(100% - 20px);
+  }
+
+  .car-cta,
+  .section-body {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  #carDetail .car-sections > .car-card:nth-of-type(1) .kv .row,
+  #carDetail .car-sections > .car-card:nth-of-type(2) .kv .row {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+}

@@ -1,3 +1,9 @@
+@import url('/api/admin-auth-style');
+
+html {
+  visibility: var(--admin-auth-visibility, hidden) !important;
+}
+
 :root{
   --bg: #0b0e13;
   --bg-elev: #11151b;
@@ -287,7 +293,7 @@ form.admin-form .actions{
 }
 
 .cell-actions{
-  
+  flex-wrap: wrap;
   align-items: center;
 }
 

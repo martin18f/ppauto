@@ -1,0 +1,248 @@
+/*
+  PP AUTO – mobilná navigácia.
+  Iba layout a vzhľad hlavičky/menu pri mobilných šírkach.
+  Desktop navigácia a existujúca toggle logika ostávajú bez zmeny.
+*/
+
+@media (max-width: 680px) {
+  /* Kompaktnejšia horná lišta: logo | Zmeniť značku | hamburger */
+  header {
+    backdrop-filter: saturate(170%) blur(14px);
+  }
+
+  header .nav {
+    min-height: 66px;
+    padding: 7px 0;
+    gap: 8px;
+  }
+
+  header .brand {
+    min-width: 0;
+    flex: 1 1 auto;
+    gap: 6px;
+  }
+
+  header .brand .logo-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+  }
+
+  header .brand svg {
+    width: 72px !important;
+  }
+
+  /* Na mobile logo plne nahrádza textový názov a uvoľní miesto akciám. */
+  header .brand h1 {
+    display: none;
+  }
+
+  header .nav-cta {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  /* Pôvodné pravidlá schovávajú všetky CTA; brand-switch má zostať v top bare. */
+  header .nav-cta > a.brand-switch.btn {
+    display: inline-flex !important;
+    width: auto;
+    min-height: 40px;
+    padding: 0 12px;
+    border-radius: 12px;
+    white-space: nowrap;
+    font-size: 11.5px;
+    font-weight: 760;
+    line-height: 1;
+    letter-spacing: .01em;
+    background: rgba(255,255,255,.035);
+    border-color: rgba(255,255,255,.10);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+  }
+
+  header .nav-cta > a.brand-switch.btn:active {
+    transform: scale(.98);
+  }
+
+  /* Login a jazyk z CTA ostávajú mimo top baru – sú v hamburger menu. */
+  header .nav-cta > a.login-link,
+  header .nav-cta > a.lang-switch {
+    display: none !important;
+  }
+
+  /* Moderný hamburger bez zásahu do existujúceho HTML/onclick. */
+  header .mobile-toggle {
+    position: relative;
+    display: inline-flex !important;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    padding: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    font-size: 0;
+    color: transparent;
+    background: rgba(255,255,255,.04);
+    border-color: rgba(255,255,255,.11);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+  }
+
+  header .mobile-toggle::before,
+  header .mobile-toggle::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    width: 18px;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--text-strong);
+    transform-origin: center;
+    transition: transform .2s ease, top .2s ease, box-shadow .2s ease, opacity .2s ease;
+  }
+
+  header .mobile-toggle::before {
+    top: 14px;
+    transform: translateX(-50%);
+    box-shadow: 0 6px 0 var(--text-strong), 0 12px 0 var(--text-strong);
+  }
+
+  header .mobile-toggle::after {
+    top: 20px;
+    opacity: 0;
+    transform: translateX(-50%);
+  }
+
+  /* Po otvorení hamburger plynulo prejde na X. */
+  header .nav.open .mobile-toggle::before {
+    top: 20px;
+    box-shadow: none;
+    transform: translateX(-50%) rotate(45deg);
+  }
+
+  header .nav.open .mobile-toggle::after {
+    top: 20px;
+    opacity: 1;
+    transform: translateX(-50%) rotate(-45deg);
+  }
+
+  /* Menu ako centrovaný mobile sheet pod hlavičkou. */
+  header .nav-links {
+    left: 50%;
+    right: auto;
+    top: calc(72px + env(safe-area-inset-top, 0px));
+    width: min(calc(100vw - 24px), 440px);
+    max-height: calc(100dvh - 92px - env(safe-area-inset-bottom, 0px));
+    margin: 0;
+    padding: 10px;
+    gap: 5px;
+    transform: translateX(-50%);
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,.10);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012)),
+      rgba(15,20,27,.97);
+    box-shadow:
+      0 24px 70px rgba(0,0,0,.52),
+      inset 0 1px 0 rgba(255,255,255,.035);
+    backdrop-filter: blur(18px) saturate(160%);
+    overscroll-behavior: contain;
+  }
+
+  /* Linky sú vizuálne jednotné a pohodlné na dotyk. */
+  header .nav-links > a {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text);
+    text-align: center;
+    font-size: 14px;
+    font-weight: 650;
+    line-height: 1.25;
+    letter-spacing: .005em;
+    transition: background-color .16s ease, border-color .16s ease, transform .12s ease;
+  }
+
+  header .nav-links > a:hover,
+  header .nav-links > a:focus-visible {
+    background: rgba(255,255,255,.055);
+    border-color: rgba(255,255,255,.075);
+    outline: none;
+  }
+
+  header .nav-links > a:active {
+    transform: scale(.985);
+  }
+
+  /* Účet a jazyk sú sekundárne akcie na spodku menu. */
+  header .nav-links > .nav-login {
+    margin-top: 7px;
+    border-top: 1px solid rgba(255,255,255,.075);
+    border-radius: 0 0 12px 12px;
+    padding-top: 14px;
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+
+  header .nav-links > .nav-lang {
+    min-height: 40px;
+    color: var(--muted);
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: .08em;
+  }
+
+  /* Overlay je mäkší a menu zostáva jasne nad ním. */
+  header .nav.open::before {
+    background: rgba(2,5,9,.60);
+    backdrop-filter: blur(3px);
+  }
+
+  body.no-scroll header .nav-links {
+    z-index: 100001;
+  }
+
+  body.no-scroll header .mobile-toggle,
+  body.no-scroll header .brand-switch {
+    position: relative;
+    z-index: 100002;
+  }
+}
+
+@media (max-width: 390px) {
+  header .nav {
+    gap: 6px;
+  }
+
+  header .brand svg {
+    width: 64px !important;
+  }
+
+  header .nav-cta {
+    gap: 6px;
+  }
+
+  header .nav-cta > a.brand-switch.btn {
+    min-height: 38px;
+    padding-inline: 9px;
+    font-size: 10.5px;
+  }
+
+  header .mobile-toggle {
+    flex-basis: 40px;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+}
