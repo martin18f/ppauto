@@ -265,8 +265,15 @@
     hydrateMailLink(link);
   });
 
+  // Promo + formulár testovacej jazdy iba na stránkach s financovaním.
+  if (document.getElementById('financovanie') && !document.querySelector('script[data-testdrive-promo-script]')) {
+    const script = document.createElement('script');
+    script.src = '/js/testdrive-promo.js';
+    script.dataset.testdrivePromoScript = '1';
+    document.head.appendChild(script);
+  }
+
   // Detail vozidla si načíta samostatný modul pre PDF dokumenty.
-  // Na ostatných stránkach sa nič navyše nenačítava.
   if (document.getElementById('carDetail') && !document.querySelector('script[data-auto-documents-script]')) {
     const script = document.createElement('script');
     script.src = '/js/auto-documents.js';
