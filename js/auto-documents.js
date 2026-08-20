@@ -82,8 +82,8 @@
     return documentsPromise;
   }
 
-  function typeLabel() {
-    return 'Cenník';
+  function typeLabel(type) {
+    return type === 'vybava' ? 'Výbava' : 'Cenník';
   }
 
   function matchingDocuments(all, brand, model) {
@@ -93,7 +93,7 @@
       .sort((a, b) => {
         const aExact = clean(a.model) && eq(a.model, model) ? 0 : 1;
         const bExact = clean(b.model) && eq(b.model, model) ? 0 : 1;
-        return aExact - bExact || clean(a.title || a.filename).localeCompare(clean(b.title || b.filename), 'sk');
+        return aExact - bExact || clean(a.type).localeCompare(clean(b.type), 'sk') || clean(a.title || a.filename).localeCompare(clean(b.title || b.filename), 'sk');
       });
   }
 
@@ -114,7 +114,7 @@
             <span class="car-document-link__icon">PDF</span>
             <span class="car-document-link__copy">
               <strong>${esc(doc.title || doc.filename)}</strong>
-              <small>${esc(typeLabel())}${doc.model ? ` · ${esc(doc.model)}` : ''}</small>
+              <small>${esc(typeLabel(doc.type))}${doc.model ? ` · ${esc(doc.model)}` : ''}</small>
             </span>
             <span class="car-document-link__download" aria-hidden="true">↓</span>
           </a>
