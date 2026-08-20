@@ -27,12 +27,23 @@
   }
 
   function ensureStyles() {
-    if (document.querySelector('link[data-auto-documents-style]')) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = '/css/auto-documents.css';
-    link.dataset.autoDocumentsStyle = '1';
-    document.head.appendChild(link);
+    const styles = [
+      { href: '/css/auto-documents.css', dataKey: 'autoDocumentsStyle' },
+      { href: '/css/auto-specs.css', dataKey: 'autoSpecsStyle' },
+    ];
+
+    styles.forEach(({ href, dataKey }) => {
+      const attr = dataKey === 'autoDocumentsStyle'
+        ? 'data-auto-documents-style'
+        : 'data-auto-specs-style';
+      if (document.querySelector(`link[${attr}]`)) return;
+
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = href;
+      link.dataset[dataKey] = '1';
+      document.head.appendChild(link);
+    });
   }
 
   function sectionByTitle(title) {
@@ -71,8 +82,8 @@
     return documentsPromise;
   }
 
-  function typeLabel(type) {
-    return type === 'vybava' ? 'Výbava' : 'Cenník';
+  function typeLabel() {
+    return 'Cenník';
   }
 
   function matchingDocuments(all, brand, model) {
@@ -82,7 +93,7 @@
       .sort((a, b) => {
         const aExact = clean(a.model) && eq(a.model, model) ? 0 : 1;
         const bExact = clean(b.model) && eq(b.model, model) ? 0 : 1;
-        return aExact - bExact || clean(a.type).localeCompare(clean(b.type), 'sk') || clean(a.title || a.filename).localeCompare(clean(b.title || b.filename), 'sk');
+        return aExact - bExact || clean(a.title || a.filename).localeCompare(clean(b.title || b.filename), 'sk');
       });
   }
 
@@ -103,7 +114,7 @@
             <span class="car-document-link__icon">PDF</span>
             <span class="car-document-link__copy">
               <strong>${esc(doc.title || doc.filename)}</strong>
-              <small>${esc(typeLabel(doc.type))}${doc.model ? ` · ${esc(doc.model)}` : ''}</small>
+              <small>${esc(typeLabel())}${doc.model ? ` · ${esc(doc.model)}` : ''}</small>
             </span>
             <span class="car-document-link__download" aria-hidden="true">↓</span>
           </a>
