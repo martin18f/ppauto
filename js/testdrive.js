@@ -22,8 +22,6 @@
     return isKnownBrand(s) ? s : null;
   }
 
-
-
   function getBrandFromURL() {
     const raw = new URLSearchParams(location.search).get('brand');
     const b = safeLower(raw);
@@ -100,31 +98,45 @@
       } catch (e) {}
     }
 
-    // 1) Načítaj autá a sprav mapu brand -> modely
+    // 1) Načítaj modely z konfigurácie adminu aj z reálnych áut.
+    // Konfigurácia zabezpečí, že vo formulári sú aj modely, ktoré práve nie sú skladom.
     let modelMap = new Map();
     try {
-      const r = await fetch(api('/api/cars'), { cache: 'no-store' });
-      if (r.ok) {
-        const cars = await r.json();
+      const tmp = new Map();
+
+      function addModel(brand, model) {
+        const b = safeLower(brand);
+        const m = String(model || '').trim();
+        if (!isKnownBrand(b) || !m) return;
+        if (!tmp.has(b)) tmp.set(b, new Set());
+        tmp.get(b).add(m);
+      }
+
+      const [carsResult, optionsResult] = await Promise.allSettled([
+        fetch(api('/api/cars'), { cache: 'no-store' }),
+        fetch(api('/api/options'), { cache: 'no-store' }),
+      ]);
+
+      if (carsResult.status === 'fulfilled' && carsResult.value.ok) {
+        const cars = await carsResult.value.json().catch(() => []);
         const list = Array.isArray(cars) ? cars : [];
-        const tmp = new Map();
-
         list.forEach((c) => {
-          // ak máš "skryte", nechceme ponúkať skryté modely
           if (c && c.skryte === true) return;
-
-          const b = safeLower(c && c.znacka);
-          const m = String((c && c.model) || '').trim();
-          if (!isKnownBrand(b) || !m) return;
-
-          if (!tmp.has(b)) tmp.set(b, new Set());
-          tmp.get(b).add(m);
-        });
-
-        tmp.forEach((set, b) => {
-          modelMap.set(b, Array.from(set).sort((x, y) => x.localeCompare(y, 'sk')));
+          addModel(c && c.znacka, c && c.model);
         });
       }
+
+      if (optionsResult.status === 'fulfilled' && optionsResult.value.ok) {
+        const options = await optionsResult.value.json().catch(() => ({}));
+        const models = options && typeof options.models === 'object' ? options.models : {};
+        Object.entries(models || {}).forEach(([brand, values]) => {
+          (Array.isArray(values) ? values : []).forEach((model) => addModel(brand, model));
+        });
+      }
+
+      tmp.forEach((set, b) => {
+        modelMap.set(b, Array.from(set).sort((x, y) => x.localeCompare(y, 'sk')));
+      });
     } catch (e) {
       // fallback bude „Iný model“
     }
@@ -271,7 +283,7 @@
       setPreview();
     });
 
-    // predvyplnenie brandu (DOM -> URL -> storage)
+    // predvyplnenie brandu (DOM -> URL)
     const preBrand = getBrandFromDOM() || getBrandFromURL();
     if (preBrand) setBrand(preBrand);
     else {
@@ -368,7 +380,6 @@
         // v brand režime nechávame značku, inak resetneme aj značku
         const keepBrand = !!getBrandFromDOM();
         if (keepBrand) {
-          // dôležité: obnoví chips + tdBrandInput (po form.reset())
           setBrand(state.brand);
         } else {
           setBrand(null);
