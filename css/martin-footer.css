@@ -1,0 +1,586 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap');
+
+/* Martin Sulak signature footer - isolated from the PP AUTO design system. */
+.martin-credit {
+  display: none !important;
+}
+
+.ms-footer,
+.ms-footer * {
+  box-sizing: border-box;
+}
+
+.ms-footer {
+  --ms-bg: #050508;
+  --ms-bg-2: #08080f;
+  --ms-border: rgba(255, 255, 255, 0.06);
+  --ms-accent: #64ffd4;
+  --ms-accent-blue: #5a8fff;
+  --ms-accent-pink: #ff6b9d;
+  --ms-text: #eaeaf8;
+  --ms-text-muted: #7878a0;
+  --ms-text-dark: #3a3a60;
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  isolation: isolate;
+  color: var(--ms-text);
+  font-family: 'DM Sans', sans-serif;
+  background:
+    radial-gradient(
+      420px circle at var(--mouse-x) var(--mouse-y),
+      rgba(100, 255, 212, 0.115),
+      transparent 65%
+    ),
+    radial-gradient(
+      420px circle at 85% 150%,
+      rgba(90, 143, 255, 0.08),
+      transparent 65%
+    ),
+    linear-gradient(135deg, var(--ms-bg), var(--ms-bg-2));
+}
+
+.ms-footer::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  z-index: 10;
+  opacity: 0.65;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--ms-accent) 22%,
+    var(--ms-accent-blue) 52%,
+    var(--ms-accent-pink) 78%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: msAccentMove 7s linear infinite;
+}
+
+@keyframes msAccentMove {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+.ms-grid {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  opacity: 0.2;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 52px 52px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 25%, #000 75%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 25%, #000 75%, transparent);
+}
+
+.ms-ambient {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(80px);
+}
+
+.ms-ambient-one {
+  width: 240px;
+  height: 180px;
+  left: 9%;
+  top: -120px;
+  background: rgba(100, 255, 212, 0.09);
+}
+
+.ms-ambient-two {
+  width: 260px;
+  height: 190px;
+  right: 11%;
+  bottom: -150px;
+  background: rgba(90, 143, 255, 0.09);
+}
+
+.ms-container {
+  position: relative;
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+.ms-main {
+  min-height: 125px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 22px;
+  padding: 25px 0 21px;
+}
+
+.ms-logo {
+  position: relative;
+  width: 55px;
+  height: 55px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 13px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.012));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.015),
+    0 10px 30px rgba(0, 0, 0, 0.22);
+  color: var(--ms-accent);
+  font-family: 'Syne', sans-serif;
+  font-size: 27px;
+  font-weight: 800;
+  cursor: default;
+  transition: 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ms-logo::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  opacity: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(100, 255, 212, 0.5),
+    transparent 35%,
+    transparent 65%,
+    rgba(90, 143, 255, 0.35)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  transition: opacity 0.35s ease;
+}
+
+.ms-logo:hover {
+  transform: translateY(-3px) rotate(-2deg);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025),
+    0 14px 35px rgba(100, 255, 212, 0.08);
+}
+
+.ms-logo:hover::after {
+  opacity: 1;
+}
+
+.ms-identity {
+  min-width: 0;
+}
+
+.ms-overline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  color: var(--ms-text-muted);
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.ms-dot {
+  position: relative;
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ms-accent);
+  box-shadow: 0 0 10px rgba(100, 255, 212, 0.8);
+}
+
+.ms-dot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--ms-accent);
+  animation: msPulse 2.4s ease-out infinite;
+}
+
+@keyframes msPulse {
+  0% { transform: scale(1); opacity: 0.75; }
+  70%, 100% { transform: scale(3.1); opacity: 0; }
+}
+
+.ms-name-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--ms-text);
+  text-decoration: none;
+}
+
+.ms-name {
+  position: relative;
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(22px, 2vw, 29px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  background: linear-gradient(
+    110deg,
+    var(--ms-text) 0%,
+    var(--ms-text) 35%,
+    var(--ms-accent) 50%,
+    var(--ms-text) 65%,
+    var(--ms-text) 100%
+  );
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ms-name-link:hover .ms-name {
+  animation: msNameShine 1.35s ease;
+  transform: translateX(2px);
+}
+
+@keyframes msNameShine {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
+.ms-name-arrow {
+  color: var(--ms-accent);
+  font-size: 15px;
+  transform: translateY(-1px);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ms-name-link:hover .ms-name-arrow {
+  transform: translate(3px, -4px);
+}
+
+.ms-role {
+  margin-top: 5px;
+  color: var(--ms-text-muted);
+  font-size: 11px;
+  letter-spacing: 0.015em;
+}
+
+.ms-role span {
+  color: var(--ms-text-dark);
+  padding: 0 5px;
+}
+
+.ms-portfolio {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 13px 10px 15px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--ms-text);
+  text-decoration: none;
+  transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ms-portfolio::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: linear-gradient(110deg, transparent, rgba(100, 255, 212, 0.055), rgba(90, 143, 255, 0.055));
+  transition: opacity 0.35s;
+}
+
+.ms-portfolio:hover {
+  transform: translateY(-2px);
+  border-color: rgba(100, 255, 212, 0.23);
+  box-shadow: 0 9px 32px rgba(100, 255, 212, 0.055);
+}
+
+.ms-portfolio:hover::before {
+  opacity: 1;
+}
+
+.ms-portfolio-content {
+  position: relative;
+  z-index: 1;
+}
+
+.ms-portfolio-label {
+  display: block;
+  margin-bottom: 1px;
+  color: var(--ms-text-dark);
+  font-family: 'Space Mono', monospace;
+  font-size: 7px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.ms-portfolio-url {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.ms-portfolio-arrow {
+  position: relative;
+  z-index: 1;
+  width: 29px;
+  height: 29px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(100, 255, 212, 0.07);
+  color: var(--ms-accent);
+  font-size: 13px;
+  transition: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ms-portfolio:hover .ms-portfolio-arrow {
+  color: #050508;
+  background: var(--ms-accent);
+  transform: translate(2px, -2px);
+}
+
+.ms-stack {
+  position: relative;
+  width: 100%;
+  height: 43px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border-top: 1px solid var(--ms-border);
+  border-bottom: 1px solid var(--ms-border);
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.ms-stack::before,
+.ms-stack::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 70px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.ms-stack::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--ms-bg), transparent);
+}
+
+.ms-stack::after {
+  right: 0;
+  background: linear-gradient(-90deg, var(--ms-bg), transparent);
+}
+
+.ms-stack-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  animation: msMarquee 29s linear infinite;
+}
+
+.ms-stack:hover .ms-stack-track {
+  animation-play-state: paused;
+}
+
+@keyframes msMarquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.ms-stack-set {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.ms-tech {
+  height: 43px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.045);
+  color: var(--ms-text-muted);
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.045em;
+  white-space: nowrap;
+  transition: color 0.25s ease, background 0.25s ease;
+}
+
+.ms-tech::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--ms-text-dark);
+  transition: 0.25s ease;
+}
+
+.ms-tech:hover {
+  color: var(--ms-text);
+  background: rgba(100, 255, 212, 0.025);
+}
+
+.ms-tech:hover::before {
+  background: var(--ms-accent);
+  box-shadow: 0 0 9px var(--ms-accent);
+}
+
+.ms-bottom {
+  min-height: 39px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  color: var(--ms-text-dark);
+  font-family: 'Space Mono', monospace;
+  font-size: 7px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.ms-bottom-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ms-bottom-separator {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--ms-text-dark);
+}
+
+.ms-main,
+.ms-stack,
+.ms-bottom {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ms-footer.ms-visible .ms-main {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.05s;
+}
+
+.ms-footer.ms-visible .ms-stack {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.12s;
+}
+
+.ms-footer.ms-visible .ms-bottom {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.19s;
+}
+
+@media (max-width: 760px) {
+  .ms-container {
+    width: min(calc(100% - 32px), 1180px);
+  }
+
+  .ms-main {
+    min-height: 145px;
+    grid-template-columns: auto 1fr;
+    gap: 15px;
+    padding: 22px 0 18px;
+  }
+
+  .ms-portfolio {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-content: space-between;
+    padding: 8px 11px 8px 13px;
+  }
+
+  .ms-portfolio-arrow {
+    width: 27px;
+    height: 27px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ms-container {
+    width: calc(100% - 28px);
+  }
+
+  .ms-main {
+    min-height: 145px;
+    padding: 19px 0 16px;
+    gap: 13px;
+  }
+
+  .ms-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 11px;
+    font-size: 23px;
+  }
+
+  .ms-name { font-size: 21px; }
+  .ms-overline { font-size: 7px; }
+  .ms-role { font-size: 9px; }
+  .ms-role span { padding: 0 3px; }
+
+  .ms-stack,
+  .ms-tech {
+    height: 40px;
+  }
+
+  .ms-tech {
+    padding: 0 13px;
+    font-size: 8px;
+  }
+
+  .ms-bottom {
+    min-height: 36px;
+    font-size: 6.5px;
+  }
+
+  .ms-bottom-right {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ms-footer *,
+  .ms-footer *::before,
+  .ms-footer *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .ms-main,
+  .ms-stack,
+  .ms-bottom {
+    opacity: 1;
+    transform: none;
+  }
+}
