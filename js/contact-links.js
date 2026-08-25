@@ -109,9 +109,130 @@
     navCta.replaceChildren(...orderedCta);
   }
 
+  function ensureMartinFooter() {
+    if (document.querySelector('.ms-footer')) return;
+
+    const ppFooter = document.querySelector('footer');
+    if (!ppFooter) return;
+
+    if (!document.querySelector('link[data-martin-footer-style]')) {
+      const style = document.createElement('link');
+      style.rel = 'stylesheet';
+      style.href = '/css/martin-footer.css';
+      style.dataset.martinFooterStyle = '1';
+      document.head.appendChild(style);
+    }
+
+    const technologies = [
+      'HTML',
+      'CSS',
+      'JavaScript',
+      'React',
+      'Python',
+      'Java',
+      'C',
+      'C#',
+      '.NET',
+      'MySQL',
+      'MATLAB',
+      'Simulink',
+      'Git',
+      'GitHub',
+      'VS Code',
+    ];
+
+    const stack = technologies
+      .map((technology) => `<div class="ms-tech">${technology}</div>`)
+      .join('');
+
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = `
+      <section class="ms-footer" aria-label="Autor webu">
+        <div class="ms-grid" aria-hidden="true"></div>
+        <div class="ms-ambient ms-ambient-one" aria-hidden="true"></div>
+        <div class="ms-ambient ms-ambient-two" aria-hidden="true"></div>
+
+        <div class="ms-container">
+          <div class="ms-main">
+            <div class="ms-logo" aria-hidden="true">M</div>
+
+            <div class="ms-identity">
+              <div class="ms-overline">
+                <span class="ms-dot" aria-hidden="true"></span>
+                Tento web vytvoril
+              </div>
+
+              <a
+                class="ms-name-link"
+                href="https://martinsulak.dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Martin Šulák – osobné portfólio"
+              >
+                <span class="ms-name">Martin Šulák</span>
+                <span class="ms-name-arrow" aria-hidden="true">↗</span>
+              </a>
+
+              <div class="ms-role">
+                AI študent <span>•</span> Developer <span>•</span> Engineering
+              </div>
+            </div>
+
+            <a
+              class="ms-portfolio"
+              href="https://martinsulak.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <div class="ms-portfolio-content">
+                <span class="ms-portfolio-label">Osobné portfólio</span>
+                <span class="ms-portfolio-url">martinsulak.dev</span>
+              </div>
+              <div class="ms-portfolio-arrow" aria-hidden="true">↗</div>
+            </a>
+          </div>
+        </div>
+
+        <div class="ms-stack" aria-label="Technológie">
+          <div class="ms-stack-track">
+            <div class="ms-stack-set">${stack}</div>
+            <div class="ms-stack-set" aria-hidden="true">${stack}</div>
+          </div>
+        </div>
+
+        <div class="ms-container">
+          <div class="ms-bottom">
+            <div>© <span data-ms-year></span> Martin Šulák</div>
+
+            <div class="ms-bottom-right">
+              <span>Based in Slovakia</span>
+              <span class="ms-bottom-separator" aria-hidden="true"></span>
+              <span>Software Development</span>
+              <span class="ms-bottom-separator" aria-hidden="true"></span>
+              <span>AI / ML</span>
+              <span class="ms-bottom-separator" aria-hidden="true"></span>
+              <span>Engineering</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    `;
+
+    const martinFooter = wrapper.firstElementChild;
+    ppFooter.insertAdjacentElement('afterend', martinFooter);
+
+    if (!document.querySelector('script[data-martin-footer-script]')) {
+      const script = document.createElement('script');
+      script.src = '/js/martin-footer.js';
+      script.dataset.martinFooterScript = '1';
+      document.body.appendChild(script);
+    }
+  }
+
   ensureMobileNavStyles();
   syncVehicleDetailNavWithMain();
   hydrateMailLinks(document);
+  ensureMartinFooter();
 
   const observer = new MutationObserver((mutations) => {
     mutations.forEach(mutation => {
