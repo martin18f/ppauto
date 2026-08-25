@@ -1,10 +1,149 @@
 (function () {
+  const BRAND_SESSION_KEY = 'ppauto.brandSession';
+  const LEGACY_BRAND_KEY = 'ppauto.brand';
+  const BRAND_SESSION_TTL_MS = 60 * 1000;
+  const BRAND_HEARTBEAT_MS = 15 * 1000;
+  const ALLOWED_BRANDS = new Set(['subaru', 'kgm', 'jeep', 'chery', 'all']);
+
   const MAILBOXES = {
     sales: ['predaj', 'ppauto.sk'],
     service: ['servis.ppauto', 'ppauto.sk'],
     tech: ['technik', 'ppauto.sk'],
     privacy: ['sulak', 'ppauto.sk'],
   };
+
+  function isLocalRouteHost() {
+    return location.protocol === 'file:' ||
+      location.hostname === 'localhost' ||
+      location.hostname === '127.0.0.1' ||
+      location.hostname === '::1';
+  }
+
+  function normalizedPath() {
+    const path = String(location.pathname || '/').replace(/\/+$/, '').toLowerCase();
+    return path || '/';
+  }
+
+  function isBrandProtectedPublicPage() {
+    const path = normalizedPath();
+    if (document.getElementById('carDetail')) return true;
+    if (/\/auta\/[^/]+$/.test(path)) return true;
+    if (path.endsWith('/auto.html') || path === '/auto.html') return true;
+    if (path.endsWith('/index.html') || path === '/index.html') return true;
+    return path === '/ponuka' || path === '/subaru' || path === '/kgm' || path === '/jeep' || path === '/chery';
+  }
+
+  function chooserHref() {
+    const lang = new URLSearchParams(location.search).get('lang');
+    const params = new URLSearchParams();
+    if (String(lang || '').toLowerCase() === 'en') params.set('lang', 'en');
+    const suffix = params.toString() ? `?${params.toString()}` : '';
+    return isLocalRouteHost() ? `vyber-znacky.html${suffix}` : `/${suffix}`;
+  }
+
+  function readBrandSession() {
+    try {
+      const raw = localStorage.getItem(BRAND_SESSION_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      const brand = String(parsed?.brand || '').toLowerCase().trim();
+      const lastSeen = Number(parsed?.lastSeen || 0);
+      if (!ALLOWED_BRANDS.has(brand) || !Number.isFinite(lastSeen) || lastSeen <= 0) return null;
+      return { brand, lastSeen };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function writeBrandSession(brand, now = Date.now()) {
+    const normalized = String(brand || '').toLowerCase().trim();
+    if (!ALLOWED_BRANDS.has(normalized)) return false;
+
+    try {
+      localStorage.setItem(BRAND_SESSION_KEY, JSON.stringify({ brand: normalized, lastSeen: now }));
+      // Existujúci detail auta používa ppauto.brand na okamžité nastavenie témy.
+      if (normalized === 'all') localStorage.removeItem(LEGACY_BRAND_KEY);
+      else localStorage.setItem(LEGACY_BRAND_KEY, normalized);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function clearBrandSession() {
+    try {
+      localStorage.removeItem(BRAND_SESSION_KEY);
+      localStorage.removeItem(LEGACY_BRAND_KEY);
+    } catch (e) {}
+  }
+
+  function isFreshBrandSession(session, now = Date.now()) {
+    return !!session && now - session.lastSeen <= BRAND_SESSION_TTL_MS;
+  }
+
+  function redirectToChooser() {
+    document.documentElement.style.visibility = 'hidden';
+    location.replace(chooserHref());
+  }
+
+  function startBrandSessionGuard() {
+    if (!isBrandProtectedPublicPage()) return true;
+
+    // Defer skript beží ešte pred DOMContentLoaded; obsah skryjeme počas kontroly.
+    document.documentElement.style.visibility = 'hidden';
+
+    const initial = readBrandSession();
+    if (!isFreshBrandSession(initial)) {
+      clearBrandSession();
+      redirectToChooser();
+      return false;
+    }
+
+    writeBrandSession(initial.brand);
+    document.documentElement.style.visibility = '';
+
+    const touch = () => {
+      const current = readBrandSession();
+      if (!current || !ALLOWED_BRANDS.has(current.brand)) return;
+      writeBrandSession(current.brand);
+    };
+
+    const validateReturn = () => {
+      const current = readBrandSession();
+      if (!isFreshBrandSession(current)) {
+        clearBrandSession();
+        redirectToChooser();
+        return false;
+      }
+      writeBrandSession(current.brand);
+      document.documentElement.style.visibility = '';
+      return true;
+    };
+
+    const heartbeat = setInterval(() => {
+      if (document.visibilityState === 'visible') touch();
+    }, BRAND_HEARTBEAT_MS);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        touch();
+        return;
+      }
+      validateReturn();
+    });
+
+    window.addEventListener('pagehide', touch);
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) validateReturn();
+    });
+    window.addEventListener('beforeunload', touch);
+
+    window.addEventListener('unload', () => clearInterval(heartbeat), { once: true });
+    return true;
+  }
+
+  // Ak session expirovala, ďalej už nič na chránenej verejnej stránke neinicializujeme.
+  if (!startBrandSessionGuard()) return;
 
   function mailboxAddress(key) {
     const parts = MAILBOXES[key];
@@ -247,8 +386,15 @@
     hydrateMailLink(link);
   });
 
+  // Promo + formulár testovacej jazdy iba na stránkach s financovaním.
+  if (document.getElementById('financovanie') && !document.querySelector('script[data-testdrive-promo-script]')) {
+    const script = document.createElement('script');
+    script.src = '/js/testdrive-promo.js';
+    script.dataset.testdrivePromoScript = '1';
+    document.head.appendChild(script);
+  }
+
   // Detail vozidla si načíta samostatný modul pre PDF dokumenty.
-  // Na ostatných stránkach sa nič navyše nenačítava.
   if (document.getElementById('carDetail') && !document.querySelector('script[data-auto-documents-script]')) {
     const script = document.createElement('script');
     script.src = '/js/auto-documents.js';
