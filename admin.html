@@ -26,6 +26,7 @@
   <link rel="icon" type="image/svg+xml" href="img/logo.svg">
   <link rel="stylesheet" href="css/admin.css">
   <link rel="stylesheet" href="css/admin-options.css">
+  <link rel="stylesheet" href="css/admin-orders.css">
 
   <style>
     body { padding: 32px; background: var(--bg); color: var(--text); }
@@ -784,6 +785,74 @@
     </table>
   </div>
 </div>
+
+<hr style="margin:28px 0; border:0; border-top:1px solid var(--line);">
+
+<section class="admin-orders" id="adminOrders">
+  <h2>📋 Admin panel – objednávky áut</h2>
+
+  <div class="orders-admin-grid">
+    <div class="list orders-list">
+      <div class="orders-toolbar">
+        <input type="text" id="ordersSearch" placeholder="Hľadať podľa zákazníka, auta, telefónu...">
+
+        <select id="ordersStatusFilter">
+          <option value="">Všetky stavy</option>
+          <option value="new">Nová</option>
+          <option value="contacted">Kontaktovaný</option>
+          <option value="reserved">Rezervované</option>
+          <option value="in_progress">V riešení</option>
+          <option value="ordered">Objednané</option>
+          <option value="closed">Vybavené</option>
+          <option value="cancelled">Zrušené</option>
+        </select>
+
+        <select id="ordersSourceFilter">
+          <option value="">Všetky typy</option>
+          <option value="stock">Skladovka</option>
+          <option value="custom">Mimo skladu</option>
+        </select>
+
+        <div class="orders-actions">
+          <label class="pp-check pp-check--sm">
+            <input type="checkbox" id="ordersShowArchived">
+            <svg viewBox="0 0 18 18" aria-hidden="true">
+              <path d="M1,9 L1,3.5 C1,2 2,1 3.5,1 L14.5,1 C16,1 17,2 17,3.5 L17,14.5 C17,16 17,16 14.5,17 L3.5,17 C2,17 1,16 1,14.5 L1,9 Z"></path>
+              <polyline points="1 9 7 14 15 4"></polyline>
+            </svg>
+            <span class="pp-check__text">Archív</span>
+          </label>
+          <button class="btnx" id="ordersReloadBtn" type="button">Načítať</button>
+        </div>
+      </div>
+
+      <p id="ordersStatus" class="sr-only" role="status" aria-live="polite"></p>
+
+      <div class="orders-table-wrap">
+        <table id="ordersTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Dátum</th>
+              <th>Zákazník</th>
+              <th>Typ</th>
+              <th>Vozidlo</th>
+              <th>Stav</th>
+              <th>Archív</th>
+              <th>Akcie</th>
+            </tr>
+          </thead>
+          <tbody><!-- render --></tbody>
+        </table>
+      </div>
+    </div>
+
+    <aside class="order-admin-detail" id="orderDetail">
+      <h3>Detail objednávky</h3>
+      <p class="order-detail-empty">Objednávky sa načítajú automaticky.</p>
+    </aside>
+  </div>
+</section>
 
 
   <script>
@@ -2752,5 +2821,6 @@ applyVybavaBrandFilter(getBrandFromForm() || 'subaru');
   <script src="js/admin-options.js"></script>
 <script src="js/admin-vehicle-options.js"></script>
 <script src="js/admin-documents.js"></script>
+<script src="js/admin-orders.js"></script>
 </body>
 </html>

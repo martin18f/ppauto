@@ -212,6 +212,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/orders.css">
 <script src="js/contact-links.js" defer></script>
 <script src="js/i18n.js" defer></script>
 
@@ -231,6 +232,7 @@
       </div>
       <nav class="nav-links">
         <a href="#ponuka">Ponuka áut</a>
+        <a href="#objednat-auto">Objednať auto</a>
         <a href="#servis">Servis</a>
         <a href="#financovanie">Financovanie</a>
         <a href="#znacky">Značky</a> 
@@ -295,6 +297,7 @@
           <p>Od roku 2011 prinášame v Poprade profesionálne služby pri predaji a servise vozidiel. Pomôžeme s&nbsp;výberom, financovaním aj poistením a postaráme sa o&nbsp;vaše auto počas celej životnosti.</p>
           <div class="quick">
             <a class="btn primary" href="#ponuka">Pozrieť skladové vozidlá</a>
+            <a class="btn" href="#objednat-auto">Objednať auto</a>
             <a class="btn" href="#servis">Objednať servis</a>
             <a class="btn" href="#znacky" data-brand-text="heroBrandsCta">Značky a demo jazdy</a>
           </div>
@@ -395,6 +398,201 @@
 
     <!-- sem sa automaticky vložia autá -->
     <div class="grid" id="inventory"></div>
+  </div>
+</section>
+
+<!-- OBJEDNANIE AUTA -->
+<section id="objednat-auto" class="order-section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="order-kicker">Objednanie vozidla</span>
+        <h3>Skladové auto alebo individuálna požiadavka</h3>
+        <p class="order-intro">Vyberte konkrétne vozidlo z aktuálnej ponuky alebo nám pošlite konfiguráciu auta, ktoré na stránke zatiaľ nie je. Po odoslaní sa požiadavka zobrazí zamestnancovi v admin paneli.</p>
+      </div>
+    </div>
+
+    <form id="vehicleOrderForm" class="order-form">
+      <input class="pp-hidden-field" type="text" name="website" tabindex="-1" autocomplete="off">
+
+      <div class="order-mode" role="radiogroup" aria-label="Typ objednávky">
+        <label class="order-mode__option">
+          <input id="orderSourceStock" type="radio" name="source" value="stock" checked>
+          <span class="order-mode__label">Zo skladových vozidiel</span>
+          <span class="order-mode__text">Zákazník si vyberie konkrétne auto z aktuálnej ponuky na stránke.</span>
+        </label>
+        <label class="order-mode__option">
+          <input id="orderSourceCustom" type="radio" name="source" value="custom">
+          <span class="order-mode__label">Auto mimo skladovej ponuky</span>
+          <span class="order-mode__text">Zákazník vypíše značku, model, motorizáciu, farbu, výbavu a ďalšie parametre.</span>
+        </label>
+      </div>
+
+      <div class="order-layout">
+        <div class="order-panel order-stock-panel" id="orderStockPanel">
+          <div class="order-panel__inner">
+            <h4 class="order-panel__title">Výber skladového vozidla</h4>
+            <div class="order-stock-tools">
+              <div class="order-field">
+                <label for="orderStockSearch">Hľadať vozidlo</label>
+                <input id="orderStockSearch" type="search" placeholder="Model, výbava, palivo...">
+              </div>
+              <div class="order-field">
+                <label for="orderStockBrand">Značka</label>
+                <select id="orderStockBrand"></select>
+              </div>
+            </div>
+            <input type="hidden" id="orderStockCarId" name="stockCarId">
+            <div class="order-stock-list" id="orderStockList" aria-live="polite"></div>
+            <div class="order-selected" id="orderStockSelected" hidden></div>
+          </div>
+        </div>
+
+        <div class="order-panel order-custom-panel" id="orderCustomPanel" hidden>
+          <div class="order-panel__inner">
+            <h4 class="order-panel__title">Parametre požadovaného auta</h4>
+            <div class="order-form-grid">
+              <div class="order-field">
+                <label for="orderBrand">Značka</label>
+                <select id="orderBrand"></select>
+              </div>
+              <div class="order-field">
+                <label for="orderModel">Model</label>
+                <select id="orderModel"></select>
+              </div>
+              <div class="order-field">
+                <label for="orderYear">Rok</label>
+                <input id="orderYear" type="number" min="2000" max="2035" placeholder="2026">
+              </div>
+              <div class="order-field">
+                <label for="orderFuel">Palivo</label>
+                <select id="orderFuel"></select>
+              </div>
+              <div class="order-field">
+                <label for="orderTransmission">Prevodovka</label>
+                <select id="orderTransmission"></select>
+              </div>
+              <div class="order-field">
+                <label for="orderPackage">Výbava / paket</label>
+                <select id="orderPackage"></select>
+              </div>
+              <div class="order-field">
+                <label for="orderEngineVolume">Objem motora (cm³)</label>
+                <input id="orderEngineVolume" type="number" min="0" placeholder="1995">
+              </div>
+              <div class="order-field">
+                <label for="orderPower">Výkon motora (kW)</label>
+                <input id="orderPower" type="number" min="0" placeholder="100">
+              </div>
+              <div class="order-field">
+                <label for="orderMileage">Najazdené (km)</label>
+                <input id="orderMileage" type="number" min="0" placeholder="0">
+              </div>
+              <div class="order-field">
+                <label for="orderBody">Karoséria</label>
+                <select id="orderBody"></select>
+              </div>
+              <div class="order-field">
+                <label for="orderDrive">Pohon</label>
+                <select id="orderDrive"></select>
+              </div>
+              <div class="order-field">
+                <label for="orderColor">Farba</label>
+                <select id="orderColor"></select>
+              </div>
+              <label class="order-check order-field--wide">
+                <input id="orderMetallic" type="checkbox">
+                <span>Metalíza</span>
+              </label>
+
+              <div class="order-equipment">
+                <div class="order-label">Doplnková výbava</div>
+                <div class="order-equipment__list" id="orderEquipmentList"></div>
+              </div>
+              <div class="order-field order-field--wide">
+                <label for="orderExtraEquipmentNote">Ďalšia výbava alebo konfigurácia</label>
+                <textarea id="orderExtraEquipmentNote" placeholder="Napr. ťažné zariadenie, typ kolies, interiér, balíky výbavy..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="order-panel order-contact-panel">
+          <div class="order-panel__inner">
+            <h4 class="order-panel__title">Kontakt a preferencie</h4>
+            <div class="order-form-grid">
+              <div class="order-field">
+                <label for="orderCustomerName">Meno a priezvisko</label>
+                <input id="orderCustomerName" type="text" autocomplete="name" required>
+              </div>
+              <div class="order-field">
+                <label for="orderCustomerCompany">Firma</label>
+                <input id="orderCustomerCompany" type="text" autocomplete="organization">
+              </div>
+              <div class="order-field">
+                <label for="orderCustomerEmail">E-mail</label>
+                <input id="orderCustomerEmail" type="email" autocomplete="email" required>
+              </div>
+              <div class="order-field">
+                <label for="orderCustomerPhone">Telefón</label>
+                <input id="orderCustomerPhone" type="tel" autocomplete="tel" required>
+              </div>
+              <div class="order-field">
+                <label for="orderPreferredContact">Preferovaný kontakt</label>
+                <select id="orderPreferredContact">
+                  <option value="">Bez preferencie</option>
+                  <option value="Telefonicky">Telefonicky</option>
+                  <option value="E-mailom">E-mailom</option>
+                </select>
+              </div>
+              <div class="order-field">
+                <label for="orderBudget">Rozpočet</label>
+                <input id="orderBudget" type="text" placeholder="Napr. do 35 000 €">
+              </div>
+              <div class="order-field">
+                <label for="orderDelivery">Preferovaný termín</label>
+                <select id="orderDelivery">
+                  <option value="">Bez preferencie</option>
+                  <option value="Ihneď">Ihneď</option>
+                  <option value="Do 1 mesiaca">Do 1 mesiaca</option>
+                  <option value="Do 3 mesiacov">Do 3 mesiacov</option>
+                  <option value="Do 6 mesiacov">Do 6 mesiacov</option>
+                  <option value="Neponáhľa">Neponáhľa</option>
+                </select>
+              </div>
+              <div class="order-field">
+                <label for="orderFinancing">Financovanie</label>
+                <select id="orderFinancing">
+                  <option value="">Neuvádza</option>
+                  <option value="Hotovosť">Hotovosť</option>
+                  <option value="Úver">Úver</option>
+                  <option value="Finančný leasing">Finančný leasing</option>
+                  <option value="Operatívny leasing">Operatívny leasing</option>
+                  <option value="Chce poradiť">Chce poradiť</option>
+                </select>
+              </div>
+              <div class="order-field order-field--wide">
+                <label for="orderTradeIn">Protiúčet</label>
+                <input id="orderTradeIn" type="text" placeholder="Značka, model, rok a orientačný nájazd aktuálneho auta">
+              </div>
+              <div class="order-field order-field--wide">
+                <label for="orderNote">Poznámka</label>
+                <textarea id="orderNote" placeholder="Doplňujúce informácie k objednávke"></textarea>
+              </div>
+              <label class="order-check order-field--wide">
+                <input id="orderPrivacy" name="orderPrivacy" type="checkbox" required>
+                <span>Súhlasím so spracovaním osobných údajov za účelom vybavenia objednávky.</span>
+              </label>
+            </div>
+
+            <div class="order-actions">
+              <button class="btn primary order-submit" id="orderSubmit" type="submit">Odoslať objednávku</button>
+              <div class="order-status" id="orderFormStatus" role="status" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
   </div>
 </section>
 
@@ -1175,6 +1373,7 @@
       <h5>Navigácia</h5>
       <ul>
         <li><a href="#ponuka">Ponuka áut</a></li>
+        <li><a href="#objednat-auto">Objednať auto</a></li>
         <li><a href="#servis">Servis</a></li>
         <li><a href="#znacky">Značky</a></li>
         <li><a href="#tim">Tím</a></li>
@@ -1470,6 +1669,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 <script src="js/script.js" defer></script>
+<script src="js/orders.js" defer></script>
 
 <script src="js/testdrive.js"></script>
 
