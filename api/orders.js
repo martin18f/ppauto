@@ -4,6 +4,171 @@ const SOURCES = new Set(['stock', 'custom']);
 const STATUSES = new Set(['new', 'contacted', 'reserved', 'in_progress', 'ordered', 'closed', 'cancelled']);
 const STORE_VERSION = 1;
 
+// =============================
+// PUBLIC BOOTSTRAP (Hobby-safe)
+// =============================
+// Verejné dáta hlavnej stránky bežia cez existujúcu /api/orders funkciu,
+// aby projekt neprekročil limit počtu Vercel Serverless Functions.
+const PUBLIC_BOOTSTRAP_BRANDS = ['Subaru', 'KGM', 'Jeep', 'Chery'];
+const PUBLIC_BOOTSTRAP_FIELDS = [
+  'znacka',
+  'palivo',
+  'typ_prevodovky',
+  'vybava_paket',
+  'karoseria',
+  'pohon',
+  'farba',
+];
+const PUBLIC_BOOTSTRAP_SEPARATOR = /\s*(?:\+|\/|,|;|\u2022|\u00b7)\s*/u;
+const PUBLIC_BOOTSTRAP_TTL_MS = 60 * 1000;
+let publicBootstrapWarmCache = { expiresAt: 0, value: null };
+
+function publicBootstrapSame(a, b) {
+  return clean(a).localeCompare(clean(b), 'sk', { sensitivity: 'accent' }) === 0;
+}
+
+function publicBootstrapUnique(values) {
+  const out = [];
+  for (const raw of Array.isArray(values) ? values : []) {
+    const value = clean(raw);
+    if (!value || out.some(item => publicBootstrapSame(item, value))) continue;
+    out.push(value);
+  }
+  return out;
+}
+
+function publicBootstrapChoiceValues(value) {
+  const out = [];
+  const append = raw => {
+    if (Array.isArray(raw)) {
+      raw.forEach(append);
+      return;
+    }
+    if (raw === null || raw === undefined) return;
+    clean(raw, 1500).split(PUBLIC_BOOTSTRAP_SEPARATOR).forEach(part => {
+      const item = clean(part, 180);
+      if (!item || out.some(existing => publicBootstrapSame(existing, item))) return;
+      out.push(item);
+    });
+  };
+  append(value);
+  return out;
+}
+
+function publicBootstrapFuelLabel(value) {
+  const parts = publicBootstrapChoiceValues(value);
+  if (!parts.length) return '';
+
+  const compositeIndex = parts.findIndex(item => /^benz[ií]n\s+(?:HEV|MHEV|PHEV)$/iu.test(item));
+  if (compositeIndex >= 0) {
+    const composite = parts[compositeIndex];
+    return publicBootstrapUnique([
+      composite,
+      ...parts.filter((item, index) => index !== compositeIndex && !/^benz[ií]n$/iu.test(item)),
+    ]).join(' ');
+  }
+
+  const petrolIndex = parts.findIndex(item => /^benz[ií]n$/iu.test(item));
+  const hybridIndex = parts.findIndex(item => /^(?:HEV|MHEV|PHEV)$/iu.test(item));
+  if (petrolIndex >= 0 && hybridIndex >= 0) {
+    const combined = `Benzín ${parts[hybridIndex].toUpperCase()}`;
+    return publicBootstrapUnique([
+      combined,
+      ...parts.filter((_, index) => index !== petrolIndex && index !== hybridIndex),
+    ]).join(' ');
+  }
+
+  return parts.join(' ');
+}
+
+function publicBootstrapParseEuro(value) {
+  if (typeof value === 'number') {
+    return Number.isSafeInteger(value) && value >= 0 ? value : null;
+  }
+  const normalized = clean(value)
+    .replace(/[\u00a0\u202f]/g, ' ')
+    .replace(/\s+/g, ' ');
+  if (!normalized || !/^(?:\d+|\d{1,3}(?: \d{3})+)\s*€?$/.test(normalized)) return null;
+  const amount = Number(normalized.replace(/[ €]/g, ''));
+  return Number.isSafeInteger(amount) ? amount : null;
+}
+
+function publicBootstrapPrice(value) {
+  const raw = clean(value);
+  if (!raw) return '';
+  const amount = publicBootstrapParseEuro(value);
+  if (amount === null) return raw;
+  return `${String(amount).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €`;
+}
+
+function publicBootstrapCar(car) {
+  if (!car || typeof car !== 'object' || Array.isArray(car)) return car;
+  return {
+    ...car,
+    palivo: publicBootstrapChoiceValues(car.palivo),
+    stara_cena: publicBootstrapPrice(car.stara_cena),
+    nova_cena: publicBootstrapPrice(car.nova_cena),
+  };
+}
+
+function publicBootstrapOptions(data) {
+  const source = data && typeof data === 'object' && !Array.isArray(data) ? data : {};
+  const sourceFields = source.fields && typeof source.fields === 'object' && !Array.isArray(source.fields)
+    ? source.fields
+    : {};
+  const sourceModels = source.models && typeof source.models === 'object' && !Array.isArray(source.models)
+    ? source.models
+    : {};
+
+  const fields = {};
+  PUBLIC_BOOTSTRAP_FIELDS.forEach(name => {
+    if (name === 'znacka') {
+      fields[name] = [...PUBLIC_BOOTSTRAP_BRANDS];
+    } else if (name === 'palivo') {
+      fields[name] = publicBootstrapUnique((Array.isArray(sourceFields[name]) ? sourceFields[name] : [])
+        .map(publicBootstrapFuelLabel)
+        .filter(Boolean));
+    } else {
+      fields[name] = publicBootstrapUnique(sourceFields[name]);
+    }
+  });
+
+  const models = {};
+  PUBLIC_BOOTSTRAP_BRANDS.forEach(brand => {
+    const sourceKey = Object.keys(sourceModels).find(key => publicBootstrapSame(key, brand));
+    models[brand] = publicBootstrapUnique(sourceKey ? sourceModels[sourceKey] : []);
+  });
+
+  return { version: 3, fields, models };
+}
+
+function publicBootstrapEnsureModels(options, cars) {
+  const next = publicBootstrapOptions(options);
+  for (const car of Array.isArray(cars) ? cars : []) {
+    if (!car || typeof car !== 'object' || Array.isArray(car)) continue;
+    const brand = PUBLIC_BOOTSTRAP_BRANDS.find(item => publicBootstrapSame(item, car.znacka));
+    const model = clean(car.model, 120);
+    if (!brand || !model) continue;
+    if (!next.models[brand].some(item => publicBootstrapSame(item, model))) next.models[brand].push(model);
+  }
+  return next;
+}
+
+function publicBootstrapNumericOptions(cars) {
+  const engineVolumes = [];
+  const powers = [];
+  for (const car of Array.isArray(cars) ? cars : []) {
+    if (!car || typeof car !== 'object' || Array.isArray(car)) continue;
+    const volume = Number(car.objem);
+    const power = Number(car.vykon);
+    if (Number.isFinite(volume) && volume >= 0 && !engineVolumes.includes(volume)) engineVolumes.push(volume);
+    if (Number.isFinite(power) && power >= 0 && !powers.includes(power)) powers.push(power);
+  }
+  engineVolumes.sort((a, b) => a - b);
+  powers.sort((a, b) => a - b);
+  return { engineVolumes, powers };
+}
+
 function encodeGithubPath(path) {
   return String(path)
     .split('/')
@@ -262,7 +427,15 @@ export default async function handler(req, res) {
   const { GITHUB_TOKEN, GITHUB_REPO, GITHUB_BRANCH } = process.env;
   const ORDERS_PATH = process.env.ORDER_REQUESTS_PATH || process.env.ORDERS_PATH || 'data/objednavky-test.json';
 
-  res.setHeader('Cache-Control', 'private, no-store, max-age=0, must-revalidate');
+  const publicBootstrapMode =
+    (req.method === 'GET' || req.method === 'HEAD') &&
+    clean(req.query?.mode, 40).toLowerCase() === 'bootstrap';
+
+  if (publicBootstrapMode) {
+    res.setHeader('Cache-Control', 'public, max-age=30, s-maxage=60, stale-while-revalidate=300');
+  } else {
+    res.setHeader('Cache-Control', 'private, no-store, max-age=0, must-revalidate');
+  }
 
   try {
     if (!GITHUB_TOKEN || !GITHUB_REPO || !GITHUB_BRANCH) {
@@ -276,6 +449,64 @@ export default async function handler(req, res) {
       Accept: 'application/vnd.github.v3+json',
       'Content-Type': 'application/json',
     };
+
+    async function readPublicBootstrapJson(path, fallback) {
+      if (!path) return fallback;
+      const safePath = encodeGithubPath(path);
+      const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${safePath}?ref=${encodeURIComponent(GITHUB_BRANCH)}`;
+      const response = await fetch(url, { headers });
+
+      if (response.status === 404) return fallback;
+      if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        throw new Error(`GET ${path} failed: ${response.status} ${response.statusText} ${text.slice(0, 180)}`);
+      }
+
+      const payload = await response.json();
+      if (!payload || Array.isArray(payload) || !payload.content) return fallback;
+      const decoded = Buffer.from(payload.content, 'base64').toString('utf8');
+      return JSON.parse(decoded || 'null') ?? fallback;
+    }
+
+    async function getPublicBootstrap() {
+      if (publicBootstrapWarmCache.value && publicBootstrapWarmCache.expiresAt > Date.now()) {
+        return publicBootstrapWarmCache.value;
+      }
+
+      const DATA_PATH = process.env.DATA_PATH || 'data/auta.json';
+      const OPTIONS_PATH = process.env.OPTIONS_PATH || 'data/parametre.json';
+      const PROMOS_PATH = process.env.PROMOS_PATH || 'data/akcie.json';
+
+      const [carsRaw, parameterOptions, promosRaw] = await Promise.all([
+        readPublicBootstrapJson(DATA_PATH, []),
+        readPublicBootstrapJson(OPTIONS_PATH, { version: 1, fields: {}, models: {} }),
+        readPublicBootstrapJson(PROMOS_PATH, []),
+      ]);
+
+      const cars = Array.isArray(carsRaw) ? carsRaw : [];
+      const options = publicBootstrapEnsureModels(parameterOptions, cars);
+      const value = {
+        version: 1,
+        cars: cars.filter(car => car && car.skryte !== true).map(publicBootstrapCar),
+        orderOptions: {
+          ...options,
+          numericOptions: publicBootstrapNumericOptions(cars),
+        },
+        promos: (Array.isArray(promosRaw) ? promosRaw : []).filter(item => item && item.skryte !== true),
+      };
+
+      publicBootstrapWarmCache = {
+        expiresAt: Date.now() + PUBLIC_BOOTSTRAP_TTL_MS,
+        value,
+      };
+      return value;
+    }
+
+    if (publicBootstrapMode) {
+      const payload = await getPublicBootstrap();
+      if (req.method === 'HEAD') return res.status(200).end();
+      return res.status(200).json(payload);
+    }
 
     async function getFile() {
       const safePath = encodeGithubPath(ORDERS_PATH);

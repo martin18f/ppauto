@@ -41,7 +41,7 @@
   }
 
   async function fetchBootstrap() {
-    const response = await fetch(`${API_BASE}/api/public-bootstrap`, {
+    const response = await fetch(`${API_BASE}/api/orders?mode=bootstrap`, {
       method: 'GET',
       credentials: 'same-origin',
       headers: { Accept: 'application/json' },
@@ -101,11 +101,14 @@
   }
 
   function getOrderOptions() {
-    return fromBootstrap('orderOptions', '/api/order-options');
+    return getBootstrap().then(payload => {
+      if (!payload?.orderOptions) throw new Error('Bootstrap neobsahuje orderOptions');
+      return payload.orderOptions;
+    });
   }
 
   function getPromos() {
-    return fromBootstrap('promos', '/api/public-promos');
+    return fromBootstrap('promos', '/api/promos');
   }
 
   function clear() {

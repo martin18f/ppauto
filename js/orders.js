@@ -263,6 +263,16 @@
       if (path === '/api/order-options') return window.ppPublicData.getOrderOptions();
     }
 
+    // Hobby-safe fallback: samostatný /api/order-options endpoint už neexistuje.
+    // Rovnaké verejné dáta sú súčasťou bootstrap režimu existujúcej /api/orders funkcie.
+    if (path === '/api/order-options') {
+      const response = await fetch(apiUrl('/api/orders?mode=bootstrap'));
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(payload?.error || `Požiadavka zlyhala (${response.status})`);
+      if (!payload?.orderOptions) throw new Error('Bootstrap neobsahuje možnosti objednávky');
+      return payload.orderOptions;
+    }
+
     const response = await fetch(apiUrl(path));
     const payload = await response.json().catch(() => null);
     if (!response.ok) throw new Error(payload?.error || `Požiadavka zlyhala (${response.status})`);

@@ -1047,8 +1047,8 @@ function initModelsStrip() {
     try {
       const items = window.ppPublicData
         ? await window.ppPublicData.getPromos()
-        : await fetch(apiUrl('/api/public-promos')).then(async r => {
-            if (!r.ok) throw new Error(`GET /api/public-promos failed: ${r.status}`);
+        : await fetch(apiUrl('/api/promos')).then(async r => {
+            if (!r.ok) throw new Error(`GET /api/promos failed: ${r.status}`);
             return r.json().catch(() => []);
           });
       const promos = Array.isArray(items) ? items : [];
