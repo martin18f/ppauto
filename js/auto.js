@@ -6,6 +6,7 @@
 
 (function () {
   const mount = document.getElementById('carDetail');
+  const vehicleData = window.ppVehicleData;
   const qs = new URLSearchParams(location.search);
   function wantedIdFromPathname() {
     const parts = location.pathname.split('/').filter(Boolean);
@@ -464,14 +465,6 @@ function parseLegacyPrevodovka(raw) {
     robots.setAttribute('content', 'noindex,follow');
 
     mount.innerHTML = `
-<<<<<<< HEAD
-      <div class="car-cta">
-  <a class="btn car-btn car-btn-primary" href="tel:+421903905280">Zavolať predaj</a>
-  <button class="btn car-btn" type="button" id="openTestDrive">Testovacia jazda</button>
-  <a class="btn car-btn" href="mailto:predaj@ppauto.sk" data-mail="sales">predaj@ppauto.sk</a>
-  <a class="btn car-btn" href="/ponuka#kontakt">Navigovať / Kontakt</a>
-</div>
-=======
       <section class="car-card">
         <div class="section-title"><h2>${escapeHtml(title)}</h2></div>
         <div class="section-body">
@@ -483,7 +476,6 @@ function parseLegacyPrevodovka(raw) {
           </div>
         </div>
       </section>
->>>>>>> 25336be9aa066797d8665cb0be391466bad7284e
     `;
   }
 
@@ -525,19 +517,7 @@ function parseLegacyPrevodovka(raw) {
     document.title = `${title} | PP AUTO s.r.o.`;
     setBrandFromCar(car);
 
-    const gallery =
-  (Array.isArray(car.galeria) && car.galeria.length) ? car.galeria :
-  (Array.isArray(car.obrazky) && car.obrazky.length) ? car.obrazky : [];
-
-let images = gallery.map(resolveLocalAssetUrl).filter(Boolean);
-
-const cover = resolveLocalAssetUrl(car.titulka || car.obrazok || '');
-if (cover) {
-  // titulka vždy prvá + bez duplicit
-  images = [cover, ...images.filter(u => u !== cover)];
-}
-
-if (!images.length && cover) images = [cover];
+    const images = vehicleData.vehicleImages(car).map(resolveLocalAssetUrl).filter(Boolean);
 
     const tags = Array.isArray(car.tagy) ? car.tagy.filter(Boolean) : [];
 
@@ -545,6 +525,8 @@ if (!images.length && cover) images = [cover];
     const najazdene = hasValue(car.najazdene) ? `${formatNumber(car.najazdene)} km` : '';
     const vykon = hasValue(car.vykon) ? `${formatNumber(car.vykon)} kW` : '';
     const metaliza = car.metaliza === true ? 'Áno' : (car.metaliza === false ? '' : '');
+    const palivoText = vehicleData.formatFuel(car);
+    const pohonText = vehicleData.formatChoices(car.pohon);
 
     // Admin má v jednom texte "Prevodovka / Výbava" (napr. "AT • Premium").
 // V detaile to rozdelíme: prevodovka -> Technické údaje, vybavaBalik -> Základné údaje.
@@ -580,13 +562,13 @@ const prevodovkaText = gearboxFullLabel(typPrevodovky);
   { label: 'Výbava', value: vybavaPaket || '' },
 
   { label: 'Karoséria', value: car.karoseria || '' },
-  { label: 'Pohon', value: car.pohon || '' },
+  { label: 'Pohon', value: pohonText },
   { label: 'Farba', value: car.farba || '' },
   { label: 'Metalíza', value: metaliza },
 ];
 
     const techRows = [
-  { label: 'Palivo', value: car.palivo || '' },
+  { label: 'Palivo', value: palivoText },
   { label: 'Prevodovka', value: prevodovkaText || '' },
 
   { label: 'Objem', value: objem },
@@ -678,7 +660,7 @@ const prevodovkaText = gearboxFullLabel(typPrevodovky);
     <div class="car-td-picked">
       <div class="car-td-title">${title}</div>
       <div class="car-td-meta">
-        ${[vybavaPaket, car.palivo, prevodovkaText, car.pohon, car.farba, najazdene].filter(Boolean).join(' • ')}
+        ${[vybavaPaket, palivoText, prevodovkaText, pohonText, car.farba, najazdene].filter(Boolean).join(' • ')}
       </div>
     </div>
 
@@ -790,7 +772,7 @@ const prevodovkaText = gearboxFullLabel(typPrevodovky);
       car_title: carTitleForMail || '—',
       car_id: carIdForMail || '—',
       car_vybava: (vybavaPaket || '').trim() || '—',
-      car_palivo: (car.palivo || '').trim() || '—',
+      car_palivo: palivoText || '—',
       car_prevodovka: (prevodovkaText || '').trim() || '—',
       car_cena: carPriceForMail,
       car_url: carUrlForMail
@@ -872,7 +854,7 @@ tdForm?.addEventListener('submit', async (e) => {
     car_title: title || '—',
     car_id: wantedId || '—',
     car_vybava: (vybavaPaket || '').trim() || '—',
-    car_palivo: (car.palivo || '').trim() || '—',
+    car_palivo: palivoText || '—',
     car_prevodovka: (prevodovkaText || '').trim() || '—',
     car_cena: getPriceText(car),
     car_url: location.href, // plná URL => tlačidlo v emaili bude klikateľné
@@ -989,14 +971,15 @@ document.addEventListener('keydown', (e) => {
     }
 
     try {
-      const r = await fetch('/api/cars', { cache: 'no-store' });
-      if (!r.ok) {
-        const t = await r.text().catch(() => '');
-        renderNotFound(`Nepodarilo sa načítať ponuku áut (${r.status}). ${t ? 'Pozri konzolu.' : ''}`);
-        return;
-      }
-
-      const cars = await r.json();
+      const cars = window.ppPublicData
+        ? await window.ppPublicData.getCars()
+        : await fetch('/api/cars').then(async r => {
+            if (!r.ok) {
+              const t = await r.text().catch(() => '');
+              throw new Error(`Nepodarilo sa načítať ponuku áut (${r.status}). ${t ? 'Pozri konzolu.' : ''}`);
+            }
+            return r.json();
+          });
 
       const list = Array.isArray(cars) ? cars : [];
       const baseCounts = new Map();

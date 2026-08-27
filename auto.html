@@ -62,10 +62,7 @@
   <script>
     (function () {
       try {
-        var b =
-          (localStorage.getItem('ppauto.brand') ||
-            sessionStorage.getItem('ppauto.brand') ||
-            '').toLowerCase().trim();
+        var b = (sessionStorage.getItem('ppauto.brand') || '').toLowerCase().trim();
 
         if (b === 'subaru' || b === 'kgm' || b === 'jeep' || b === 'chery') {
           document.documentElement.setAttribute('data-brand', b);
@@ -91,18 +88,13 @@
       </div>
       <nav class="nav-links">
   <a href="/ponuka#ponuka">Ponuka áut</a>
+  <a href="/ponuka#objednat-auto">Objednať auto</a>
   <a href="/ponuka#servis">Servis</a>
-  <a href="/ponuka#znacky">Značky</a>
-  
-      
-  <!-- na detaile auta je sekcia #testdrive generovaná JS -->
-  <a href="#testdrive">Testovacia jazda</a>
-
   <a href="/ponuka#tim">Tím</a>
-
   <a href="/ponuka#kontakt">Kontakt</a>
+  <a class="nav-brand" href="/vyber-znacky.html?choose=1">Zmeniť značku</a>
+  <a class="nav-lang" data-lang-switch aria-label="Switch to English" href="#">EN</a>
   <a class="nav-login" href="https://ppauto.sk/admin.html">Prihlásiť sa</a>
-  <a class="nav-lang" href="#" data-lang-switch aria-label="Switch to English">EN</a>
 </nav>
 
       <div class="nav-cta">
@@ -250,6 +242,8 @@
 </script>
 
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="/js/vehicle-data.js"></script>
+  <script src="/js/public-data.js"></script>
   <script src="/js/auto.js"></script>
 </body>
 </html>

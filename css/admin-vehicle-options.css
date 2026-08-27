@@ -2,7 +2,8 @@
 
 /* Scoped only to the new vehicle option behaviour and promo image input. */
 
-form.admin-form .choice-control[data-choice-field="vybava_paket"] .choice-label::after {
+form.admin-form .choice-control[data-choice-field="vybava_paket"] .choice-label::after,
+form.admin-form .choice-control[data-choice-field="palivo"] .choice-label::after {
   content: "viac možností";
   margin-left: 8px;
   padding: 3px 7px;
@@ -17,7 +18,9 @@ form.admin-form .choice-control[data-choice-field="vybava_paket"] .choice-label:
 }
 
 form.admin-form .choice-control[data-choice-field="vybava_paket"] .choice-option-wrap:has(.choice-option.is-selected),
-form.admin-form .choice-control[data-choice-field="vybava_paket"] .choice-option-wrap:has(.choice-option[aria-pressed="true"]) {
+form.admin-form .choice-control[data-choice-field="vybava_paket"] .choice-option-wrap:has(.choice-option[aria-pressed="true"]),
+form.admin-form .choice-control[data-choice-field="palivo"] .choice-option-wrap:has(.choice-option.is-selected),
+form.admin-form .choice-control[data-choice-field="palivo"] .choice-option-wrap:has(.choice-option[aria-pressed="true"]) {
   border-color: rgba(59,130,246,.95);
   background: rgba(59,130,246,.18);
   box-shadow: 0 0 0 1px rgba(59,130,246,.18);

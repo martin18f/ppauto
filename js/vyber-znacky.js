@@ -1,50 +1,10 @@
-(function(){
-  try { sessionStorage.removeItem('ppauto.chooserRedirectAt'); } catch (e) {}
+(function () {
+  'use strict';
 
   const BRAND_SESSION_KEY = 'ppauto.brandSession';
   const LEGACY_BRAND_KEY = 'ppauto.brand';
-  const SESSION_TTL_MS = 60 * 1000;
+  const SESSION_TTL_MS = 2 * 60 * 1000;
   const ALLOWED_BRANDS = new Set(['subaru', 'kgm', 'jeep', 'chery', 'all']);
-
-  function readBrandSession() {
-    try {
-      const raw = localStorage.getItem(BRAND_SESSION_KEY);
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      const brand = String(parsed?.brand || '').toLowerCase().trim();
-      const lastSeen = Number(parsed?.lastSeen || 0);
-      if (!ALLOWED_BRANDS.has(brand) || !Number.isFinite(lastSeen) || lastSeen <= 0) return null;
-      return { brand, lastSeen };
-    } catch (e) {
-      return null;
-    }
-  }
-
-  function writeBrandSession(brand, now = Date.now()) {
-    const normalized = String(brand || '').toLowerCase().trim();
-    if (!ALLOWED_BRANDS.has(normalized)) return false;
-
-    try {
-      localStorage.setItem(BRAND_SESSION_KEY, JSON.stringify({ brand: normalized, lastSeen: now }));
-      // Zachovanie kompatibility s existujúcou brand témou na detailoch vozidiel.
-      if (normalized === 'all') localStorage.removeItem(LEGACY_BRAND_KEY);
-      else localStorage.setItem(LEGACY_BRAND_KEY, normalized);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  function clearExpiredBrandSession() {
-    try {
-      localStorage.removeItem(BRAND_SESSION_KEY);
-      localStorage.removeItem(LEGACY_BRAND_KEY);
-    } catch (e) {}
-  }
-
-  function isSessionFresh(session, now = Date.now()) {
-    return !!session && now - session.lastSeen <= SESSION_TTL_MS;
-  }
 
   function isLocalRouteHost() {
     return location.protocol === 'file:' ||
@@ -57,94 +17,140 @@
     return window.ppI18n ? window.ppI18n.withLang(href) : href;
   }
 
-  // Navigácia cez čitateľné URL na produkcii, cez reálne súbory lokálne.
   function cleanBrandHref(brand) {
     if (isLocalRouteHost()) return 'index.html?brand=' + encodeURIComponent(brand);
-    if (brand === 'all') return '/ponuka';
-    return '/' + encodeURIComponent(brand);
+    return brand === 'all' ? '/ponuka' : '/' + encodeURIComponent(brand);
   }
 
   function forcedChooser() {
     return new URLSearchParams(location.search).get('choose') === '1';
   }
 
-  // Ak sa používateľ vráti na ppauto.sk počas stále platnej session,
-  // výberová stránka ho pošle rovno späť do jeho poslednej voľby.
-  // Parameter ?choose=1 je vedomé kliknutie na „Zmeniť značku“ a výber vždy zobrazí.
+  function clearLegacyStorage() {
+    try {
+      localStorage.removeItem(BRAND_SESSION_KEY);
+      localStorage.removeItem(LEGACY_BRAND_KEY);
+    } catch (e) {}
+    try { sessionStorage.removeItem('selected_brand'); } catch (e) {}
+  }
+
+  function clearBrandSession() {
+    try {
+      sessionStorage.removeItem(BRAND_SESSION_KEY);
+      sessionStorage.removeItem(LEGACY_BRAND_KEY);
+    } catch (e) {}
+    clearLegacyStorage();
+  }
+
+  function readBrandSession() {
+    try {
+      const raw = sessionStorage.getItem(BRAND_SESSION_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      const brand = String(parsed?.brand || '').toLowerCase().trim();
+      const expiresAt = Number(parsed?.expiresAt || 0);
+      if (!ALLOWED_BRANDS.has(brand) || !Number.isFinite(expiresAt) || expiresAt <= Date.now()) {
+        clearBrandSession();
+        return null;
+      }
+      return { brand, expiresAt };
+    } catch (e) {
+      clearBrandSession();
+      return null;
+    }
+  }
+
+  function writeBrandSession(brand) {
+    const normalized = String(brand || '').toLowerCase().trim();
+    if (!ALLOWED_BRANDS.has(normalized)) return false;
+
+    clearLegacyStorage();
+    try {
+      const session = {
+        brand: normalized,
+        expiresAt: Date.now() + SESSION_TTL_MS,
+      };
+      sessionStorage.setItem(BRAND_SESSION_KEY, JSON.stringify(session));
+      if (normalized === 'all') sessionStorage.removeItem(LEGACY_BRAND_KEY);
+      else sessionStorage.setItem(LEGACY_BRAND_KEY, normalized);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  clearLegacyStorage();
+
+  // Pri obyčajnom návrate na chooser počas stále platnej session pokračuj vo voľbe.
+  // ?choose=1 je explicitné „Zmeniť značku“ a chooser musí zostať zobrazený.
   const existingSession = readBrandSession();
   if (!forcedChooser() && existingSession) {
-    if (isSessionFresh(existingSession)) {
-      writeBrandSession(existingSession.brand);
-      location.replace(withLang(cleanBrandHref(existingSession.brand)));
-      return;
-    }
-    clearExpiredBrandSession();
+    location.replace(withLang(cleanBrandHref(existingSession.brand)));
+    return;
   }
 
   const cards = document.querySelectorAll('.card');
 
-  // Tilt + svetelný lesk
+  // Tilt + svetelný lesk.
   cards.forEach(card => {
     const shine = card.querySelector('.media .shine');
-    card.addEventListener('mousemove', (e) => {
-      const r = card.getBoundingClientRect();
-      const px = (e.clientX - r.left) / r.width;
-      const py = (e.clientY - r.top) / r.height;
-      const rx = (py - 0.5) * -6;
-      const ry = (px - 0.5) * 10;
-      card.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`;
-      if (shine){
-        shine.style.setProperty('--mx', (px*100)+'%');
-        shine.style.setProperty('--my', (py*100)+'%');
+    card.addEventListener('mousemove', event => {
+      const rect = card.getBoundingClientRect();
+      const px = (event.clientX - rect.left) / rect.width;
+      const py = (event.clientY - rect.top) / rect.height;
+      card.style.transform = `perspective(900px) rotateX(${(py - 0.5) * -6}deg) rotateY(${(px - 0.5) * 10}deg)`;
+      if (shine) {
+        shine.style.setProperty('--mx', (px * 100) + '%');
+        shine.style.setProperty('--my', (py * 100) + '%');
       }
     });
     card.addEventListener('mouseleave', () => { card.style.transform = ''; });
   });
 
-  function go(brand){
-    if (!ALLOWED_BRANDS.has(String(brand || '').toLowerCase())) return;
-    writeBrandSession(brand);
-    const href = cleanBrandHref(brand);
-    location.href = withLang(href);
+  function go(brand) {
+    const normalized = String(brand || '').toLowerCase().trim();
+    if (!ALLOWED_BRANDS.has(normalized)) return;
+    if (!writeBrandSession(normalized)) return;
+    location.href = withLang(cleanBrandHref(normalized));
   }
 
-  // Klik a klávesnica na kartách
   cards.forEach(card => {
-    const brand = String(card.dataset.brand || '').toLowerCase();
+    const brand = String(card.dataset.brand || '').toLowerCase().trim();
     const mainLink = card.querySelector('.card-main-link');
-    if (brand && mainLink) mainLink.setAttribute('href', withLang(cleanBrandHref(brand)));
 
-    // Link samotný musí session uložiť ešte pred navigáciou.
-    mainLink?.addEventListener('click', () => {
-      if (brand) writeBrandSession(brand);
-    });
+    if (brand && mainLink) {
+      mainLink.setAttribute('href', withLang(cleanBrandHref(brand)));
+      mainLink.addEventListener('click', event => {
+        // Pri otvorení v novom tabe nemôžeme preniesť sessionStorage; nech nový tab
+        // začne ako nový návštevník cez chooser.
+        if (event.ctrlKey || event.metaKey || event.shiftKey || event.button === 1) return;
+        if (!writeBrandSession(brand)) event.preventDefault();
+      });
+    }
 
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('a, button')) return;
+    card.addEventListener('click', event => {
+      if (event.target.closest('a, button')) return;
       if (brand) go(brand);
     });
-    card.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(brand); }
-    });
-  });
 
-  // Tlačidlo „Vstúpiť“
-  document.querySelectorAll('.enter').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const brand = e.currentTarget.dataset.brand;
+    card.addEventListener('keydown', event => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
       if (brand) go(brand);
     });
   });
 
-  // „Zobraziť všetko“ je tiež platná voľba session.
-  document.getElementById('skipOnce')?.addEventListener('click', () => {
-    writeBrandSession('all');
-    const href = isLocalRouteHost() ? 'index.html?brand=all' : '/ponuka';
-    location.href = withLang(href);
+  document.querySelectorAll('.enter').forEach(button => {
+    button.addEventListener('click', event => {
+      event.stopPropagation();
+      const brand = event.currentTarget.dataset.brand;
+      if (brand) go(brand);
+    });
   });
 
-  // Slider fotiek autosalónu
+  document.getElementById('skipOnce')?.addEventListener('click', () => go('all'));
+
+  // Slider fotiek autosalónu – zachované pôvodné správanie.
   const slider = document.querySelector('.showroom-slider');
   if (slider) {
     const track = slider.querySelector('.showroom-slider__track');
@@ -178,15 +184,20 @@
 
     prev?.addEventListener('click', () => moveSlider(-1));
     next?.addEventListener('click', () => moveSlider(1));
-
     startAuto();
     slider.addEventListener('mouseenter', stopAuto);
     slider.addEventListener('mouseleave', startAuto);
   }
 
-  // Preload pre svižnejší hover
   if (navigator.connection?.effectiveType !== '2g') {
-    ['img/subarulogo.png','img/grandcherokke2024red.avif','img/subaruoutback2025magnetitgrey.avif','img/cherylogo.png']
-      .forEach(src => { const i = new Image(); i.src = src; });
+    [
+      'img/subarulogo.png',
+      'img/grandcherokke2024red.avif',
+      'img/subaruoutback2025magnetitgrey.avif',
+      'img/cherylogo.png',
+    ].forEach(src => {
+      const image = new Image();
+      image.src = src;
+    });
   }
 })();

@@ -122,29 +122,45 @@
       location.hostname === '::1';
   }
 
-  const CHOOSER_REDIRECT_KEY = 'ppauto.chooserRedirectAt';
+  const BRAND_SESSION_KEY = 'ppauto.brandSession';
+  const LEGACY_BRAND_KEY = 'ppauto.brand';
 
   function chooserHref(langQuery) {
-    if (!isLocalRouteHost()) return '/' + (langQuery || '');
-
     const params = new URLSearchParams((langQuery || '').replace(/^\?/, ''));
-    params.set('choose', '1');
-    return 'vyber-znacky.html?' + params.toString();
+    const query = params.toString();
+    const base = isLocalRouteHost() ? 'vyber-znacky.html' : '/vyber-znacky.html';
+    return query ? `${base}?${query}` : base;
+  }
+
+  function readBrandSession() {
+    try {
+      const raw = sessionStorage.getItem(BRAND_SESSION_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      const brand = String(parsed?.brand || '').toLowerCase().trim();
+      const expiresAt = Number(parsed?.expiresAt || 0);
+      if (!isAllowed(brand) || !Number.isFinite(expiresAt) || expiresAt <= Date.now()) return null;
+      return { brand, expiresAt };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function clearBrandSession() {
+    try {
+      sessionStorage.removeItem(BRAND_SESSION_KEY);
+      sessionStorage.removeItem(LEGACY_BRAND_KEY);
+      sessionStorage.removeItem('selected_brand');
+    } catch (e) {}
+    // Vyčisti starú implementáciu, aby localStorage nebol druhým zdrojom pravdy.
+    try {
+      localStorage.removeItem(BRAND_SESSION_KEY);
+      localStorage.removeItem(LEGACY_BRAND_KEY);
+    } catch (e) {}
   }
 
   function redirectToChooser(langQuery) {
-    try {
-      const last = Number(sessionStorage.getItem(CHOOSER_REDIRECT_KEY) || 0);
-      const now = Date.now();
-
-      if (last && now - last < 2500) {
-        sessionStorage.removeItem(CHOOSER_REDIRECT_KEY);
-        return;
-      }
-
-      sessionStorage.setItem(CHOOSER_REDIRECT_KEY, String(now));
-    } catch (e) {}
-
+    clearBrandSession();
     location.replace(chooserHref(langQuery));
   }
 
@@ -153,6 +169,19 @@
     if (!slug || slug === 'index.html') return '';
     if (slug === 'ponuka') return 'all';
     return isAllowed(slug) ? slug : '';
+  }
+
+  function hrefForBrand(brand, langQuery, hash) {
+    const params = new URLSearchParams((langQuery || '').replace(/^\?/, ''));
+    const suffix = params.toString() ? `?${params.toString()}` : '';
+    const anchor = hash || '';
+    if (isLocalRouteHost()) {
+      const localParams = new URLSearchParams(params);
+      localParams.set('brand', brand);
+      return `index.html?${localParams.toString()}${anchor}`;
+    }
+    const path = brand === 'all' ? '/ponuka' : `/${encodeURIComponent(brand)}`;
+    return `${path}${suffix}${anchor}`;
   }
 
   function setAttr(selector, attr, value) {
@@ -178,29 +207,41 @@
   }
 
   try {
-    // legacy cleanup – nič si nepamätáme
-    try { localStorage.removeItem('ppauto.brand'); } catch (e) {}
-    try { sessionStorage.removeItem('ppauto.brand'); } catch (e) {}
-    try { sessionStorage.removeItem('selected_brand'); } catch (e) {}
+    // localStorage z predchádzajúcej implementácie nesmie prežiť novú návštevu.
+    try {
+      localStorage.removeItem(BRAND_SESSION_KEY);
+      localStorage.removeItem(LEGACY_BRAND_KEY);
+    } catch (e) {}
 
     const params = new URLSearchParams(location.search);
-    const brand = (brandFromPathname() || params.get('brand') || '').toLowerCase().trim();
+    const requestedBrand = (brandFromPathname() || params.get('brand') || '').toLowerCase().trim();
     const lang = (params.get('lang') || '').toLowerCase().trim();
     const langQuery = lang === 'en' ? '?lang=en' : '';
+    const session = readBrandSession();
 
-    
-
-    // Bez platnej značky v query alebo v čistej URL sa ide na výber značky.
-    if (!isAllowed(brand)) {
+    // Bez platného dvojminútového výberu sa verejná ponuka nesmie zobraziť.
+    if (!session) {
       redirectToChooser(langQuery);
       return;
     }
 
-    // Len nastav tému (bez ukladania do storage)
-    if (brand === 'all') document.documentElement.removeAttribute('data-brand');
-    else document.documentElement.setAttribute('data-brand', brand);
+    // Session je jediný zdroj pravdy. Pri ručnom otvorení inej brand URL
+    // vráť návštevníka na jeho stále platnú voľbu bez predĺženia TTL.
+    if (!isAllowed(requestedBrand) || requestedBrand !== session.brand) {
+      location.replace(hrefForBrand(session.brand, langQuery, location.hash));
+      return;
+    }
 
-    applyPageMeta(brand);
+    if (session.brand === 'all') document.documentElement.removeAttribute('data-brand');
+    else document.documentElement.setAttribute('data-brand', session.brand);
+
+    // Legacy theme key ostáva iba v sessionStorage kvôli detailu vozidla.
+    try {
+      if (session.brand === 'all') sessionStorage.removeItem(LEGACY_BRAND_KEY);
+      else sessionStorage.setItem(LEGACY_BRAND_KEY, session.brand);
+    } catch (e) {}
+
+    applyPageMeta(session.brand);
   } catch (e) {
     redirectToChooser('');
   }
@@ -212,6 +253,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/orders.css">
 <script src="js/contact-links.js" defer></script>
 <script src="js/i18n.js" defer></script>
 
@@ -231,9 +273,8 @@
       </div>
       <nav class="nav-links">
         <a href="#ponuka">Ponuka áut</a>
+        <a href="#objednat-auto">Objednať auto</a>
         <a href="#servis">Servis</a>
-        <a href="#financovanie">Financovanie</a>
-        <a href="#znacky">Značky</a> 
         <a href="#tim">Tím</a>
         <a href="#kontakt">Kontakt</a>
         <a class="nav-brand" href="vyber-znacky.html?choose=1">Zmeniť značku</a>
@@ -295,6 +336,7 @@
           <p>Od roku 2011 prinášame v Poprade profesionálne služby pri predaji a servise vozidiel. Pomôžeme s&nbsp;výberom, financovaním aj poistením a postaráme sa o&nbsp;vaše auto počas celej životnosti.</p>
           <div class="quick">
             <a class="btn primary" href="#ponuka">Pozrieť skladové vozidlá</a>
+            <a class="btn" href="#objednat-auto">Objednať auto</a>
             <a class="btn" href="#servis">Objednať servis</a>
             <a class="btn" href="#znacky" data-brand-text="heroBrandsCta">Značky a demo jazdy</a>
           </div>
@@ -340,7 +382,7 @@
   <div class="container">
     <div class="promo2-head">
       <div>
-        <h3 class="promo2-title">Aktuálne ponuky</h3>
+        <h3 class="promo2-title">Aktuálna ponuka</h3>
       </div>
 
       <div class="promo2-controls" aria-label="Ovládanie slidera">
@@ -395,6 +437,213 @@
 
     <!-- sem sa automaticky vložia autá -->
     <div class="grid" id="inventory"></div>
+  </div>
+</section>
+
+<!-- OBJEDNANIE AUTA -->
+<section id="objednat-auto" class="order-section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="order-kicker">Objednanie vozidla</span>
+        <h3>Skladové auto alebo individuálna požiadavka</h3>
+        <p class="order-intro">Vyberte konkrétne vozidlo z aktuálnej ponuky alebo nám pošlite konfiguráciu auta, ktoré na stránke zatiaľ nie je.</p>
+      </div>
+    </div>
+
+    <form
+      id="vehicleOrderForm"
+      class="order-form"
+      data-emailjs-service="service_i68hphn"
+      data-emailjs-admin-template="template_order_admin"
+      data-emailjs-customer-template="template_order_customer"
+      data-emailjs-admin-email="martinsulak18@gmail.com"
+    >
+      <input class="pp-hidden-field" type="text" name="website" tabindex="-1" autocomplete="off">
+
+      <div class="order-mode" role="radiogroup" aria-label="Typ objednávky">
+        <label class="order-mode__option">
+          <input id="orderSourceStock" type="radio" name="source" value="stock" checked>
+          <span class="order-mode__label">Zo skladových vozidiel</span>
+          <span class="order-mode__text">Vyberte si konkrétne vozidlo z našej aktuálnej ponuky a odošlite nezáväznú požiadavku.</span>
+        </label>
+        <label class="order-mode__option">
+          <input id="orderSourceCustom" type="radio" name="source" value="custom">
+          <span class="order-mode__label">Auto mimo skladovej ponuky</span>
+          <span class="order-mode__text">Nenašli ste vhodné vozidlo v našej ponuke? Zadajte svoju predstavu a my vás budeme kontaktovať.</span>
+        </label>
+      </div>
+
+      <div class="order-layout">
+        <div class="order-panel order-stock-panel" id="orderStockPanel">
+          <div class="order-panel__inner">
+            <h4 class="order-panel__title">Výber skladového vozidla</h4>
+            <div class="order-stock-tools">
+              <div class="order-field">
+                <label for="orderStockSearch">Hľadať vozidlo</label>
+                <input id="orderStockSearch" type="search" placeholder="Model, výbava, palivo...">
+              </div>
+              <div class="order-field">
+                <label for="orderStockBrand">Značka</label>
+                <select id="orderStockBrand"></select>
+              </div>
+            </div>
+            <input type="hidden" id="orderStockCarId" name="stockCarId">
+            <div class="order-stock-list" id="orderStockList" aria-live="polite"></div>
+            <div class="order-selected" id="orderStockSelected" hidden></div>
+          </div>
+        </div>
+
+        <div class="order-panel order-custom-panel" id="orderCustomPanel" hidden>
+          <div class="order-panel__inner">
+            <h4 class="order-panel__title">Parametre požadovaného auta</h4>
+            <p class="order-config-note" id="orderConfigModeNote">Vyberte jednu z našich značiek a požadovaný model.</p>
+            <div class="order-form-grid">
+              <div class="order-field" data-order-choice-field="brand">
+                <label for="orderBrand">Značka</label>
+                <select id="orderBrand" data-order-choice-select="brand"></select>
+              </div>
+              <div class="order-field" data-order-choice-field="model">
+                <label for="orderModel">Model</label>
+                <select id="orderModel" data-order-choice-select="model"></select>
+              </div>
+              <div class="order-field">
+                <label for="orderYear">Rok</label>
+                <input id="orderYear" type="number" min="1900" max="2100" placeholder="2026">
+              </div>
+              <div class="order-field" data-order-choice-field="fuel">
+                <label for="orderFuel">Palivo</label>
+                <select id="orderFuel" data-order-choice-select="fuel"></select>
+                  <input id="orderFuelCustom" data-order-choice-custom="fuel" type="text" placeholder="Napíšte palivo" hidden>
+                  <button class="order-custom-value-btn" type="button" data-order-choice-toggle="fuel">+ Zadať vlastné palivo</button>
+              </div>
+              <div class="order-field" data-order-choice-field="transmission">
+                <label for="orderTransmission">Prevodovka</label>
+                <select id="orderTransmission" data-order-choice-select="transmission"></select>
+                  <input id="orderTransmissionCustom" data-order-choice-custom="transmission" type="text" placeholder="Napíšte prevodovku" hidden>
+                  <button class="order-custom-value-btn" type="button" data-order-choice-toggle="transmission">+ Zadať vlastnú prevodovku</button>
+              </div>
+              <div class="order-field" data-order-choice-field="package">
+                <label for="orderPackage">Výbava / paket</label>
+                <select id="orderPackage" data-order-choice-select="package"></select>
+                  <input id="orderPackageCustom" data-order-choice-custom="package" type="text" placeholder="Napíšte výbavu / paket" hidden>
+                  <button class="order-custom-value-btn" type="button" data-order-choice-toggle="package">+ Zadať vlastnú výbavu</button>
+              </div>
+              <div class="order-field" data-order-choice-field="volume">
+                <label for="orderEngineVolume">Objem motora (cm³)</label>
+                <select id="orderEngineVolume" data-order-choice-select="volume"></select>
+                <input id="orderEngineVolumeCustom" data-order-choice-custom="volume" type="number" min="0" inputmode="numeric" placeholder="Napíšte objem motora" hidden>
+                <button class="order-custom-value-btn" type="button" data-order-choice-toggle="volume">+ Zadať vlastný objem</button>
+              </div>
+              <div class="order-field" data-order-choice-field="power">
+                <label for="orderPower">Výkon motora (kW)</label>
+                <select id="orderPower" data-order-choice-select="power"></select>
+                <input id="orderPowerCustom" data-order-choice-custom="power" type="number" min="0" inputmode="numeric" placeholder="Napíšte výkon" hidden>
+                <button class="order-custom-value-btn" type="button" data-order-choice-toggle="power">+ Zadať vlastný výkon</button>
+              </div>
+              <div class="order-field" data-order-choice-field="body">
+                <label for="orderBody">Karoséria</label>
+                <select id="orderBody" data-order-choice-select="body"></select>
+                  <input id="orderBodyCustom" data-order-choice-custom="body" type="text" placeholder="Napíšte karosériu" hidden>
+                  <button class="order-custom-value-btn" type="button" data-order-choice-toggle="body">+ Zadať vlastnú karosériu</button>
+              </div>
+              <div class="order-field" data-order-choice-field="drive">
+                <label for="orderDrive">Pohon</label>
+                <select id="orderDrive" data-order-choice-select="drive"></select>
+                  <input id="orderDriveCustom" data-order-choice-custom="drive" type="text" placeholder="Napíšte pohon" hidden>
+                  <button class="order-custom-value-btn" type="button" data-order-choice-toggle="drive">+ Zadať vlastný pohon</button>
+              </div>
+              <div class="order-field" data-order-choice-field="color">
+                <label for="orderColor">Farba</label>
+                <select id="orderColor" data-order-choice-select="color"></select>
+                <input id="orderColorCustom" data-order-choice-custom="color" type="text" placeholder="Napíšte farbu" hidden>
+                <button class="order-custom-value-btn" type="button" data-order-choice-toggle="color">+ Zadať vlastnú farbu</button>
+              </div>
+              <label class="order-check order-field--wide">
+                <input id="orderMetallic" type="checkbox">
+                <span>Metalíza</span>
+              </label>
+
+              <div class="order-field order-field--wide">
+                <label for="orderExtraEquipmentNote">Ďalšia výbava alebo konfigurácia</label>
+                <textarea id="orderExtraEquipmentNote" placeholder="Napr. ťažné zariadenie, typ kolies, interiér, balíky výbavy..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="order-panel order-contact-panel">
+          <div class="order-panel__inner">
+            <h4 class="order-panel__title">Kontakt a preferencie</h4>
+            <div class="order-form-grid">
+              <div class="order-field">
+                <label for="orderCustomerName">Meno a priezvisko</label>
+                <input id="orderCustomerName" type="text" autocomplete="name" required>
+              </div>
+              <div class="order-field">
+                <label for="orderCustomerCompany">Firma</label>
+                <input id="orderCustomerCompany" type="text" autocomplete="organization">
+              </div>
+              <div class="order-field">
+                <label for="orderCustomerEmail">E-mail</label>
+                <input id="orderCustomerEmail" type="email" autocomplete="email" required>
+              </div>
+              <div class="order-field">
+                <label for="orderCustomerPhone">Telefón</label>
+                <input id="orderCustomerPhone" type="tel" autocomplete="tel" required>
+              </div>
+              <div class="order-field">
+                <label for="orderPreferredContact">Preferovaný kontakt</label>
+                <select id="orderPreferredContact">
+                  <option value="">Bez preferencie</option>
+                  <option value="Telefonicky">Telefonicky</option>
+                  <option value="E-mailom">E-mailom</option>
+                </select>
+              </div>
+              <div class="order-field">
+                <label for="orderDelivery">Preferovaný termín</label>
+                <select id="orderDelivery">
+                  <option value="">Bez preferencie</option>
+                  <option value="Ihneď">Ihneď</option>
+                  <option value="Do 1 mesiaca">Do 1 mesiaca</option>
+                  <option value="Do 3 mesiacov">Do 3 mesiacov</option>
+                  <option value="Do 6 mesiacov">Do 6 mesiacov</option>
+                  <option value="Neponáhľa">Neponáhľa</option>
+                </select>
+              </div>
+              <div class="order-field order-field--wide">
+                <label for="orderFinancing">Financovanie</label>
+                <select id="orderFinancing">
+                  <option value="">Neuvádza</option>
+                  <option value="Hotovosť">Hotovosť</option>
+                  <option value="Úver">Úver</option>
+                  <option value="Finančný leasing">Finančný leasing</option>
+                  <option value="Operatívny leasing">Operatívny leasing</option>
+                  <option value="Chce poradiť">Chce poradiť</option>
+                </select>
+              </div>
+              <div class="order-field order-field--wide">
+                <label for="orderTradeIn">Protiúčet</label>
+                <input id="orderTradeIn" type="text" placeholder="Značka, model, rok a orientačný nájazd aktuálneho auta">
+              </div>
+              <div class="order-field order-field--wide">
+                <label for="orderNote">Poznámka</label>
+                <textarea id="orderNote" placeholder="Doplňujúce informácie k objednávke"></textarea>
+              </div>
+              <label class="order-check order-field--wide">
+                <input id="orderPrivacy" name="orderPrivacy" type="checkbox" required>
+                <span>Súhlasím so spracovaním osobných údajov za účelom vybavenia objednávky.</span>
+              </label>
+            </div>
+
+            <div class="order-actions">
+              <button class="btn primary order-submit" id="orderSubmit" type="submit">Odoslať objednávku</button>
+              <div class="order-status" id="orderFormStatus" role="status" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
   </div>
 </section>
 
@@ -1175,6 +1424,7 @@
       <h5>Navigácia</h5>
       <ul>
         <li><a href="#ponuka">Ponuka áut</a></li>
+        <li><a href="#objednat-auto">Objednať auto</a></li>
         <li><a href="#servis">Servis</a></li>
         <li><a href="#znacky">Značky</a></li>
         <li><a href="#tim">Tím</a></li>
@@ -1469,7 +1719,10 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 
+<script src="js/vehicle-data.js" defer></script>
+<script src="js/public-data.js" defer></script>
 <script src="js/script.js" defer></script>
+<script src="js/orders.js" defer></script>
 
 <script src="js/testdrive.js"></script>
 
@@ -1486,7 +1739,7 @@ document.addEventListener("DOMContentLoaded", () => {
     fx.style.setProperty("--my", e.clientY + "px");
   }
 
-  window.addEventListener("mousemove", setPos, { passive: true });
+  window.addEventListener("pointermove", setPos, { passive: true });
 
   window.addEventListener("mouseleave", () => {
     fx.style.setProperty("--mx", "50vw");
@@ -1566,4 +1819,3 @@ document.addEventListener("DOMContentLoaded", () => {
 <script src="js/cookie-consent.js"></script>
 </body>
 </html>
-

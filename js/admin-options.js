@@ -13,6 +13,8 @@
     'pohon',
     'farba',
   ];
+  const MULTI_FIELDS = new Set(['palivo']);
+  const vehicleData = window.ppVehicleData;
 
   const PARAMETER_GROUPS = [
     {
@@ -90,10 +92,35 @@
     return persistedValuesFor(name).some(item => eq(item, value));
   }
 
+  function selectedValuesFor(name) {
+    const value = form.elements[name]?.value;
+    return MULTI_FIELDS.has(name)
+      ? vehicleData.toChoiceList(value)
+      : [clean(value)].filter(Boolean);
+  }
+
+  function selectAddedOption(name, value) {
+    const next = MULTI_FIELDS.has(name)
+      ? [...selectedValuesFor(name), value]
+      : value;
+    setChoiceValue(name, next, { emit: true });
+  }
+
+  function removeSelectedOption(name, value) {
+    if (!MULTI_FIELDS.has(name)) {
+      setChoiceValue(name, '', { emit: true });
+      return;
+    }
+    setChoiceValue(
+      name,
+      selectedValuesFor(name).filter(item => !eq(item, value)),
+      { emit: true }
+    );
+  }
+
   function buildOptionsForField(name) {
     const persisted = persistedValuesFor(name);
-    const selected = clean(form.elements[name]?.value);
-    return unique([...persisted, ...(selected ? [selected] : [])]);
+    return unique([...persisted, ...selectedValuesFor(name)]);
   }
 
   function organizeParameterLayout() {
@@ -276,7 +303,7 @@
     if (!trimmed) return;
 
     if (isPersisted(name, trimmed)) {
-      setChoiceValue(name, trimmed, { emit: true });
+      selectAddedOption(name, trimmed);
       return;
     }
 
@@ -286,7 +313,7 @@
     addLocalOption(name, trimmed, brand);
     refreshAllChoiceFields();
     if (name === 'znacka') syncBrandInputs(trimmed);
-    setChoiceValue(name, trimmed, { emit: true });
+    selectAddedOption(name, trimmed);
     setFieldBusy(name, true);
 
     try {
@@ -297,7 +324,7 @@
       adminOptions = payload;
       refreshAllChoiceFields();
       if (name === 'znacka') syncBrandInputs(trimmed);
-      setChoiceValue(name, trimmed, { emit: true });
+      selectAddedOption(name, trimmed);
     } catch (error) {
       adminOptions = previousOptions;
       refreshAllChoiceFields();
@@ -315,12 +342,12 @@
     const brand = name === 'model' ? currentBrandLabel() : '';
     const previousOptions = cloneOptions();
     const previousValue = clean(form.elements[name]?.value);
-    const wasSelected = eq(previousValue, value);
+    const wasSelected = selectedValuesFor(name).some(item => eq(item, value));
 
     // Bez potvrdzovacieho dialógu: klik na × je samotná mazacia akcia.
     // UI reaguje okamžite a pri chybe servera sa pôvodný stav obnoví.
     deleteLocalOption(name, value, brand);
-    if (wasSelected) setChoiceValue(name, '', { emit: true });
+    if (wasSelected) removeSelectedOption(name, value);
     refreshAllChoiceFields();
     if (name === 'znacka') syncBrandInputs(currentBrandLabel());
     setFieldBusy(name, true);
@@ -331,7 +358,7 @@
         body: JSON.stringify({ field: name, value, ...(brand ? { brand } : {}) }),
       });
       adminOptions = payload;
-      if (wasSelected) setChoiceValue(name, '', { emit: true });
+      if (wasSelected) removeSelectedOption(name, value);
       refreshAllChoiceFields();
       if (name === 'znacka') syncBrandInputs(currentBrandLabel());
     } catch (error) {
@@ -347,8 +374,8 @@
 
   function clearLegacyOption(name, value) {
     const input = form.elements[name];
-    if (!input || !eq(input.value, value)) return;
-    setChoiceValue(name, '', { emit: true });
+    if (!input || !selectedValuesFor(name).some(item => eq(item, value))) return;
+    removeSelectedOption(name, value);
     refreshAllChoiceFields();
   }
 
@@ -360,7 +387,7 @@
 
     const settings = CHOICE_SETTINGS[name] || {};
     const values = choiceOptions.get(name) || [];
-    const selected = clean(input.value);
+    const selected = selectedValuesFor(name);
     buttons.innerHTML = '';
 
     values.forEach(value => {
@@ -373,10 +400,15 @@
       button.textContent = value;
       button.dataset.choiceValue = value;
 
-      const active = eq(selected, value);
+      const active = selected.some(item => eq(item, value));
       button.classList.toggle('is-selected', active);
       button.setAttribute('aria-pressed', active ? 'true' : 'false');
       button.addEventListener('click', () => {
+        if (MULTI_FIELDS.has(name)) {
+          if (active) removeSelectedOption(name, value);
+          else setChoiceValue(name, [...selected, value], { emit: true });
+          return;
+        }
         if (active && settings.allowEmpty) {
           setChoiceValue(name, '', { emit: true });
           return;

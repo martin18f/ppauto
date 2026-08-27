@@ -45,6 +45,42 @@ function normalizeCarPrices(car) {
   };
 }
 
+const LEGACY_CHOICE_SEPARATOR = /\s*(?:\+|\/|,|;|\u2022|\u00b7)\s*/u;
+
+function normalizeChoiceList(value) {
+  const result = [];
+
+  function append(raw) {
+    if (Array.isArray(raw)) {
+      raw.forEach(append);
+      return;
+    }
+    if (typeof raw !== "string" && typeof raw !== "number") return;
+
+    String(raw).trim().split(LEGACY_CHOICE_SEPARATOR).forEach((part) => {
+      const item = String(part || "").trim();
+      if (!item) return;
+      if (result.some((existing) => (
+        existing.localeCompare(item, "sk", { sensitivity: "accent" }) === 0
+      ))) return;
+      result.push(item);
+    });
+  }
+
+  append(value);
+  return result;
+}
+
+function normalizeCarForClient(car) {
+  const normalized = normalizeCarPrices(car);
+  if (!normalized || typeof normalized !== "object" || Array.isArray(normalized)) return normalized;
+  return { ...normalized, palivo: normalizeChoiceList(normalized.palivo) };
+}
+
+function normalizeCarForWrite(car) {
+  return normalizeCarForClient(car);
+}
+
 function encodeGithubPath(path) {
   // Zachová lomky, enkóduje len segmenty
   return String(path)
@@ -98,7 +134,7 @@ function collectEffectiveCarIds(cars) {
 }
 
 function createDuplicateCar(source, cars) {
-  const duplicate = normalizeCarPrices(JSON.parse(JSON.stringify(source)));
+  const duplicate = normalizeCarForWrite(JSON.parse(JSON.stringify(source)));
   const usedIds = collectEffectiveCarIds(cars);
   const preferredId = String(source.id || "").trim() ||
     `${source.znacka || ""}-${source.model || ""}-${source.rok ?? ""}`;
@@ -114,6 +150,17 @@ function normalizeRevision(value) {
     .replace(/^"|"$/g, "");
 }
 
+
+const PUBLIC_CACHE_TTL_MS = 60 * 1000;
+let publicCarsWarmCache = { expiresAt: 0, cars: null, sha: '' };
+
+function setPublicCacheHeaders(res) {
+  res.setHeader('Cache-Control', 'public, max-age=30, s-maxage=60, stale-while-revalidate=300');
+}
+
+function setPrivateNoStoreHeaders(res) {
+  res.setHeader('Cache-Control', 'private, no-store, max-age=0, must-revalidate');
+}
 function setRevisionHeaders(res, revision) {
   const value = String(revision || "").trim();
   if (!value) return;
@@ -142,7 +189,14 @@ export default async function handler(req, res) {
       "Content-Type": "application/json",
     };
 
-    async function getFile() {
+    async function getFile({ allowPublicCache = false } = {}) {
+      if (allowPublicCache && publicCarsWarmCache.cars && publicCarsWarmCache.expiresAt > Date.now()) {
+        return {
+          cars: publicCarsWarmCache.cars,
+          sha: publicCarsWarmCache.sha,
+        };
+      }
+
       const safePath = encodeGithubPath(DATA_PATH);
       const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${safePath}?ref=${encodeURIComponent(
         GITHUB_BRANCH
@@ -165,6 +219,14 @@ export default async function handler(req, res) {
       const content = Buffer.from(data.content, "base64").toString("utf8");
       const json = JSON.parse(content);
       if (!Array.isArray(json)) throw new Error("auta.json nie je pole []");
+
+      if (allowPublicCache) {
+        publicCarsWarmCache = {
+          expiresAt: Date.now() + PUBLIC_CACHE_TTL_MS,
+          cars: json,
+          sha: data.sha,
+        };
+      }
 
       return { cars: json, sha: data.sha };
     }
@@ -198,7 +260,9 @@ export default async function handler(req, res) {
         throw error;
       }
 
-      return r.json();
+      const payload = await r.json();
+      publicCarsWarmCache = { expiresAt: 0, cars: null, sha: '' };
+      return payload;
     }
 
     // DEBUG režim – otvor si /api/cars?debug=1 na produkcii a uvidíš presne,
@@ -233,8 +297,11 @@ export default async function handler(req, res) {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
-      const { cars, sha } = await getFile();
-      const normalizedCars = cars.map(normalizeCarPrices);
+      if (includeHidden) setPrivateNoStoreHeaders(res);
+      else setPublicCacheHeaders(res);
+
+      const { cars, sha } = await getFile({ allowPublicCache: !includeHidden });
+      const normalizedCars = cars.map(normalizeCarForClient);
       const visible = includeHidden
         ? normalizedCars
         : normalizedCars.filter((c) => c && c.skryte !== true);
@@ -313,7 +380,7 @@ export default async function handler(req, res) {
           code: "INVALID_PRICE",
         });
       }
-      const car = normalizeCarPrices(req.body);
+      const car = normalizeCarForWrite(req.body);
 
       const { cars, sha } = await getFile();
       cars.push(car);
@@ -342,7 +409,7 @@ export default async function handler(req, res) {
           code: "INVALID_PRICE",
         });
       }
-      const car = normalizeCarPrices(req.body);
+      const car = normalizeCarForWrite(req.body);
       const { cars, sha } = await getFile();
 
       if (index >= cars.length) return res.status(404).json({ error: "Not found" });
