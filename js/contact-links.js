@@ -1,8 +1,6 @@
 (function () {
   const BRAND_SESSION_KEY = 'ppauto.brandSession';
   const LEGACY_BRAND_KEY = 'ppauto.brand';
-  const BRAND_SESSION_TTL_MS = 60 * 1000;
-  const BRAND_HEARTBEAT_MS = 15 * 1000;
   const ALLOWED_BRANDS = new Set(['subaru', 'kgm', 'jeep', 'chery', 'all']);
 
   const MAILBOXES = {
@@ -38,107 +36,96 @@
     const params = new URLSearchParams();
     if (String(lang || '').toLowerCase() === 'en') params.set('lang', 'en');
     const suffix = params.toString() ? `?${params.toString()}` : '';
-    return isLocalRouteHost() ? `vyber-znacky.html${suffix}` : `/${suffix}`;
+    return `${isLocalRouteHost() ? 'vyber-znacky.html' : '/vyber-znacky.html'}${suffix}`;
   }
 
   function readBrandSession() {
     try {
-      const raw = localStorage.getItem(BRAND_SESSION_KEY);
+      const raw = sessionStorage.getItem(BRAND_SESSION_KEY);
       if (!raw) return null;
       const parsed = JSON.parse(raw);
       const brand = String(parsed?.brand || '').toLowerCase().trim();
-      const lastSeen = Number(parsed?.lastSeen || 0);
-      if (!ALLOWED_BRANDS.has(brand) || !Number.isFinite(lastSeen) || lastSeen <= 0) return null;
-      return { brand, lastSeen };
+      const expiresAt = Number(parsed?.expiresAt || 0);
+      if (!ALLOWED_BRANDS.has(brand) || !Number.isFinite(expiresAt) || expiresAt <= Date.now()) return null;
+      return { brand, expiresAt };
     } catch (e) {
       return null;
     }
   }
 
-  function writeBrandSession(brand, now = Date.now()) {
-    const normalized = String(brand || '').toLowerCase().trim();
-    if (!ALLOWED_BRANDS.has(normalized)) return false;
-
-    try {
-      localStorage.setItem(BRAND_SESSION_KEY, JSON.stringify({ brand: normalized, lastSeen: now }));
-      // Existujúci detail auta používa ppauto.brand na okamžité nastavenie témy.
-      if (normalized === 'all') localStorage.removeItem(LEGACY_BRAND_KEY);
-      else localStorage.setItem(LEGACY_BRAND_KEY, normalized);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
   function clearBrandSession() {
+    try {
+      sessionStorage.removeItem(BRAND_SESSION_KEY);
+      sessionStorage.removeItem(LEGACY_BRAND_KEY);
+      sessionStorage.removeItem('selected_brand');
+    } catch (e) {}
+    // Starý localStorage variant nesmie ovplyvniť novú návštevu.
     try {
       localStorage.removeItem(BRAND_SESSION_KEY);
       localStorage.removeItem(LEGACY_BRAND_KEY);
     } catch (e) {}
   }
 
-  function isFreshBrandSession(session, now = Date.now()) {
-    return !!session && now - session.lastSeen <= BRAND_SESSION_TTL_MS;
+  function isFreshBrandSession(session) {
+    return !!session && session.expiresAt > Date.now();
   }
 
   function redirectToChooser() {
     document.documentElement.style.visibility = 'hidden';
+    clearBrandSession();
     location.replace(chooserHref());
   }
 
   function startBrandSessionGuard() {
     if (!isBrandProtectedPublicPage()) return true;
 
-    // Defer skript beží ešte pred DOMContentLoaded; obsah skryjeme počas kontroly.
     document.documentElement.style.visibility = 'hidden';
-
     const initial = readBrandSession();
     if (!isFreshBrandSession(initial)) {
-      clearBrandSession();
       redirectToChooser();
       return false;
     }
 
-    writeBrandSession(initial.brand);
+    // Theme kompatibilita iba v sessionStorage; TTL sa pri pohybe po webe nepredlžuje.
+    try {
+      if (initial.brand === 'all') sessionStorage.removeItem(LEGACY_BRAND_KEY);
+      else sessionStorage.setItem(LEGACY_BRAND_KEY, initial.brand);
+    } catch (e) {}
     document.documentElement.style.visibility = '';
-
-    const touch = () => {
-      const current = readBrandSession();
-      if (!current || !ALLOWED_BRANDS.has(current.brand)) return;
-      writeBrandSession(current.brand);
-    };
 
     const validateReturn = () => {
       const current = readBrandSession();
       if (!isFreshBrandSession(current)) {
-        clearBrandSession();
         redirectToChooser();
         return false;
       }
-      writeBrandSession(current.brand);
       document.documentElement.style.visibility = '';
       return true;
     };
 
-    const heartbeat = setInterval(() => {
-      if (document.visibilityState === 'visible') touch();
-    }, BRAND_HEARTBEAT_MS);
+    // Po dvoch minútach výber iba zneplatníme. Aktuálnu stránku násilne
+    // neprerušujeme; ďalšia navigácia/obnovenie už začne cez chooser.
+    const remaining = Math.max(0, initial.expiresAt - Date.now());
+    const expiryTimer = setTimeout(clearBrandSession, remaining + 10);
 
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') {
-        touch();
-        return;
-      }
-      validateReturn();
+      if (document.visibilityState === 'visible') validateReturn();
     });
-
-    window.addEventListener('pagehide', touch);
     window.addEventListener('pageshow', (event) => {
       if (event.persisted) validateReturn();
     });
-    window.addEventListener('beforeunload', touch);
+    window.addEventListener('unload', () => clearTimeout(expiryTimer), { once: true });
 
-    window.addEventListener('unload', () => clearInterval(heartbeat), { once: true });
+    // Pri skutočnom odchode na inú stránku/doménu vo rovnakom okne voľbu zabudni.
+    document.addEventListener('click', (event) => {
+      const link = event.target.closest('a[href]');
+      if (!link || link.target === '_blank' || event.defaultPrevented) return;
+      try {
+        const url = new URL(link.href, location.href);
+        if (url.origin !== location.origin) clearBrandSession();
+      } catch (e) {}
+    }, true);
+
     return true;
   }
 
@@ -214,9 +201,8 @@
 
     const primaryLinks = [
       makeNavLink('Ponuka áut', '/ponuka#ponuka'),
+      makeNavLink('Objednať auto', '/ponuka#objednat-auto'),
       makeNavLink('Servis', '/ponuka#servis'),
-      makeNavLink('Financovanie', '/ponuka#financovanie'),
-      makeNavLink('Značky', '/ponuka#znacky'),
       makeNavLink('Tím', '/ponuka#tim'),
       makeNavLink('Kontakt', '/ponuka#kontakt'),
       makeNavLink('Zmeniť značku', '/vyber-znacky.html?choose=1', 'nav-brand'),
@@ -385,6 +371,43 @@
     if (!link) return;
     hydrateMailLink(link);
   });
+
+  // Plávajúce „Nastavenia cookies“ jemne schováme tak, aby nekolidovalo
+  // s CTA testovacej jazdy. Na mobile sa po existujúcom/novom súhlase
+  // automaticky odsunie; na desktope zmizne po otvorení nastavení.
+  function dismissCookieLauncher(delay = 0) {
+    window.setTimeout(() => {
+      const launcher = document.getElementById('ppCookieOpenSettings');
+      if (!launcher || launcher.classList.contains('is-dismissed')) return;
+      launcher.classList.add('is-dismissing');
+      window.setTimeout(() => launcher.classList.add('is-dismissed'), 230);
+    }, delay);
+  }
+
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest('button');
+    if (!button) return;
+
+    if (button.id === 'ppCookieOpenSettings') {
+      dismissCookieLauncher();
+      return;
+    }
+
+    if (window.matchMedia('(max-width: 680px)').matches &&
+        button.matches('[data-cookie-save], [data-cookie-accept-all], [data-cookie-reject]')) {
+      // Cookie modul najprv zobrazí launcher; potom ho necháme plynulo zmiznúť.
+      dismissCookieLauncher(70);
+    }
+  }, true);
+
+  if (window.matchMedia('(max-width: 680px)').matches) {
+    // Ak už bol súhlas uložený z predchádzajúcej návštevy, cookie modul launcher
+    // po inicializácii zobrazí automaticky. Krátke oneskorenie zachová jemnú animáciu.
+    window.setTimeout(() => {
+      const launcher = document.getElementById('ppCookieOpenSettings');
+      if (launcher?.classList.contains('is-visible')) dismissCookieLauncher();
+    }, 320);
+  }
 
   // Promo + formulár testovacej jazdy iba na stránkach s financovaním.
   if (document.getElementById('financovanie') && !document.querySelector('script[data-testdrive-promo-script]')) {

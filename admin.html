@@ -12,6 +12,7 @@
   gtag('config', 'G-D1M84JBWQG');
 </script>
 
+  <script src="js/vehicle-data.js"></script>
   <script>
     (async () => {
       const r = await fetch('/api/auth-check');
@@ -822,7 +823,6 @@
             </svg>
             <span class="pp-check__text">Archív</span>
           </label>
-          <button class="btnx" id="ordersReloadBtn" type="button">Načítať</button>
         </div>
       </div>
 
@@ -864,6 +864,7 @@
       : location.origin;
 
     const apiUrl = (path) => `${API_BASE}${path}`;
+    const vehicleData = window.ppVehicleData;
 
     const normalizeRevision = (value) => String(value || '')
       .trim()
@@ -905,6 +906,140 @@
     const galeriaInput = document.getElementById('galeriaInput');
     const titulkaPreview = document.getElementById('titulkaPreview');
     const galeriaPreview = document.getElementById('galeriaPreview');
+    let galleryItems = [];
+    let galleryItemSequence = 0;
+    let draggedGalleryItemId = '';
+
+    function nextGalleryItemId() {
+      galleryItemSequence += 1;
+      return `gallery-item-${galleryItemSequence}`;
+    }
+
+    function galleryUrlItem(url) {
+      return {
+        id: nextGalleryItemId(),
+        url: String(url || '').trim(),
+        file: null,
+        previewUrl: '',
+      };
+    }
+
+    function galleryFileItem(file) {
+      return {
+        id: nextGalleryItemId(),
+        url: '',
+        file,
+        previewUrl: URL.createObjectURL(file),
+      };
+    }
+
+    function releaseGalleryItem(item) {
+      if (item?.previewUrl) URL.revokeObjectURL(item.previewUrl);
+    }
+
+    function replaceGalleryItems(nextItems) {
+      galleryItems.forEach(item => {
+        if (!nextItems.includes(item)) releaseGalleryItem(item);
+      });
+      galleryItems = nextItems;
+      renderGalleryState();
+    }
+
+    function clearGalleryDropState() {
+      galeriaPreview?.querySelectorAll('.gallery-sort-item').forEach(item => {
+        item.classList.remove('is-dragging', 'is-drop-before', 'is-drop-after');
+      });
+    }
+
+    function renderGalleryState() {
+      if (titulkaPreview) {
+        titulkaPreview.innerHTML = '';
+        const primary = galleryItems[0];
+        if (primary) {
+          const img = document.createElement('img');
+          img.src = primary.previewUrl || primary.url;
+          img.alt = 'Titulná fotka';
+          titulkaPreview.appendChild(img);
+        } else {
+          titulkaPreview.innerHTML = '<small class="hint">Titulná fotka pre ponuku áut</small>';
+        }
+      }
+
+      if (!galeriaPreview) return;
+      galeriaPreview.innerHTML = '';
+      galeriaPreview.classList.toggle('gallery-sort-list', galleryItems.length > 0);
+
+      if (!galleryItems.length) {
+        galeriaPreview.innerHTML = '<small class="hint">Prvá fotka bude titulná</small>';
+        return;
+      }
+
+      galleryItems.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'gallery-sort-item';
+        card.dataset.galleryId = item.id;
+        card.draggable = true;
+
+        const img = document.createElement('img');
+        img.src = item.previewUrl || item.url;
+        img.alt = item.file?.name || `Fotka ${index + 1}`;
+        img.draggable = false;
+        card.appendChild(img);
+
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'gallery-sort-remove';
+        remove.dataset.galleryRemove = item.id;
+        remove.textContent = '×';
+        remove.draggable = false;
+        const removeLabel = index === 0
+          ? `Odstrániť titulnú fotku ${index + 1}`
+          : `Odstrániť fotku ${index + 1}`;
+        remove.title = removeLabel;
+        remove.setAttribute('aria-label', removeLabel);
+        card.appendChild(remove);
+
+        const handle = document.createElement('span');
+        handle.className = 'gallery-sort-handle';
+        handle.textContent = '↕';
+        handle.title = 'Potiahnutím zmeňte poradie';
+        handle.setAttribute('aria-hidden', 'true');
+        card.appendChild(handle);
+
+        const order = document.createElement('span');
+        order.className = 'gallery-sort-order';
+        order.textContent = String(index + 1);
+        card.appendChild(order);
+
+        if (index === 0) {
+          card.classList.add('is-primary');
+          const badge = document.createElement('span');
+          badge.className = 'gallery-sort-primary';
+          badge.textContent = 'Titulná';
+          card.appendChild(badge);
+        }
+
+        galeriaPreview.appendChild(card);
+      });
+    }
+
+    function setGalleryFromCar(car) {
+      replaceGalleryItems(vehicleData.vehicleImages(car).map(galleryUrlItem));
+    }
+
+    function moveGalleryItem(sourceId, targetId, placeAfter) {
+      const fromIndex = galleryItems.findIndex(item => item.id === sourceId);
+      const targetIndex = galleryItems.findIndex(item => item.id === targetId);
+      if (fromIndex < 0 || targetIndex < 0 || fromIndex === targetIndex) return;
+
+      const next = [...galleryItems];
+      const [moved] = next.splice(fromIndex, 1);
+      let insertAt = targetIndex + (placeAfter ? 1 : 0);
+      if (fromIndex < insertAt) insertAt -= 1;
+      next.splice(insertAt, 0, moved);
+      galleryItems = next;
+      renderGalleryState();
+    }
 
     const parseEuroAmount = (value) => {
       if (typeof value === 'number') {
@@ -1105,25 +1240,95 @@
       updateBulkActionUI();
     });
 
-    // náhľad titulky
+    // Samostatná titulka nahradí prvú položku jednotnej galérie.
     titulkaInput?.addEventListener('change', () => {
-      const f = titulkaInput.files?.[0];
-      if (!f) return;
-      if (!validateImageSelection(titulkaInput, titulkaPreview, '<small class="hint">Titulná fotka pre ponuku áut</small>')) return;
-      titulkaPreview.innerHTML = `<img src="${URL.createObjectURL(f)}" alt="titulka">`;
+      const file = titulkaInput.files?.[0];
+      if (!file) return;
+      if (!validateImageSelection(titulkaInput, null, '')) {
+        renderGalleryState();
+        return;
+      }
+
+      const next = [...galleryItems];
+      const primary = galleryFileItem(file);
+      if (next.length) {
+        releaseGalleryItem(next[0]);
+        next[0] = primary;
+      } else {
+        next.push(primary);
+      }
+      galleryItems = next;
+      titulkaInput.value = '';
+      renderGalleryState();
     });
 
-    // náhľad galérie
+    // Nové súbory sa pridajú k existujúcim URL a dajú sa spolu zoradiť.
     galeriaInput?.addEventListener('change', () => {
-      if (!validateImageSelection(galeriaInput, galeriaPreview, '<small class="hint">Prvá fotka bude titulná</small>')) return;
-      galeriaPreview.innerHTML = '';
-      [...(galeriaInput.files || [])].forEach(f => {
-        const img = document.createElement('img');
-        img.src = URL.createObjectURL(f);
-        img.style.maxWidth = '120px';
-        img.style.margin = '4px';
-        galeriaPreview.appendChild(img);
-      });
+      if (!validateImageSelection(galeriaInput, null, '')) {
+        renderGalleryState();
+        return;
+      }
+      const files = [...(galeriaInput.files || [])];
+      if (!files.length) return;
+      galleryItems = [...galleryItems, ...files.map(galleryFileItem)];
+      galeriaInput.value = '';
+      renderGalleryState();
+    });
+
+    galeriaPreview?.addEventListener('click', event => {
+      const remove = event.target.closest('.gallery-sort-remove');
+      if (!remove) return;
+
+      event.preventDefault();
+      const itemId = remove.dataset.galleryRemove || '';
+      if (!itemId) return;
+
+      draggedGalleryItemId = '';
+      replaceGalleryItems(galleryItems.filter(item => item.id !== itemId));
+    });
+
+    galeriaPreview?.addEventListener('dragstart', event => {
+      if (event.target.closest('.gallery-sort-remove')) {
+        event.preventDefault();
+        return;
+      }
+      const item = event.target.closest('.gallery-sort-item');
+      if (!item) return;
+      draggedGalleryItemId = item.dataset.galleryId || '';
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', draggedGalleryItemId);
+      requestAnimationFrame(() => item.classList.add('is-dragging'));
+    });
+
+    galeriaPreview?.addEventListener('dragover', event => {
+      const target = event.target.closest('.gallery-sort-item');
+      if (!target || !draggedGalleryItemId || target.dataset.galleryId === draggedGalleryItemId) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'move';
+      clearGalleryDropState();
+      const rect = target.getBoundingClientRect();
+      const placeAfter = event.clientX > rect.left + (rect.width / 2);
+      target.classList.add(placeAfter ? 'is-drop-after' : 'is-drop-before');
+      galeriaPreview.querySelector(`[data-gallery-id="${draggedGalleryItemId}"]`)?.classList.add('is-dragging');
+    });
+
+    galeriaPreview?.addEventListener('drop', event => {
+      const target = event.target.closest('.gallery-sort-item');
+      if (!target || !draggedGalleryItemId) return;
+      event.preventDefault();
+      const rect = target.getBoundingClientRect();
+      moveGalleryItem(
+        draggedGalleryItemId,
+        target.dataset.galleryId || '',
+        event.clientX > rect.left + (rect.width / 2)
+      );
+      draggedGalleryItemId = '';
+      clearGalleryDropState();
+    });
+
+    galeriaPreview?.addEventListener('dragend', () => {
+      draggedGalleryItemId = '';
+      clearGalleryDropState();
     });
 
     
@@ -1174,7 +1379,7 @@ const ADMIN_BRANDS = {
 const CHOICE_DEFAULTS = {
   znacka: Object.values(ADMIN_BRANDS).map(brand => brand.label),
   model: [],
-  palivo: ['Benzín', 'Diesel', 'Hybrid', 'Plug-in hybrid', 'MHEV', 'Elektromotor'],
+  palivo: ['Benzín', 'Diesel', 'Hybrid', 'HEV', 'Plug-in hybrid', 'MHEV', 'Elektromotor'],
   typ_prevodovky: ['AT', 'MT', 'CVT', 'DCT', 'DSG'],
   vybava_paket: ['Comfort', 'Style', 'Premium', 'Limited', 'Adventure', 'Sport'],
   karoseria: ['SUV', 'Crossover', 'Hatchback', 'Sedan', 'Kombi', 'Coupé', 'Cabrio', 'Pick-up', 'MPV'],
@@ -1219,7 +1424,9 @@ function renderChoiceField(name) {
 
   const settings = CHOICE_SETTINGS[name] || {};
   const values = choiceOptions.get(name) || [];
-  const selected = String(input.value || '').trim();
+  const selectedValues = name === 'palivo'
+    ? vehicleData.toChoiceList(input.value)
+    : [String(input.value || '').trim()].filter(Boolean);
   buttons.innerHTML = '';
 
   const addButton = (label, value, extraClass = '') => {
@@ -1228,10 +1435,21 @@ function renderChoiceField(name) {
     button.className = `choice-option ${extraClass}`.trim();
     button.textContent = label;
     button.dataset.choiceValue = value;
-    const isSelected = selected.toLocaleLowerCase('sk') === value.toLocaleLowerCase('sk');
+    const isSelected = selectedValues.some(selected => (
+      selected.toLocaleLowerCase('sk') === value.toLocaleLowerCase('sk')
+    ));
     button.classList.toggle('is-selected', isSelected);
     button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
-    button.addEventListener('click', () => setChoiceValue(name, value, { emit: true }));
+    button.addEventListener('click', () => {
+      if (name !== 'palivo') {
+        setChoiceValue(name, value, { emit: true });
+        return;
+      }
+      const next = isSelected
+        ? selectedValues.filter(selected => selected.toLocaleLowerCase('sk') !== value.toLocaleLowerCase('sk'))
+        : [...selectedValues, value];
+      setChoiceValue(name, next, { emit: true });
+    });
     buttons.appendChild(button);
   };
 
@@ -1252,7 +1470,7 @@ function renderChoiceField(name) {
     customButton.textContent = 'Iné…';
     customButton.addEventListener('click', () => {
       const label = field.querySelector('.choice-label')?.textContent || name;
-      const customValue = window.prompt(`Zadaj vlastnú hodnotu pre „${label}“:`, selected);
+      const customValue = window.prompt(`Zadaj vlastnú hodnotu pre „${label}“:`, selectedValues.join(' + '));
       if (customValue === null || !customValue.trim()) return;
       setChoiceOptions(name, [...values, customValue]);
       setChoiceValue(name, customValue, { emit: true });
@@ -1263,10 +1481,12 @@ function renderChoiceField(name) {
 
 function setChoiceOptions(name, values) {
   const input = form.elements[name];
-  const selected = String(input?.value || '').trim();
+  const selected = name === 'palivo'
+    ? vehicleData.toChoiceList(input?.value)
+    : [String(input?.value || '').trim()].filter(Boolean);
   const nextValues = uniqueChoiceValues([
     ...(values || []),
-    ...(selected ? [selected] : []),
+    ...selected,
   ]);
   choiceOptions.set(name, nextValues);
   renderChoiceField(name);
@@ -1276,8 +1496,22 @@ function setChoiceValue(name, value, { emit = false } = {}) {
   const input = form.elements[name];
   if (!input) return;
 
-  const clean = String(value ?? '').trim();
   const values = choiceOptions.get(name) || [];
+  if (name === 'palivo') {
+    const selected = vehicleData.toChoiceList(value).map(item => (
+      values.find(option => option.toLocaleLowerCase('sk') === item.toLocaleLowerCase('sk')) || item
+    ));
+    choiceOptions.set(name, uniqueChoiceValues([...values, ...selected]));
+    input.value = selected.join(' + ');
+    renderChoiceField(name);
+    if (emit) {
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    return;
+  }
+
+  const clean = String(value ?? '').trim();
   const canonical = values.find(option => option.toLocaleLowerCase('sk') === clean.toLocaleLowerCase('sk')) || clean;
   const previous = String(input.value || '').trim();
 
@@ -1318,7 +1552,7 @@ function refreshChoiceOptionsFromCars() {
 
   cars.forEach(car => {
     const parsedGearbox = parseLegacyPrevodovka(car?.prevodovka || '');
-    fromCars.palivo.push(car?.palivo);
+    fromCars.palivo.push(...vehicleData.fuelValues(car));
     fromCars.typ_prevodovky.push(car?.typ_prevodovky || parsedGearbox.typ);
     fromCars.vybava_paket.push(car?.vybava_paket || parsedGearbox.paket);
     fromCars.karoseria.push(car?.karoseria);
@@ -1558,8 +1792,7 @@ function hideProgress() {
     }
 
     function resetImagePreviews() {
-      if (titulkaPreview) titulkaPreview.innerHTML = '<small class="hint">Titulná fotka pre ponuku áut</small>';
-      if (galeriaPreview) galeriaPreview.innerHTML = '<small class="hint">Prvá fotka bude titulná</small>';
+      replaceGalleryItems([]);
       if (titulkaInput) titulkaInput.value = '';
       if (galeriaInput) galeriaInput.value = '';
     }
@@ -1715,7 +1948,7 @@ function hideProgress() {
             c.znacka,
             c.model,
             c.rok,
-            c.palivo,
+            vehicleData.formatFuel(c),
             displayPrevodovkaForSearch(c),
             (c.tagy || []).join(' ')
           ].join(' ').toLowerCase();
@@ -1867,12 +2100,8 @@ function hideProgress() {
   applyVybavaBrandFilter(brandForSave);
 
   // Progress počítame až po validácii (aby sa overlay nezasekol na returne)
-  const willUploadTitle = !!(titulkaInput?.files && titulkaInput.files[0]);
-  const willUploadGallery = !!(galeriaInput?.files && galeriaInput.files.length > 0);
-
-  const uploadsCount =
-    (willUploadTitle ? 1 : 0) +
-    (willUploadGallery ? galeriaInput.files.length : 0);
+  const galleryForSave = [...galleryItems];
+  const uploadsCount = galleryForSave.filter(item => item.file).length;
 
   const totalSteps = uploadsCount + 1; // +1 = uloženie záznamu
   showProgress(totalSteps, uploadsCount ? 'Nahrávam fotky…' : 'Ukladám…');
@@ -1890,46 +2119,14 @@ function hideProgress() {
     const baseId = `${znackaVal}-${modelVal}-${rokRaw}`;
     const carId = currentId || generateUniqueCarId(baseId, usedIds);
 
-    // ====== obrázky (titulka + galéria) ======
-    const existing = isEdit ? (cars[idx] || {}) : {};
-
-    // TITULKA: ak nevyberieš novú, zober existujúcu (alebo fallback starý obrazok)
-    let titulkaUrl = String(existing.titulka || existing.obrazok || '').trim();
-    if (titulkaInput.files && titulkaInput.files[0]) {
-      titulkaUrl = await uploadImage(titulkaInput.files[0]);
-      stepProgress('Nahraná titulná fotka');
+    // Jediný zoradený stav obsahuje existujúce URL aj nové File objekty.
+    const galeria = [];
+    for (const item of galleryForSave) {
+      const url = item.file ? await uploadImage(item.file) : String(item.url || '').trim();
+      if (url) galeria.push(url);
+      if (item.file) stepProgress('Nahrávam fotky…');
     }
-
-    // GALÉRIA: ak vyberieš nové fotky, nahradí sa galéria; ak nie, ponechá sa existujúca
-    let galeria =
-  Array.isArray(existing.galeria) ? [...existing.galeria] :
-  (Array.isArray(existing.obrazky) ? [...existing.obrazky] : []);
-    const hasNewGallery = galeriaInput.files && galeriaInput.files.length > 0;
-
-    if (hasNewGallery) {
-      const uploadedGallery = [];
-
-      for (const f of galeriaInput.files) {
-        const url = await uploadImage(f);
-        if (url) uploadedGallery.push(url);
-        stepProgress('Nahrávam fotky…');
-      }
-
-      // Ak nie je vybraná samostatná titulka, prvá nová fotka z galérie sa stane titulnou.
-      if (!willUploadTitle && uploadedGallery.length) {
-        titulkaUrl = uploadedGallery[0];
-      }
-
-      galeria = willUploadTitle && titulkaUrl
-        ? [titulkaUrl, ...uploadedGallery]
-        : uploadedGallery;
-    } else {
-      // bez novej galérie len zabezpeč, že prvá fotka je titulka
-      if (titulkaUrl) {
-        if (galeria.length === 0) galeria = [titulkaUrl];
-        else galeria[0] = titulkaUrl;
-      }
-    }
+    const titulkaUrl = galeria[0] || '';
 
     const typPrevodovky = normalizeGearbox(form.elements['typ_prevodovky']?.value || '');
 const vybavaPaket = (form.elements['vybava_paket']?.value || '').trim();
@@ -1942,11 +2139,12 @@ const base = isEdit ? (cars[idx] || {}) : {};
 
 
     const data = {
+      ...base,
       id: carId,
       znacka: znackaVal,
       model: modelVal,
       rok: Number(rokRaw),
-      palivo: (form.elements['palivo']?.value || '').trim(),
+      palivo: vehicleData.fuelValues(form.elements['palivo']?.value),
       typ_prevodovky: typPrevodovky,
   vybava_paket: vybavaPaket,
     prevodovka: prevodovkaLegacy,
@@ -2180,29 +2378,7 @@ setChoiceValue('vybava_paket', a.vybava_paket || parsed.paket || '');
       skryte.checked = isHidden(a);
       toggleZlavaUI();
 
-      // PREVIEW titulky
-      const t = (a.titulka || a.obrazok || '').trim();
-      titulkaPreview.innerHTML = t
-        ? `<img src="${t}" alt="titulka">`
-        : `<small class="hint">Titulná fotka nie je nastavená</small>`;
-
-      // PREVIEW galérie
-const gallery =
-  (Array.isArray(a.galeria) && a.galeria.length) ? a.galeria :
-  (Array.isArray(a.obrazky) && a.obrazky.length) ? a.obrazky : [];
-
-if (gallery.length) {
-  galeriaPreview.innerHTML = '';
-  gallery.forEach(src => {
-    const img = document.createElement('img');
-    img.src = src;
-    img.style.maxWidth = '120px';
-    img.style.margin = '4px';
-    galeriaPreview.appendChild(img);
-  });
-} else {
-  galeriaPreview.innerHTML = '<small class="hint">Galéria je prázdna</small>';
-}
+      setGalleryFromCar(a);
 
       setFormMode('edit', index);
     }

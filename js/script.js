@@ -598,14 +598,7 @@ function vykresliKartu(auto) {
   const detailHref = window.ppI18n ? window.ppI18n.withLang(rawDetailHref) : rawDetailHref;
 
   // --- titulka / galéria fallback ---
-  const coverImg =
-    String(
-      auto.titulka ||
-        (Array.isArray(auto.galeria) && auto.galeria.length ? auto.galeria[0] : '') ||
-        (Array.isArray(auto.obrazky) && auto.obrazky.length ? auto.obrazky[0] : '') ||
-        auto.obrazok ||
-        ''
-    ).trim();
+  const coverImg = window.ppVehicleData.primaryImage(auto);
 
   // --- cena ---
   const formattedOldPrice = formatEuroAmount(auto.stara_cena);
@@ -630,7 +623,7 @@ function vykresliKartu(auto) {
     (typ ? typ : '-');
 
   // --- ostatné hodnoty ---
-  const palivo = String(auto.palivo || '-').trim() || '-';
+  const palivo = window.ppVehicleData.formatFuel(auto) || '-';
   const objem = formatObjem(auto.objem) || '-';
 
   const znackaUpper = String(auto.znacka || '').toUpperCase().trim();
@@ -806,8 +799,12 @@ function initFiltery() {
  */
 async function nacitajAuta() {
   try {
-    const response = await fetch('/api/cars', { cache: 'no-store' });
-    const auta = await response.json();
+    const auta = window.ppPublicData
+      ? await window.ppPublicData.getCars()
+      : await fetch('/api/cars').then(response => {
+          if (!response.ok) throw new Error(`GET /api/cars failed: ${response.status}`);
+          return response.json();
+        });
 
     // Stabilné ID pre linky na detail (aj pre staré záznamy bez `id`)
     // stabilné (a nekolidujúce) ID pre detail stránky
@@ -1048,10 +1045,12 @@ function initModelsStrip() {
     track.innerHTML = `<div class="promo2-empty">Načítavam…</div>`;
 
     try {
-      const r = await fetch(apiUrl('/api/promos'), { cache: 'no-store' });
-      if (!r.ok) throw new Error(`GET /api/promos failed: ${r.status}`);
-
-      const items = await r.json().catch(() => []);
+      const items = window.ppPublicData
+        ? await window.ppPublicData.getPromos()
+        : await fetch(apiUrl('/api/public-promos')).then(async r => {
+            if (!r.ok) throw new Error(`GET /api/public-promos failed: ${r.status}`);
+            return r.json().catch(() => []);
+          });
       const promos = Array.isArray(items) ? items : [];
 
       // nič nie je → empty

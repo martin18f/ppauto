@@ -114,15 +114,15 @@ html {
   display:flex;
   flex: 1;                    /* zaberie priestor medzi logom a CTA */
   align-items:center;
-  justify-content: center; /* ROZTIAHNE položky po šírke */
-  gap: 0;                     /* medzery rieši space-evenly */
+  justify-content: space-evenly;
+  gap: clamp(4px, .5vw, 8px);
   padding: 0 14px;            /* jemný vnútorný okraj */
   min-width: 0;
   flex-wrap: nowrap;
 }
     
 .nav-links a{
-  padding: 12px 18px;         /* väčší “klik” priestor */
+  padding: 12px clamp(10px, 1vw, 16px);
   border-radius: 10px;
   white-space: nowrap;        /* aby sa “Testovacia jazda” nelámala */
 }
@@ -3197,10 +3197,6 @@ body.promo2-lock{ overflow: hidden; }
     overflow-x: hidden;
   }
 
-  .global-cursorfx {
-    display: none !important;
-  }
-
   .section-head,
   .filter-row,
   .finance-pills,
@@ -3347,4 +3343,101 @@ body.promo2-lock{ overflow: hidden; }
     position: relative;
     z-index: 100002;
   }
+}
+
+
+/* === objednavky-test continuation: floating controls === */
+/* Cookie launcher: fixed prvok neovplyvňuje layout, preto ho vieme animovať bez display:none. */
+.pp-cookie-open-settings {
+  display: inline-flex !important;
+  left: auto !important;
+  right: 18px !important;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(6px) scale(.985);
+  transition:
+    opacity .22s ease,
+    transform .22s ease,
+    visibility 0s linear .22s !important;
+}
+
+.pp-cookie-open-settings.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+  transition-delay: 0s !important;
+}
+
+.pp-cookie-open-settings.is-visible.is-dismissing {
+  opacity: 0;
+  visibility: visible;
+  pointer-events: none;
+  transform: translateY(5px) scale(.98);
+}
+
+/* Testovacia jazda: CTA zostáva vždy viditeľná/klikateľná a je naľavo. */
+.pp-testdrive-fab {
+  left: 18px !important;
+  right: auto !important;
+}
+
+.pp-testdrive-fab.is-section-visible {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: none !important;
+}
+
+@media (max-width: 680px) {
+  .pp-cookie-open-settings {
+    left: auto !important;
+    right: 10px !important;
+    bottom: 10px !important;
+  }
+
+  .pp-testdrive-fab {
+    left: 12px !important;
+    right: auto !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-cookie-open-settings {
+    transition: none !important;
+  }
+}
+
+
+/* V4: mobile promo navigation = šípka – Aktuálna ponuka – šípka. */
+@media (max-width: 680px) {
+  .promo2-head {
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100%;
+  }
+  .promo2-head > div:first-child {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+    text-align: center;
+  }
+  .promo2-title {
+    margin: 0;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .promo2-controls { display: contents !important; }
+  .promo2-btn[data-promo2="prev"] { grid-column: 1; grid-row: 1; justify-self: center; }
+  .promo2-btn[data-promo2="next"] { grid-column: 3; grid-row: 1; justify-self: center; }
+}
+
+/* Po otvorení cookie nastavení launcher jemne zmizne a do reloadu sa nevráti. */
+.pp-cookie-open-settings.is-dismissed {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transform: translateY(6px) scale(.98) !important;
 }

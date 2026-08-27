@@ -4,9 +4,13 @@
 
 .orders-admin-grid{
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 430px);
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
   align-items: start;
+}
+
+.orders-list{
+  min-width: 0;
 }
 
 .orders-toolbar{
@@ -52,12 +56,6 @@
   font-weight: 700;
 }
 
-.order-cell-sub{
-  margin-top: 2px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
 .order-source-pill,
 .order-status-pill{
   display: inline-flex;
@@ -88,8 +86,9 @@
 }
 
 .order-admin-detail{
-  position: sticky;
-  top: 20px;
+  position: static;
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: 16px;
@@ -123,7 +122,7 @@
 
 .order-detail-grid{
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: 8px;
 }
 
@@ -194,16 +193,6 @@
   margin-top: 10px;
 }
 
-@media (max-width: 1180px){
-  .orders-admin-grid{
-    grid-template-columns: 1fr;
-  }
-
-  .order-admin-detail{
-    position: static;
-  }
-}
-
 @media (max-width: 760px){
   .orders-toolbar{
     grid-template-columns: 1fr;
@@ -211,5 +200,62 @@
 
   .orders-actions{
     justify-content: flex-start;
+  }
+
+  .order-detail-grid{
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+
+/* V4: viditeľné potvrdenie uloženia objednávky. */
+.order-save-toast {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(360px, calc(100vw - 28px));
+  padding: 11px 14px;
+  border: 1px solid rgba(34,197,94,.38);
+  border-radius: 12px;
+  background: rgba(10,18,15,.95);
+  color: #dffbea;
+  box-shadow: 0 18px 50px rgba(0,0,0,.38);
+  backdrop-filter: blur(14px);
+  font-size: 13px;
+  font-weight: 750;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(8px) scale(.985);
+  transition: opacity .2s ease, transform .2s ease, visibility 0s linear .2s;
+}
+.order-save-toast::before {
+  content: "✓";
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(34,197,94,.16);
+  color: #64e991;
+  font-size: 13px;
+}
+.order-save-toast.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  transition-delay: 0s;
+}
+@media (max-width: 680px) {
+  .order-save-toast {
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    max-width: none;
+    justify-content: center;
   }
 }

@@ -2,6 +2,7 @@
 
 const SOURCES = new Set(['stock', 'custom']);
 const STATUSES = new Set(['new', 'contacted', 'reserved', 'in_progress', 'ordered', 'closed', 'cancelled']);
+const STORE_VERSION = 1;
 
 function encodeGithubPath(path) {
   return String(path)
@@ -46,6 +47,24 @@ function cleanArray(value, maxItems = 80) {
   return out;
 }
 
+function cleanChoiceArray(value, maxItems = 20) {
+  const source = [];
+
+  function append(raw) {
+    if (Array.isArray(raw)) {
+      raw.forEach(append);
+      return;
+    }
+    if (raw === null || raw === undefined) return;
+    clean(raw, 1500).split(/\s*(?:\+|\/|,|;|\u2022|\u00b7)\s*/u).forEach(part => {
+      if (part) source.push(part);
+    });
+  }
+
+  append(value);
+  return cleanArray(source, maxItems);
+}
+
 function numberOrNull(value) {
   if (value === null || value === undefined || value === '') return null;
   const number = Number(value);
@@ -78,7 +97,7 @@ function normalizeVehicle(vehicle = {}) {
     znacka: clean(v.znacka, 80),
     model: clean(v.model, 120),
     rok: numberOrNull(v.rok),
-    palivo: clean(v.palivo, 100),
+    palivo: cleanChoiceArray(v.palivo, 20).join(' '),
     typ_prevodovky: clean(v.typ_prevodovky, 50),
     prevodovka: clean(v.prevodovka, 140),
     vybava_paket: cleanArray(v.vybava_paket, 20).join(' + '),
@@ -107,16 +126,22 @@ function normalizeCustomer(customer = {}) {
   };
 }
 
-function normalizePreferences(preferences = {}) {
+function normalizePreferences(preferences = {}, previousPreferences = null) {
   const p = preferences && typeof preferences === 'object' && !Array.isArray(preferences) ? preferences : {};
-  return {
-    budget: clean(p.budget, 120),
+  const normalized = {
     deliveryTime: clean(p.deliveryTime, 120),
     financing: clean(p.financing, 120),
     tradeIn: clean(p.tradeIn, 120),
     extraEquipmentNote: cleanMultiline(p.extraEquipmentNote, 1500),
     note: cleanMultiline(p.note, 3000),
   };
+
+  // Rozpočet sa už pri nových objednávkach neukladá. Pri aktualizácii
+  // staršieho záznamu ho však ponecháme, aby zmena stavu nezmazala legacy dáta.
+  const legacyBudget = clean(previousPreferences?.budget, 120);
+  if (legacyBudget) normalized.budget = legacyBudget;
+
+  return normalized;
 }
 
 function normalizeIncomingOrder(body, previous = null) {
@@ -132,7 +157,7 @@ function normalizeIncomingOrder(body, previous = null) {
     archived: body?.archived === undefined ? !!previous?.archived : bool(body.archived),
     customer: normalizeCustomer(body?.customer ?? previous?.customer),
     vehicle: normalizeVehicle(body?.vehicle ?? previous?.vehicle),
-    preferences: normalizePreferences(body?.preferences ?? previous?.preferences),
+    preferences: normalizePreferences(body?.preferences ?? previous?.preferences, previous?.preferences),
     consent: body?.consent === undefined ? !!previous?.consent : bool(body.consent),
     page: clean(body?.page ?? previous?.page, 700),
     userAgent: clean(body?.userAgent ?? previous?.userAgent, 500),
@@ -174,7 +199,50 @@ function validateOrder(order) {
 
 function isConflict(error) {
   const text = String(error?.message || error || '');
-  return text.includes('409') || text.includes('Conflict');
+  return error?.status === 409 || text.includes('409') || text.includes('Conflict');
+}
+
+function positiveSafeInteger(value) {
+  const number = Number(value);
+  return Number.isSafeInteger(number) && number > 0 ? number : null;
+}
+
+function normalizeStore(payload) {
+  let orders;
+  let requestedNext = null;
+
+  if (Array.isArray(payload)) {
+    orders = payload;
+  } else if (payload && typeof payload === 'object' && Array.isArray(payload.orders)) {
+    orders = payload.orders;
+    requestedNext = positiveSafeInteger(payload.nextOrderNumber);
+  } else {
+    throw new Error('Súbor objednávok nemá podporovaný formát');
+  }
+
+  let highestOrderNumber = 0;
+  for (const order of orders) {
+    const number = positiveSafeInteger(order?.orderNumber);
+    if (number && number > highestOrderNumber) highestOrderNumber = number;
+  }
+
+  if (highestOrderNumber >= Number.MAX_SAFE_INTEGER) {
+    throw new Error('Číselný rad objednávok dosiahol maximálnu hodnotu');
+  }
+
+  return {
+    version: STORE_VERSION,
+    nextOrderNumber: Math.max(requestedNext || 1, highestOrderNumber + 1),
+    orders: [...orders],
+  };
+}
+
+function emptyStore() {
+  return {
+    version: STORE_VERSION,
+    nextOrderNumber: 1,
+    orders: [],
+  };
 }
 
 function findOrderIndex(orders, query = {}) {
@@ -215,7 +283,7 @@ export default async function handler(req, res) {
       const response = await fetch(url, { headers, cache: 'no-store' });
 
       if (response.status === 404) {
-        return { orders: [], sha: null };
+        return { store: emptyStore(), sha: null };
       }
       if (!response.ok) {
         const text = await response.text().catch(() => '');
@@ -228,18 +296,18 @@ export default async function handler(req, res) {
       }
 
       const decoded = Buffer.from(payload.content || '', 'base64').toString('utf8');
-      const orders = JSON.parse(decoded || '[]');
-      if (!Array.isArray(orders)) throw new Error('Súbor objednávok nie je pole []');
-      return { orders, sha: payload.sha || null };
+      const parsed = JSON.parse(decoded || '[]');
+      const store = normalizeStore(parsed);
+      return { store, sha: payload.sha || null };
     }
 
-    async function putFile(orders, sha, message) {
+    async function putFile(store, sha, message) {
       const safePath = encodeGithubPath(ORDERS_PATH);
       const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${safePath}`;
       const body = {
         message,
         branch: GITHUB_BRANCH,
-        content: Buffer.from(JSON.stringify(orders, null, 2) + '\n', 'utf8').toString('base64'),
+        content: Buffer.from(JSON.stringify(store, null, 2) + '\n', 'utf8').toString('base64'),
       };
       if (sha) body.sha = sha;
 
@@ -251,7 +319,9 @@ export default async function handler(req, res) {
 
       if (!response.ok) {
         const text = await response.text().catch(() => '');
-        throw new Error(`PUT orders failed: ${response.status} ${response.statusText} ${text.slice(0, 300)}`);
+        const error = new Error(`PUT orders failed: ${response.status} ${response.statusText} ${text.slice(0, 300)}`);
+        error.status = response.status;
+        throw error;
       }
 
       return response.json();
@@ -259,8 +329,12 @@ export default async function handler(req, res) {
 
     async function mutate(mutator, message) {
       for (let attempt = 1; attempt <= 3; attempt += 1) {
-        const { orders, sha } = await getFile();
-        const next = mutator([...orders]);
+        const { store, sha } = await getFile();
+        const draft = {
+          ...store,
+          orders: [...store.orders],
+        };
+        const next = normalizeStore(mutator(draft));
         try {
           await putFile(next, sha, message);
           return next;
@@ -274,9 +348,14 @@ export default async function handler(req, res) {
 
     if (req.method === 'GET') {
       if (!admin) return res.status(401).json({ error: 'Unauthorized' });
+      const archivedOnly = String(req.query?.archived_only || '') === '1';
       const includeArchived = String(req.query?.include_archived || '') === '1';
-      const { orders } = await getFile();
-      const visible = includeArchived ? orders : orders.filter(order => order && order.archived !== true);
+      const { store } = await getFile();
+      const visible = archivedOnly
+        ? store.orders.filter(order => order && order.archived === true)
+        : includeArchived
+          ? store.orders
+          : store.orders.filter(order => order && order.archived !== true);
       return res.status(200).json(visible);
     }
 
@@ -300,15 +379,27 @@ export default async function handler(req, res) {
       order.history = [{ status: 'new', at: order.createdAt, note: 'Vytvorené cez web' }];
       validateOrder(order);
 
-      await mutate(orders => [order, ...orders], `chore(orders): add ${order.source} order ${order.id}`);
-      return res.status(201).json({ ok: true, id: order.id });
+      let createdOrder = order;
+      await mutate(store => {
+        const number = positiveSafeInteger(store.nextOrderNumber);
+        if (!number || number >= Number.MAX_SAFE_INTEGER) {
+          throw new Error('Nie je možné prideliť ďalšie číslo objednávky');
+        }
+
+        createdOrder = { ...order, orderNumber: number };
+        store.nextOrderNumber = number + 1;
+        store.orders.unshift(createdOrder);
+        return store;
+      }, `chore(orders): add ${order.source} order ${order.id}`);
+      return res.status(201).json({ ok: true, id: createdOrder.id, orderNumber: createdOrder.orderNumber });
     }
 
     if (req.method === 'PUT') {
       if (!admin) return res.status(401).json({ error: 'Unauthorized' });
 
       let updatedOrder = null;
-      await mutate(orders => {
+      await mutate(store => {
+        const orders = store.orders;
         const index = findOrderIndex(orders, req.query);
         if (index < 0 || index >= orders.length) {
           const error = new Error('Objednávka nebola nájdená.');
@@ -332,7 +423,7 @@ export default async function handler(req, res) {
 
         updatedOrder = next;
         orders[index] = next;
-        return orders;
+        return store;
       }, `chore(orders): update order ${clean(req.query?.id || req.query?.index, 120)}`);
 
       return res.status(200).json({ ok: true, order: updatedOrder });
@@ -341,7 +432,8 @@ export default async function handler(req, res) {
     if (req.method === 'DELETE') {
       if (!admin) return res.status(401).json({ error: 'Unauthorized' });
 
-      await mutate(orders => {
+      await mutate(store => {
+        const orders = store.orders;
         const index = findOrderIndex(orders, req.query);
         if (index < 0 || index >= orders.length) {
           const error = new Error('Objednávka nebola nájdená.');
@@ -349,7 +441,7 @@ export default async function handler(req, res) {
           throw error;
         }
         orders.splice(index, 1);
-        return orders;
+        return store;
       }, `chore(orders): delete order ${clean(req.query?.id || req.query?.index, 120)}`);
 
       return res.status(200).json({ ok: true });
