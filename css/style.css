@@ -1324,8 +1324,6 @@ html[data-brand] #ponuka .filter-row .tag[data-filter="chery"] {
   max-width: 220px;
   text-decoration: none;
   user-select: none;
-  background: var(--ms-surface);
-  border: 1px solid var(--ms-border);
   border-radius: var(--ms-radius);
   padding: 14px 14px 12px;
 
