@@ -192,12 +192,11 @@
     const brandTitle = header.querySelector('.brand h1');
     if (brandTitle) brandTitle.textContent = 'PP AUTO s.r.o.';
 
-    // Zachovávame existujúce EN/login uzly, aby sa nestratili event listenery i18n.
+    // Zachovávame jazykový uzol, aby sa nestratil i18n listener.
     const navLang = navLinks.querySelector('.nav-lang') || makeNavLink('EN', '#', 'nav-lang');
     navLang.setAttribute('data-lang-switch', '');
     navLang.setAttribute('aria-label', 'Switch to English');
 
-    const navLogin = navLinks.querySelector('.nav-login') || makeNavLink('Prihlásiť sa', 'https://ppauto.sk/admin.html', 'nav-login');
 
     const primaryLinks = [
       makeNavLink('Ponuka áut', '/ponuka#ponuka'),
@@ -208,29 +207,16 @@
       makeNavLink('Zmeniť značku', '/vyber-znacky.html?choose=1', 'nav-brand'),
     ];
 
-    navLinks.replaceChildren(...primaryLinks, navLang, navLogin);
+    navLinks.replaceChildren(...primaryLinks, navLang);
 
     const brandSwitch = navCta.querySelector('.brand-switch');
     const langSwitch = navCta.querySelector('.lang-switch');
     const loginLink = navCta.querySelector('.login-link');
     const mobileToggle = navCta.querySelector('#mobileMenuToggle, .mobile-toggle');
 
-    if (loginLink) {
-      loginLink.className = 'user-profile login-link';
-      loginLink.setAttribute('aria-label', 'Prihlásiť sa');
-      loginLink.innerHTML = `
-        <div class="user-profile-inner">
-          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <g data-name="Layer 2" id="Layer_2">
-              <path d="m15.626 11.769a6 6 0 1 0 -7.252 0 9.008 9.008 0 0 0 -5.374 8.231 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 9.008 9.008 0 0 0 -5.374-8.231zm-7.626-4.769a4 4 0 1 1 4 4 4 4 0 0 1 -4-4zm10 14h-12a1 1 0 0 1 -1-1 7 7 0 0 1 14 0 1 1 0 0 1 -1 1z"></path>
-            </g>
-          </svg>
-          <span>Prihlásiť sa</span>
-        </div>
-      `;
-    }
+    if (loginLink) loginLink.remove();
 
-    const orderedCta = [brandSwitch, langSwitch, loginLink, mobileToggle].filter(Boolean);
+    const orderedCta = [brandSwitch, langSwitch, mobileToggle].filter(Boolean);
     navCta.replaceChildren(...orderedCta);
   }
 

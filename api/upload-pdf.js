@@ -1,3 +1,4 @@
+import { hasAdminSession } from '../lib/admin-session.js';
 // /api/upload-pdf
 function encodeGithubPath(path) {
   return String(path)
@@ -11,7 +12,7 @@ const MAX_PDF_BYTES = 3 * 1024 * 1024;
 const MAX_BASE64_CHARS = Math.ceil(MAX_PDF_BYTES / 3) * 4 + 16;
 
 function isAdmin(req) {
-  return /(?:^|;\s*)admin=1(?:;|$)/.test(String(req.headers.cookie || ''));
+  return hasAdminSession(req);
 }
 
 function safeFilename(filename) {

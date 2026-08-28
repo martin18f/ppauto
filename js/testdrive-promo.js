@@ -240,14 +240,7 @@
 
   async function ensureTestDriveLogic() {
     try {
-      if (!window.emailjs) {
-        await loadScriptOnce(
-          'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js',
-          'data-pp-emailjs'
-        );
-      }
-
-      if (!document.querySelector('script[data-pp-testdrive-logic]')) {
+if (!document.querySelector('script[data-pp-testdrive-logic]')) {
         await loadScriptOnce('/js/testdrive.js', 'data-pp-testdrive-logic');
       }
     } catch (error) {

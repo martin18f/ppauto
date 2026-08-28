@@ -279,34 +279,11 @@
         <a href="#kontakt">Kontakt</a>
         <a class="nav-brand" href="vyber-znacky.html?choose=1">Zmeniť značku</a>
         <a class="nav-lang" href="#" data-lang-switch aria-label="Switch to English">EN</a>
-        <a class="nav-login" href="https://ppauto.sk/admin.html">Prihlásiť sa</a>
       </nav>
       <div class="nav-cta">
   <a class="btn brand-switch" href="vyber-znacky.html?choose=1" aria-label="Zmeniť značku">Zmeniť značku</a>
 
   <a class="btn lang-switch" href="#" data-lang-switch aria-label="Switch to English">EN</a>
-
-  <a
-    href="https://ppauto.sk/admin.html"
-    aria-label="Prihlásiť sa"
-    class="user-profile login-link"
-  >
-    <div class="user-profile-inner">
-      <svg
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-      >
-        <g data-name="Layer 2" id="Layer_2">
-          <path
-            d="m15.626 11.769a6 6 0 1 0 -7.252 0 9.008 9.008 0 0 0 -5.374 8.231 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 9.008 9.008 0 0 0 -5.374-8.231zm-7.626-4.769a4 4 0 1 1 4 4 4 4 0 0 1 -4-4zm10 14h-12a1 1 0 0 1 -1-1 7 7 0 0 1 14 0 1 1 0 0 1 -1 1z"
-          ></path>
-        </g>
-      </svg>
-
-      <span>Prihlásiť sa</span>
-    </div>
-  </a>
 
   <button
   id="mobileMenuToggle"
@@ -334,9 +311,17 @@
           </div>
           <h2>Nové aj skladové vozidlá.<br>Férové podmienky.<br> Servis, ktorému veríte.</h2>
           <p>Od roku 2011 prinášame v Poprade profesionálne služby pri predaji a servise vozidiel. Pomôžeme s&nbsp;výberom, financovaním aj poistením a postaráme sa o&nbsp;vaše auto počas celej životnosti.</p>
+          <a class="hero-online-order" href="#objednat-auto" aria-label="Začať nezáväznú online objednávkovú požiadavku">
+            <span class="hero-online-order__badge">NOVÉ</span>
+            <span class="hero-online-order__copy">
+              <strong>Auto si už objednáte aj online</strong>
+              <small>Vyberte skladové vozidlo alebo vlastnú konfiguráciu. Ide o nezáväznú objednávkovú požiadavku.</small>
+            </span>
+            <span class="hero-online-order__action">Začať <span aria-hidden="true">→</span></span>
+          </a>
           <div class="quick">
             <a class="btn primary" href="#ponuka">Pozrieť skladové vozidlá</a>
-            <a class="btn" href="#objednat-auto">Objednať auto</a>
+            <a class="btn" href="#objednat-auto">Objednať auto online</a>
             <a class="btn" href="#servis">Objednať servis</a>
             <a class="btn" href="#znacky" data-brand-text="heroBrandsCta">Značky a demo jazdy</a>
           </div>
@@ -454,10 +439,6 @@
     <form
       id="vehicleOrderForm"
       class="order-form"
-      data-emailjs-service="service_i68hphn"
-      data-emailjs-admin-template="template_order_admin"
-      data-emailjs-customer-template="template_order_customer"
-      data-emailjs-admin-email="martinsulak18@gmail.com"
     >
       <input class="pp-hidden-field" type="text" name="website" tabindex="-1" autocomplete="off">
 
@@ -1322,60 +1303,7 @@
     </div>
   </form>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>
-(() => {
-  emailjs.init({
-    publicKey: '_7xrgG31AEooF0kcr'
-  });
 
-  const form = document.getElementById('contactForm');
-  if (!form) return;
-
-  const btn = document.getElementById('contactSubmit');
-  const status = document.getElementById('contactStatus');
-
-  form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  const fd = new FormData(form);
-  const payload = Object.fromEntries(fd.entries());
-
-  // honeypot
-  if (payload.website) {
-    if (status) status.textContent = 'Ďakujeme! Správa bola odoslaná.';
-    form.reset();
-    return;
-  }
-
-  btn.disabled = true;
-  const oldText = btn.textContent;
-  btn.textContent = 'Odosielam…';
-  if (status) status.textContent = '';
-
-  try {
-    const contactNumber = Math.floor(Math.random() * 100000);
-
-    await emailjs.sendForm(
-      'service_i68hphn',
-      'template_contact', // sem daj reálne Template ID z EmailJS
-      form,
-      { contact_number: contactNumber }
-    );
-
-    if (status) status.textContent = 'Ďakujeme! Správa bola odoslaná.';
-    form.reset();
-  } catch (err) {
-    console.error(err);
-    if (status) status.textContent = 'Nepodarilo sa odoslať. Skúste neskôr.';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = oldText;
-  }
-});
-})();
-
-</script>
 
 
         </div>
@@ -1721,6 +1649,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 <script src="js/vehicle-data.js" defer></script>
 <script src="js/public-data.js" defer></script>
+<script src="/js/form-api.js" defer></script>
 <script src="js/script.js" defer></script>
 <script src="js/orders.js" defer></script>
 

@@ -1,3 +1,4 @@
+import { hasAdminSession } from '../lib/admin-session.js';
 // /api/upload-image
 function encodeGithubPath(path) {
   return String(path)
@@ -17,7 +18,7 @@ function getFileExtension(filename) {
 }
 
 export default async function handler(req, res) {
-  if (!req.headers.cookie?.includes("admin=1")) {
+  if (!hasAdminSession(req)) {
     return res.status(401).end();
   }
 

@@ -73,6 +73,7 @@
 
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="/css/auto.css" />
+  <link rel="stylesheet" href="/css/auto-order.css" />
   <script src="/js/contact-links.js" defer></script>
   <script src="/js/i18n.js" defer></script>
 </head>
@@ -94,14 +95,12 @@
   <a href="/ponuka#kontakt">Kontakt</a>
   <a class="nav-brand" href="/vyber-znacky.html?choose=1">Zmeniť značku</a>
   <a class="nav-lang" data-lang-switch aria-label="Switch to English" href="#">EN</a>
-  <a class="nav-login" href="https://ppauto.sk/admin.html">Prihlásiť sa</a>
 </nav>
 
       <div class="nav-cta">
   
 
   <a class="btn brand-switch" href="/vyber-znacky.html?choose=1" aria-label="Zmeniť značku">Zmeniť značku</a>
-  <a class="btn login-link" href="https://ppauto.sk/admin.html" aria-label="Prihlásiť sa">Prihlásiť sa</a>
   <a class="btn lang-switch" href="#" data-lang-switch aria-label="Switch to English">EN</a>
 
   
@@ -234,16 +233,10 @@
   });
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>
-  (function () {
-    try { emailjs.init({ publicKey: '_7xrgG31AEooF0kcr' }); } catch (e) {}
-  })();
-</script>
-
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="/js/form-api.js"></script>
   <script src="/js/vehicle-data.js"></script>
   <script src="/js/public-data.js"></script>
   <script src="/js/auto.js"></script>
+  <script src="/js/auto-order.js"></script>
 </body>
 </html>

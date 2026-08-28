@@ -1,0 +1,30 @@
+.car-order-main-cta{
+  background:linear-gradient(135deg,#fff,#dbeafe);
+  color:#0b1220 !important;
+  border-color:rgba(255,255,255,.78) !important;
+  box-shadow:0 12px 30px rgba(59,130,246,.18);
+  font-weight:900;
+}
+.car-order-card{
+  overflow:hidden;
+  border-color:rgba(96,165,250,.34);
+  box-shadow:0 18px 50px rgba(0,0,0,.2);
+}
+.car-order-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  background:radial-gradient(520px 150px at 0 0,rgba(59,130,246,.2),transparent 70%);
+}
+.car-order-kicker{display:block;margin-bottom:4px;color:#93c5fd;font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+.car-order-pill{display:inline-flex;align-items:center;min-height:28px;padding:5px 10px;border-radius:999px;background:#dbeafe;color:#102044;font-size:11px;font-weight:900}
+.car-order-selected{display:grid;gap:5px;margin-bottom:18px;padding:14px 15px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.035)}
+.car-order-selected strong{font-size:17px;color:#fff}.car-order-selected span{color:#aeb9ca;line-height:1.5}
+.car-order-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.car-order-field{display:grid;gap:7px}.car-order-field label{font-size:12px;font-weight:800;color:#c7d0dd}
+.car-order-field input,.car-order-field select,.car-order-field textarea{width:100%;min-height:46px;padding:11px 12px;border:1px solid rgba(255,255,255,.11);border-radius:12px;background:rgba(10,14,20,.72);color:#eef3fa;font:inherit;outline:none}
+.car-order-field textarea{min-height:100px;resize:vertical}.car-order-field input:focus,.car-order-field select:focus,.car-order-field textarea:focus{border-color:rgba(147,197,253,.72);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+.car-order-wide{grid-column:1/-1}.car-order-consent{display:flex;align-items:flex-start;gap:10px;color:#c4cedb;font-size:12px;line-height:1.5}.car-order-consent input{margin-top:3px}.car-order-consent a{text-decoration:underline}
+.car-order-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:18px}.car-order-actions .hint{min-height:20px;color:#cbd5e1}
+@media(max-width:720px){.car-order-grid{grid-template-columns:1fr}.car-order-wide{grid-column:auto}.car-order-head{align-items:flex-start}.car-order-actions{display:grid}.car-order-actions .car-btn{width:100%;text-align:center}}

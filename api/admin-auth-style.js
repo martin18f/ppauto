@@ -1,6 +1,4 @@
-function hasAdminSession(req) {
-  return /(?:^|;\s*)admin=1(?:;|$)/.test(String(req.headers.cookie || ''));
-}
+import { hasAdminSession } from '../lib/admin-session.js';
 
 export default function handler(req, res) {
   res.setHeader('Content-Type', 'text/css; charset=utf-8');
@@ -13,12 +11,10 @@ export default function handler(req, res) {
     return res.status(405).send('');
   }
 
-  // Fail closed: bez platnej admin session sa premenná nenastaví na visible.
-  // admin-options.css používa fallback `hidden`, takže obsah adminu sa nikdy
-  // nevykreslí ešte pred dokončením auth kontroly.
-  const css = hasAdminSession(req)
+  let visible = false;
+  try { visible = hasAdminSession(req); } catch (error) { console.error(error?.code || error?.message || error); }
+  const css = visible
     ? ':root{--admin-auth-visibility:visible;}\n'
     : ':root{--admin-auth-visibility:hidden;}\n';
-
   return res.status(200).send(css);
 }

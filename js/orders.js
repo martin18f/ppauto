@@ -8,10 +8,8 @@
   const apiUrl = path => `${API_BASE}${path}`;
   const vehicleData = window.ppVehicleData;
 
-  const EMAILJS_SERVICE_ID = String(form.dataset.emailjsService || 'service_i68hphn').trim();
-  const EMAILJS_TEMPLATE_ADMIN = String(form.dataset.emailjsAdminTemplate || 'template_order_admin').trim();
-  const EMAILJS_TEMPLATE_CUSTOMER = String(form.dataset.emailjsCustomerTemplate || 'template_order_customer').trim();
-  const EMAILJS_ADMIN_EMAIL = String(form.dataset.emailjsAdminEmail || 'martinsulak18@gmail.com').trim();
+  let formStartedAt = Date.now();
+  let pendingSubmissionId = '';
 
   const DEFAULT_OPTIONS = {
     fields: {
@@ -532,8 +530,8 @@
   function fixedChoiceValues(name) {
     const definition = FIXED_CHOICE_FIELDS[name];
     if (!definition) return [];
-    // Verejný formulár používa celý zoznam možností spravovaný v admin paneli,
-    // nie iba hodnoty, ktoré sú aktuálne aplikované na konkrétnom aute/modeli.
+    // Verejný formulár používa celý zoznam dostupných možností, nie iba
+    // hodnoty, ktoré sú aktuálne aplikované na konkrétnom aute alebo modeli.
     return unique(state.options.fields[definition.global]);
   }
 
@@ -569,12 +567,12 @@
       return;
     }
     if (!model) {
-      els.configModeNote.textContent = 'Vyberte model z ponuky admin panela.';
+      els.configModeNote.textContent = 'Vyberte model z ponuky dostupných modelov.';
       return;
     }
 
     els.configModeNote.classList.add('is-known');
-    els.configModeNote.textContent = 'Vyberte si z kompletných možností admin panela. Každý parameter okrem značky a modelu môžete prepísať vlastnou hodnotou.';
+    els.configModeNote.textContent = 'Vyberte si z dostupných možností konfigurácie. Každý parameter okrem značky a modelu môžete prepísať vlastnou hodnotou.';
   }
 
   function setKnownChoice(name, values, placeholder, { reset = false, autoSelectSingle = false } = {}) {
@@ -679,7 +677,7 @@
     }
 
     if (resetModel) clearChoice('model');
-    populateSelect(modelControl?.select, models, models.length ? 'Vyberte model' : 'Pre túto značku nie sú v admin paneli modely');
+    populateSelect(modelControl?.select, models, models.length ? 'Vyberte model' : 'Pre túto značku momentálne nie sú dostupné modely');
     if (modelControl?.select) modelControl.select.disabled = models.length === 0;
     updateModelDependentFields({ resetFields: true });
   }
@@ -889,140 +887,15 @@
     els.status.textContent = message || '';
   }
 
-  function emailText(value, fallback = '—') {
-    const normalized = Array.isArray(value)
-      ? value.map(clean).filter(Boolean).join(' • ')
-      : clean(value);
-    return normalized || fallback;
+  function makeSubmissionId() {
+    if (typeof crypto?.randomUUID === 'function') return crypto.randomUUID();
+    return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
 
-  function buildOrderEmailParams(payload, result) {
-    const vehicle = payload.vehicle || {};
-    const customer = payload.customer || {};
-    const preferences = payload.preferences || {};
-    const orderNumber = Number(result?.orderNumber);
-    const reference = Number.isSafeInteger(orderNumber) && orderNumber > 0
-      ? `#${orderNumber}`
-      : emailText(result?.reference, '—');
-
-    return {
-      order_id: emailText(result?.id),
-      order_number: Number.isSafeInteger(orderNumber) && orderNumber > 0 ? String(orderNumber) : '—',
-      order_reference: reference,
-      order_created_at: new Date().toLocaleString('sk-SK'),
-      admin_email: EMAILJS_ADMIN_EMAIL,
-      source: emailText(payload.source),
-      source_label: payload.source === 'stock' ? 'Skladové vozidlo' : 'Individuálna objednávka',
-      customer_name: emailText(customer.name),
-      customer_email: emailText(customer.email),
-      customer_phone: emailText(customer.phone),
-      customer_company: emailText(customer.company),
-      preferred_contact: emailText(customer.preferredContact),
-      vehicle_stock_id: emailText(vehicle.stockCarId),
-      vehicle_stock_url: emailText(vehicle.stockUrl),
-      vehicle_brand: emailText(vehicle.znacka),
-      vehicle_model: emailText(vehicle.model),
-      vehicle_year: emailText(vehicle.rok),
-      vehicle_fuel: emailText(vehicleData.formatFuel(vehicle.palivo)),
-      vehicle_transmission: emailText(vehicle.typ_prevodovky),
-      vehicle_legacy_transmission: emailText(vehicle.prevodovka),
-      vehicle_package: emailText(vehicle.vybava_paket),
-      vehicle_body: emailText(vehicle.karoseria),
-      vehicle_drive: emailText(vehicle.pohon),
-      vehicle_color: emailText(vehicle.farba),
-      vehicle_metallic: vehicle.metaliza ? 'Áno' : 'Nie',
-      vehicle_engine_volume: emailText(vehicle.objem),
-      vehicle_power: emailText(vehicle.vykon),
-      vehicle_mileage: emailText(vehicle.najazdene),
-      vehicle_old_price: emailText(vehicle.stara_cena),
-      vehicle_new_price: emailText(vehicle.nova_cena),
-      vehicle_image: emailText(vehicle.obrazok),
-      vehicle_equipment: emailText(vehicle.vybava),
-      delivery_time: emailText(preferences.deliveryTime),
-      financing: emailText(preferences.financing),
-      trade_in: emailText(preferences.tradeIn),
-      extra_equipment: emailText(preferences.extraEquipmentNote),
-      note: emailText(preferences.note),
-      page_url: emailText(payload.page),
-      consent: payload.consent ? 'Áno' : 'Nie',
-    };
-  }
-
-  function orderEmailSummary(params) {
-    return [
-      `Objednávka: ${params.order_reference}`,
-      `Typ: ${params.source_label}`,
-      `Zákazník: ${params.customer_name}`,
-      `E-mail: ${params.customer_email}`,
-      `Telefón: ${params.customer_phone}`,
-      `Vozidlo: ${params.vehicle_brand} ${params.vehicle_model}`,
-      `Rok: ${params.vehicle_year}`,
-      `Palivo: ${params.vehicle_fuel}`,
-      `Prevodovka: ${params.vehicle_transmission}`,
-      `Výbava/paket: ${params.vehicle_package}`,
-      `Karoséria: ${params.vehicle_body}`,
-      `Pohon: ${params.vehicle_drive}`,
-      `Objem: ${params.vehicle_engine_volume}`,
-      `Výkon: ${params.vehicle_power}`,
-      `Farba: ${params.vehicle_color}`,
-      `Poznámka: ${params.note}`,
-    ].join('\n');
-  }
-
-  async function sendOrderEmails(params) {
-    if (typeof window.emailjs?.send !== 'function') {
-      console.error('EmailJS nie je dostupný; objednávka už bola uložená.');
-      return { adminSent: false, customerSent: false };
-    }
-
-    const summary = orderEmailSummary(params);
-    const adminParams = {
-      ...params,
-      to_email: EMAILJS_ADMIN_EMAIL,
-      recipient_email: EMAILJS_ADMIN_EMAIL,
-      to_name: 'PP AUTO',
-      recipient_name: 'PP AUTO',
-      reply_to: params.customer_email,
-      email_role: 'admin',
-      message: summary,
-    };
-    const customerParams = {
-      ...params,
-      to_email: params.customer_email,
-      recipient_email: params.customer_email,
-      to_name: params.customer_name,
-      recipient_name: params.customer_name,
-      reply_to: EMAILJS_ADMIN_EMAIL,
-      email_role: 'customer',
-      message: summary,
-    };
-
-    const results = await Promise.allSettled([
-      Promise.resolve().then(() => window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN, adminParams)),
-      Promise.resolve().then(() => window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CUSTOMER, customerParams)),
-    ]);
-    results.forEach((result, index) => {
-      if (result.status === 'rejected') {
-        console.error(`EmailJS ${index === 0 ? 'admin' : 'customer'} notification failed`, result.reason);
-      }
-    });
-    return {
-      adminSent: results[0].status === 'fulfilled',
-      customerSent: results[1].status === 'fulfilled',
-    };
-  }
-
-  function emailDeliveryMessage(result) {
-    if (result.adminSent && result.customerSent) {
-      return ' Potvrdenie sme poslali na váš e-mail.';
-    }
-    if (result.customerSent) {
-      return ' Potvrdenie sme poslali na váš e-mail, interné e-mailové upozornenie sa však nepodarilo odoslať.';
-    }
-    if (result.adminSent) {
-      return ' Predajcu sme upozornili, potvrdenie na váš e-mail sa však nepodarilo odoslať.';
-    }
-    return ' Objednávka bola uložená, ale e-mailové upozornenia sa nepodarilo odoslať.';
+  function confirmationMessage(notifications) {
+    return notifications?.customerSent
+      ? ' Potvrdenie sme poslali na váš e-mail.'
+      : ' Vašu požiadavku sme zaevidovali a budeme vás kontaktovať.';
   }
 
   function validateBeforeSubmit(source) {
@@ -1058,6 +931,8 @@
     const stockCar = stockCarById(state.selectedStockId);
     const payload = {
       source,
+      submissionId: pendingSubmissionId || makeSubmissionId(),
+      formStartedAt,
       website: clean(form.elements.website?.value),
       customer: customerPayload(),
       vehicle: source === 'stock' ? stockSnapshot(stockCar) : customVehiclePayload(),
@@ -1065,6 +940,7 @@
       consent: !!form.elements.orderPrivacy?.checked,
       page: location.href,
     };
+    pendingSubmissionId = payload.submissionId;
 
     if (els.submit) {
       els.submit.disabled = true;
@@ -1079,28 +955,21 @@
         body: JSON.stringify(payload),
       });
       const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result?.error || `Odoslanie zlyhalo (${response.status})`);
+      if (!response.ok) throw new Error('Objednávku sa nepodarilo odoslať. Skúste to, prosím, znova.');
 
       const createdId = clean(result.id);
       const orderNumber = Number(result.orderNumber);
       const isStoredOrder = !!createdId && Number.isSafeInteger(orderNumber) && orderNumber > 0;
-      let emailResult = { adminSent: false, customerSent: false };
-      if (isStoredOrder) {
-        try {
-          emailResult = await sendOrderEmails(buildOrderEmailParams(payload, result));
-        } catch (emailError) {
-          console.error('EmailJS notifications failed after the order was stored', emailError);
-        }
-      }
-
       form.reset();
+      pendingSubmissionId = '';
+      formStartedAt = Date.now();
       state.selectedStockId = '';
       document.getElementById('orderSourceStock').checked = true;
       updateMode();
       populateStaticFields({ resetCustom: true });
       renderStockList();
       const publicNumber = isStoredOrder ? `#${orderNumber}` : '';
-      const emailMessage = isStoredOrder ? emailDeliveryMessage(emailResult) : '';
+      const emailMessage = isStoredOrder ? confirmationMessage(result.notifications) : '';
       setStatus(
         publicNumber
           ? `Ďakujeme, objednávka bola odoslaná. Číslo objednávky: ${publicNumber}.${emailMessage}`
@@ -1143,7 +1012,7 @@
       } else {
         console.warn('Order options fallback', optionsResult.reason);
         state.options = mergeOptions({});
-        loadIssues.push('možnosti parametrov z admin panela');
+        loadIssues.push('možnosti konfigurácie');
       }
 
       populateStaticFields();

@@ -1,3 +1,4 @@
+import { hasAdminSession } from '../lib/admin-session.js';
 // /api/options
 
 function encodeGithubPath(path) {
@@ -9,8 +10,7 @@ function encodeGithubPath(path) {
 }
 
 function getIsAdmin(req) {
-  const cookie = String(req.headers.cookie || '');
-  return /(?:^|;\s*)admin=1(?:;|$)/.test(cookie);
+  return hasAdminSession(req);
 }
 
 function isConflictError(err) {

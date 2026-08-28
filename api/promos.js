@@ -1,3 +1,4 @@
+import { hasAdminSession } from '../lib/admin-session.js';
 // /api/promos
 
 function encodeGithubPath(path) {
@@ -19,9 +20,7 @@ function normalizePromoBrand(b) {
 }
 
 function getIsAdmin(req) {
-  const c = String(req.headers.cookie || "");
-  // presnejšie než includes("admin=1")
-  return /(?:^|;\s*)admin=1(?:;|$)/.test(c);
+  return hasAdminSession(req);
 }
 
 export default async function handler(req, res) {
@@ -124,19 +123,6 @@ export default async function handler(req, res) {
       }
     }
 
-    // DEBUG: /api/promos?debug=1
-    if (req.method === "GET" && (req.query?.debug || "") === "1") {
-      const safePath = encodeGithubPath(PROMOS_PATH);
-      const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${safePath}?ref=${encodeURIComponent(
-        GITHUB_BRANCH
-      )}`;
-      const r = await fetch(url, { headers });
-      const text = await r.text();
-      return res.status(200).json({
-        env: { GITHUB_REPO, GITHUB_BRANCH, PROMOS_PATH, hasToken: !!GITHUB_TOKEN },
-        github: { url, status: r.status, statusText: r.statusText, bodyPreview: text.slice(0, 300) },
-      });
-    }
 
     // GET (public) / GET include_hidden=1 (admin only)
     if (req.method === "GET") {

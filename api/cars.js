@@ -1,3 +1,4 @@
+import { hasAdminSession } from '../lib/admin-session.js';
 // /api/cars
 function parseEuroAmount(value) {
   if (typeof value === "number") {
@@ -171,7 +172,7 @@ function setRevisionHeaders(res, revision) {
 }
 
 export default async function handler(req, res) {
-  const isAdmin = !!req.headers.cookie?.includes("admin=1");
+  const isAdmin = hasAdminSession(req);
 
   try {
     const { GITHUB_TOKEN, GITHUB_REPO, GITHUB_BRANCH, DATA_PATH } = process.env;
@@ -265,30 +266,6 @@ export default async function handler(req, res) {
       return payload;
     }
 
-    // DEBUG režim – otvor si /api/cars?debug=1 na produkcii a uvidíš presne,
-    // aký repo/branch/path používa produkcia (bez tokenu).
-    if (req.method === "GET" && (req.query?.debug || "") === "1") {
-      const safePath = encodeGithubPath(DATA_PATH);
-      const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${safePath}?ref=${encodeURIComponent(
-        GITHUB_BRANCH
-      )}`;
-      const r = await fetch(url, { headers });
-      const text = await r.text();
-      return res.status(200).json({
-        env: {
-          GITHUB_REPO,
-          GITHUB_BRANCH,
-          DATA_PATH,
-          hasToken: !!GITHUB_TOKEN,
-        },
-        github: {
-          url,
-          status: r.status,
-          statusText: r.statusText,
-          bodyPreview: text.slice(0, 300),
-        },
-      });
-    }
 
     // GET (public) / GET include_hidden=1 (admin only)
     if (req.method === "GET") {
