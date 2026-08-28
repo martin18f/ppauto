@@ -2,6 +2,6 @@
 .env.local
 .env
 .env*
-node_modules
+node_modules/
 guide.txt
-cennik
+cennik/
