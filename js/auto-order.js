@@ -103,7 +103,7 @@
               </label>
             </div>
             <div class="car-order-actions">
-              <button class="btn car-btn car-btn-primary" id="carOrderSubmit" type="submit">Odoslať objednávku</button>
+              <button class="btn primary car-btn" id="carOrderSubmit" type="submit">Odoslať objednávku</button>
               <small id="carOrderStatus" class="hint" role="status" aria-live="polite"></small>
             </div>
           </form>
@@ -128,7 +128,7 @@
     else sections.appendChild(section);
 
     const button = document.createElement('a');
-    button.className = 'btn car-btn car-order-main-cta';
+    button.className = 'btn primary car-btn car-order-main-cta';
     button.href = '#car-order';
     button.textContent = 'Objednať toto auto';
     cta.insertBefore(button, cta.firstChild);
