@@ -4,6 +4,7 @@
 
 import crypto from 'node:crypto';
 import { hasAdminSession } from '../lib/admin-session.js';
+import { renderAdminRequestEmail, renderCustomerConfirmationEmail } from '../lib/email-templates.js';
 import { sendAdminMail, sendCustomerMail, smtpPublicStatus } from '../lib/mailer.js';
 
 const SOURCES = new Set(['stock', 'custom']);
@@ -552,68 +553,248 @@ function fakeSuccess(res) {
   return res.status(200).json({ ok: true });
 }
 
+function textBlock(title, lines) {
+  const visible = (Array.isArray(lines) ? lines : [])
+    .map(line => cleanMultiline(line, 30000))
+    .filter(Boolean);
+  return visible.length ? [title, ...visible].join('\n') : '';
+}
+
+function formatDateTime(value) {
+  const raw = clean(value, 120);
+  if (!raw) return '';
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return raw;
+  try {
+    return new Intl.DateTimeFormat('sk-SK', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+      timeZone: 'Europe/Bratislava',
+    }).format(parsed);
+  } catch {
+    return raw;
+  }
+}
+
+function formatDateOnly(value) {
+  const raw = clean(value, 80);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  const parsed = new Date(`${raw}T12:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) return raw;
+  try {
+    return new Intl.DateTimeFormat('sk-SK', {
+      dateStyle: 'long',
+      timeZone: 'UTC',
+    }).format(parsed);
+  } catch {
+    return raw;
+  }
+}
+
+function numberWithUnit(value, unit) {
+  if (value === null || value === undefined || value === '') return '';
+  const number = Number(value);
+  const formatted = Number.isFinite(number)
+    ? new Intl.NumberFormat('sk-SK', { maximumFractionDigits: 2 }).format(number)
+    : clean(value, 100);
+  return `${formatted} ${unit}`;
+}
+
+function vehicleTitle(vehicle = {}) {
+  return [clean(vehicle.znacka, 80), clean(vehicle.model, 120)].filter(Boolean).join(' ') || 'Vozidlo';
+}
+
+function publicVehicleUrl(value) {
+  const raw = clean(value, 700);
+  return raw.startsWith('/') ? `https://ppauto.sk${raw}` : raw;
+}
+
+function orderVehicleItems(order) {
+  const v = order.vehicle || {};
+  return [
+    { label: 'Vozidlo', value: vehicleTitle(v) },
+    { label: 'ID skladového vozidla', value: v.stockCarId },
+    { label: 'Detail vozidla', value: publicVehicleUrl(v.stockUrl) },
+    { label: 'Značka', value: v.znacka },
+    { label: 'Model', value: v.model },
+    { label: 'Rok', value: v.rok ?? '' },
+    { label: 'Palivo', value: v.palivo },
+    { label: 'Typ prevodovky', value: v.typ_prevodovky },
+    { label: 'Prevodovka – detail', value: v.prevodovka },
+    { label: 'Výbava / paket', value: v.vybava_paket },
+    { label: 'Karoséria', value: v.karoseria },
+    { label: 'Pohon', value: v.pohon },
+    { label: 'Farba', value: v.farba },
+    { label: 'Metalíza', value: v.metaliza ? 'Áno' : 'Nie' },
+    { label: 'Objem motora', value: numberWithUnit(v.objem, 'cm³') },
+    { label: 'Výkon', value: numberWithUnit(v.vykon, 'kW') },
+    { label: 'Najazdené', value: numberWithUnit(v.najazdene, 'km') },
+    { label: v.nova_cena ? 'Pôvodná cena' : 'Cena', value: v.stara_cena },
+    { label: 'Akciová cena', value: v.nova_cena },
+    { label: 'Obrázok', value: v.obrazok },
+  ];
+}
+
+function orderPreferenceItems(order) {
+  const p = order.preferences || {};
+  return [
+    { label: 'Preferovaný termín', value: p.deliveryTime },
+    { label: 'Financovanie', value: p.financing },
+    { label: 'Protiúčet', value: p.tradeIn },
+    { label: 'Rozpočet', value: p.budget },
+    { label: 'Ďalšia konfigurácia', value: p.extraEquipmentNote },
+    { label: 'Poznámka', value: p.note },
+  ];
+}
+
 function formatOrderText(order) {
   const v = order.vehicle || {};
   const c = order.customer || {};
-  const p = order.preferences || {};
+  const equipment = Array.isArray(v.vybava) ? v.vybava.filter(Boolean) : [];
+  const sourceLabel = order.source === 'stock' ? 'Skladové vozidlo' : 'Individuálna konfigurácia';
+  const vehicleLines = orderVehicleItems(order).map(item => item.value ? `${item.label}: ${item.value}` : '');
+  if (equipment.length) vehicleLines.push(`Kompletná výbava:\n${equipment.map(item => `- ${item}`).join('\n')}`);
+
   return [
-    `Nová online objednávková požiadavka #${order.orderNumber}`,
-    `Typ: ${order.source === 'stock' ? 'Skladové vozidlo' : 'Individuálna konfigurácia'}`,
-    '',
-    `Zákazník: ${c.name}`,
-    `E-mail: ${c.email}`,
-    `Telefón: ${c.phone}`,
-    c.company ? `Firma: ${c.company}` : '',
-    c.preferredContact ? `Preferovaný kontakt: ${c.preferredContact}` : '',
-    '',
-    `Vozidlo: ${v.znacka} ${v.model}`,
-    v.rok ? `Rok: ${v.rok}` : '',
-    v.palivo ? `Palivo: ${v.palivo}` : '',
-    v.typ_prevodovky ? `Prevodovka: ${v.typ_prevodovky}` : '',
-    v.vybava_paket ? `Výbava/paket: ${v.vybava_paket}` : '',
-    v.karoseria ? `Karoséria: ${v.karoseria}` : '',
-    v.pohon ? `Pohon: ${v.pohon}` : '',
-    v.objem !== null ? `Objem: ${v.objem} cm³` : '',
-    v.vykon !== null ? `Výkon: ${v.vykon} kW` : '',
-    v.farba ? `Farba: ${v.farba}${v.metaliza ? ' (metalíza)' : ''}` : '',
-    v.najazdene !== null ? `Najazdené: ${v.najazdene} km` : '',
-    v.nova_cena ? `Cena: ${v.nova_cena}` : v.stara_cena ? `Cena: ${v.stara_cena}` : '',
-    '',
-    p.deliveryTime ? `Preferovaný termín: ${p.deliveryTime}` : '',
-    p.financing ? `Financovanie: ${p.financing}` : '',
-    p.tradeIn ? `Protiúčet: ${p.tradeIn}` : '',
-    p.extraEquipmentNote ? `Ďalšia konfigurácia: ${p.extraEquipmentNote}` : '',
-    p.note ? `Poznámka: ${p.note}` : '',
-    '',
-    `Stránka: ${order.page || '—'}`,
-  ].filter(Boolean).join('\n');
+    textBlock(`Nová online objednávková požiadavka #${order.orderNumber}`, [
+      `Typ: ${sourceLabel}`,
+      formatDateTime(order.createdAt) ? `Prijaté: ${formatDateTime(order.createdAt)}` : '',
+    ]),
+    textBlock('Zákazník', [
+      `Meno: ${c.name}`,
+      `E-mail: ${c.email}`,
+      `Telefón: ${c.phone}`,
+      c.company ? `Firma: ${c.company}` : '',
+      c.preferredContact ? `Preferovaný kontakt: ${c.preferredContact}` : '',
+    ]),
+    textBlock('Vozidlo', vehicleLines),
+    textBlock('Preferencie zákazníka', orderPreferenceItems(order).map(item => (
+      item.value ? `${item.label}: ${item.value}` : ''
+    ))),
+    textBlock('Informácie o požiadavke', [
+      `Súhlas so spracovaním údajov: ${order.consent ? 'Áno' : 'Nie'}`,
+      `Stránka: ${order.page || '—'}`,
+    ]),
+  ].filter(Boolean).join('\n\n');
+}
+
+function orderAdminHtml(order) {
+  const c = order.customer || {};
+  const v = order.vehicle || {};
+  const equipment = Array.isArray(v.vybava) ? v.vybava.filter(Boolean) : [];
+  const sourceLabel = order.source === 'stock' ? 'Skladové vozidlo' : 'Individuálna konfigurácia';
+
+  return renderAdminRequestEmail({
+    preheader: `Nová online objednávka #${order.orderNumber} od ${c.name}.`,
+    typeLabel: 'Online objednávka',
+    title: 'Online objednávka vozidla',
+    reference: `Objednávka #${order.orderNumber}`,
+    intro: `${sourceLabel} · ${vehicleTitle(v)}`,
+    contacts: [
+      { label: 'Meno a priezvisko', value: c.name },
+      { label: 'E-mail', value: c.email },
+      { label: 'Telefón', value: c.phone },
+    ],
+    sections: [
+      {
+        title: 'Zákazník',
+        items: [
+          { label: 'Firma', value: c.company },
+          { label: 'Preferovaný kontakt', value: c.preferredContact },
+        ],
+      },
+      { title: 'Vozidlo', items: orderVehicleItems(order) },
+      {
+        title: 'Kompletná výbava vozidla',
+        items: [{ label: 'Položky výbavy', value: equipment.map(item => `• ${item}`).join('\n') }],
+      },
+      { title: 'Preferencie zákazníka', items: orderPreferenceItems(order) },
+      {
+        title: 'Informácie o požiadavke',
+        items: [
+          { label: 'Číslo', value: `#${order.orderNumber}` },
+          { label: 'Typ', value: sourceLabel },
+          { label: 'Prijaté', value: formatDateTime(order.createdAt) },
+          { label: 'Súhlas s údajmi', value: order.consent ? 'Áno' : 'Nie' },
+          { label: 'Zdrojová stránka', value: order.page || '—' },
+        ],
+      },
+    ],
+  });
+}
+
+function orderCustomerHtml(order) {
+  const v = order.vehicle || {};
+  const p = order.preferences || {};
+  const sourceLabel = order.source === 'stock' ? 'Skladové vozidlo' : 'Individuálna konfigurácia';
+
+  return renderCustomerConfirmationEmail({
+    preheader: `Potvrdenie online požiadavky #${order.orderNumber} – ${vehicleTitle(v)}.`,
+    typeLabel: 'Online objednávka',
+    title: 'Vašu požiadavku sme prijali',
+    greeting: `Dobrý deň, ${order.customer.name},`,
+    intro: 'Ďakujeme za váš záujem o vozidlo z ponuky PP AUTO. Nižšie nájdete súhrn prijatej požiadavky.',
+    reference: `Požiadavka #${order.orderNumber}`,
+    summaryLabel: 'Vybrané vozidlo',
+    summaryValue: vehicleTitle(v),
+    sections: [
+      {
+        title: 'Zhrnutie vozidla',
+        items: [
+          { label: 'Typ požiadavky', value: sourceLabel },
+          { label: 'Rok', value: v.rok ?? '' },
+          { label: 'Palivo', value: v.palivo },
+          { label: 'Prevodovka', value: v.typ_prevodovky || v.prevodovka },
+          { label: 'Výbava / paket', value: v.vybava_paket },
+          { label: 'Farba', value: v.farba ? `${v.farba}${v.metaliza ? ' · metalíza' : ''}` : '' },
+          { label: 'Cena', value: v.nova_cena || v.stara_cena },
+        ],
+      },
+      {
+        title: 'Vaše preferencie',
+        items: [
+          { label: 'Preferovaný termín', value: p.deliveryTime },
+          { label: 'Financovanie', value: p.financing },
+          { label: 'Protiúčet', value: p.tradeIn },
+          { label: 'Ďalšia konfigurácia', value: p.extraEquipmentNote },
+          { label: 'Poznámka', value: p.note },
+        ],
+      },
+    ],
+    nextStep: 'Náš predajca vás bude kontaktovať a potvrdí dostupnosť vozidla, aktuálnu cenu a ďalší postup.',
+    disclaimer: 'Požiadavka je nezáväzná a nepredstavuje uzatvorenie kúpnej zmluvy.',
+  });
 }
 
 async function sendOrderNotifications(order) {
   const reference = `#${order.orderNumber}`;
   const adminText = formatOrderText(order);
   const customerText = [
-    `Dobrý deň ${order.customer.name},`,
+    `Dobrý deň, ${order.customer.name},`,
     '',
     `ďakujeme za vašu online objednávkovú požiadavku ${reference}.`,
-    `Vozidlo: ${order.vehicle.znacka} ${order.vehicle.model}.`,
+    `Vozidlo: ${vehicleTitle(order.vehicle)}.`,
+    `Typ: ${order.source === 'stock' ? 'Skladové vozidlo' : 'Individuálna konfigurácia'}.`,
+    order.preferences?.deliveryTime ? `Preferovaný termín: ${order.preferences.deliveryTime}.` : '',
     '',
     'Požiadavka je nezáväzná. Náš predajca vás bude kontaktovať a potvrdí dostupnosť, cenu a ďalší postup.',
     '',
     'PP AUTO s.r.o.',
-  ].join('\n');
+  ].filter((line, index, lines) => line || (index > 0 && lines[index - 1])).join('\n');
 
   const [adminResult, customerResult] = await Promise.allSettled([
     sendAdminMail({
       kind: 'orders',
       subject: `Nová objednávka ${reference} – ${order.vehicle.znacka} ${order.vehicle.model}`,
       text: adminText,
+      htmlBody: orderAdminHtml(order),
       replyTo: order.customer.email,
     }),
     sendCustomerMail({
       to: order.customer.email,
       subject: `PP AUTO – potvrdenie požiadavky ${reference}`,
       text: customerText,
+      htmlBody: orderCustomerHtml(order),
     }),
   ]);
 
@@ -643,27 +824,185 @@ function formData(body) {
   };
 }
 
-function formMailText(type, data, page) {
-  const title = type === 'contact' ? 'Kontaktný formulár' : type === 'finance' ? 'Dopyt na financovanie' : 'Žiadosť o testovaciu jazdu';
+function formPresentation(type) {
+  if (type === 'contact') {
+    return {
+      label: 'kontaktný formulár',
+      typeLabel: 'Kontaktný formulár',
+      adminTitle: 'Kontaktný formulár',
+      customerTitle: 'Ďakujeme za vašu správu',
+      summaryLabel: 'Stav požiadavky',
+      summaryValue: 'Správa bola úspešne doručená',
+      nextStep: 'Našu odpoveď vám pošleme e-mailom alebo vás budeme kontaktovať telefonicky, ak ste uviedli telefónne číslo.',
+      disclaimer: 'Tento e-mail potvrdzuje prijatie správy odoslanej cez kontaktný formulár PP AUTO.',
+    };
+  }
+  if (type === 'finance') {
+    return {
+      label: 'financovanie',
+      typeLabel: 'Financovanie',
+      adminTitle: 'Dopyt na financovanie',
+      customerTitle: 'Dopyt na financovanie sme prijali',
+      summaryLabel: 'Typ požiadavky',
+      summaryValue: 'Financovanie vozidla',
+      nextStep: 'Náš predajca vás bude kontaktovať, doplní potrebné údaje a pripraví riešenie podľa vašich preferencií.',
+      disclaimer: 'Orientačná kalkulácia nie je záväznou ponukou financovania. Presné podmienky vám potvrdí predajca.',
+    };
+  }
+  return {
+    label: 'testovaciu jazdu',
+    typeLabel: 'Testovacia jazda',
+    adminTitle: 'Žiadosť o testovaciu jazdu',
+    customerTitle: 'Žiadosť o testovaciu jazdu sme prijali',
+    summaryLabel: 'Vybrané vozidlo',
+    summaryValue: '',
+    nextStep: 'Vybraný termín je predbežný. Náš predajca vás bude kontaktovať a dostupnosť vozidla aj presný čas jazdy potvrdí.',
+    disclaimer: 'Termín testovacej jazdy je platný až po potvrdení zo strany PP AUTO.',
+  };
+}
+
+function formVehicleTitle(data) {
+  return data.carTitle || [data.brand, data.model].filter(Boolean).join(' ');
+}
+
+function formVehicleItems(data) {
   return [
-    title,
-    '------------------------------',
-    `Meno: ${data.name}`,
-    `E-mail: ${data.email}`,
-    data.phone ? `Telefón: ${data.phone}` : '',
-    data.brand ? `Značka: ${data.brand}` : '',
-    data.model ? `Model: ${data.model}` : '',
-    data.carTitle ? `Vozidlo: ${data.carTitle}` : '',
-    data.carId ? `ID vozidla: ${data.carId}` : '',
-    data.carUrl ? `Vozidlo URL: ${data.carUrl}` : '',
-    data.date ? `Dátum: ${data.date}` : '',
-    data.slot ? `Časť dňa: ${data.slot}` : '',
-    data.time ? `Čas: ${data.time}` : '',
-    data.calcSummary ? `\nKalkulácia:\n${data.calcSummary}` : '',
-    data.message ? `\nSpráva:\n${data.message}` : '',
-    data.note ? `\nPoznámka:\n${data.note}` : '',
-    `\nStránka: ${clean(page, 700) || '—'}`,
-  ].filter(Boolean).join('\n');
+    { label: 'Vozidlo', value: data.carTitle },
+    { label: 'Značka', value: data.brand },
+    { label: 'Model', value: data.model },
+    { label: 'ID vozidla', value: data.carId },
+    { label: 'Detail vozidla', value: data.carUrl },
+  ];
+}
+
+function formAppointmentItems(data) {
+  return [
+    { label: 'Dátum', value: formatDateOnly(data.date) },
+    { label: 'Časť dňa', value: data.slot },
+    { label: 'Konkrétny čas', value: data.time },
+  ];
+}
+
+function formMailText(type, data, page) {
+  const presentation = formPresentation(type);
+  return [
+    presentation.adminTitle,
+    textBlock('Zákazník', [
+      `Meno: ${data.name}`,
+      `E-mail: ${data.email}`,
+      data.phone ? `Telefón: ${data.phone}` : '',
+    ]),
+    textBlock('Vozidlo', formVehicleItems(data).map(item => item.value ? `${item.label}: ${item.value}` : '')),
+    textBlock('Požadovaný termín', formAppointmentItems(data).map(item => item.value ? `${item.label}: ${item.value}` : '')),
+    textBlock('Obsah požiadavky', [
+      data.calcSummary ? `Kalkulácia:\n${data.calcSummary}` : '',
+      data.message ? `Správa:\n${data.message}` : '',
+      data.note ? `Poznámka:\n${data.note}` : '',
+    ]),
+    textBlock('Informácie o odoslaní', [`Stránka: ${clean(page, 700) || '—'}`]),
+  ].filter(Boolean).join('\n\n');
+}
+
+function formAdminHtml(type, data, page) {
+  const presentation = formPresentation(type);
+  const vehicle = formVehicleTitle(data);
+  return renderAdminRequestEmail({
+    preheader: `${presentation.adminTitle} od ${data.name}.`,
+    typeLabel: presentation.typeLabel,
+    title: presentation.adminTitle,
+    intro: vehicle ? `Nová požiadavka z webu · ${vehicle}` : 'Nová požiadavka z webu PP AUTO.',
+    contacts: [
+      { label: 'Meno a priezvisko', value: data.name },
+      { label: 'E-mail', value: data.email },
+      { label: 'Telefón', value: data.phone },
+    ],
+    sections: [
+      { title: 'Vozidlo', items: formVehicleItems(data) },
+      { title: 'Požadovaný termín', items: formAppointmentItems(data) },
+      {
+        title: 'Obsah požiadavky',
+        items: [
+          { label: 'Kalkulácia', value: data.calcSummary },
+          { label: 'Správa', value: data.message },
+          { label: 'Poznámka', value: data.note },
+        ],
+      },
+      {
+        title: 'Informácie o odoslaní',
+        items: [{ label: 'Zdrojová stránka', value: clean(page, 700) || '—' }],
+      },
+    ],
+  });
+}
+
+function formCustomerHtml(type, data) {
+  const presentation = formPresentation(type);
+  const vehicle = formVehicleTitle(data);
+  const summaryValue = type === 'testdrive' ? (vehicle || 'Testovacia jazda') : presentation.summaryValue;
+  const sections = [];
+
+  if (type === 'testdrive') {
+    sections.push(
+      {
+        title: 'Vozidlo',
+        items: [
+          { label: 'Vybrané vozidlo', value: vehicle },
+          { label: 'Značka', value: data.brand },
+          { label: 'Model', value: data.model },
+        ],
+      },
+      { title: 'Požadovaný termín', items: formAppointmentItems(data) },
+      { title: 'Doplňujúce údaje', items: [{ label: 'Poznámka', value: data.note }] },
+    );
+  } else if (type === 'finance') {
+    sections.push({
+      title: 'Zhrnutie dopytu',
+      items: [
+        { label: 'Orientačná kalkulácia', value: data.calcSummary },
+        { label: 'Vaša správa', value: data.message },
+      ],
+    });
+  } else {
+    sections.push({
+      title: 'Vaša správa',
+      items: [{ label: 'Správa', value: data.message }],
+    });
+  }
+
+  return renderCustomerConfirmationEmail({
+    preheader: `${presentation.customerTitle} – PP AUTO.`,
+    typeLabel: presentation.typeLabel,
+    title: presentation.customerTitle,
+    greeting: `Dobrý deň, ${data.name},`,
+    intro: 'Ďakujeme, vašu požiadavku sme úspešne prijali. Jej súhrn nájdete nižšie.',
+    summaryLabel: presentation.summaryLabel,
+    summaryValue,
+    sections,
+    nextStep: presentation.nextStep,
+    disclaimer: presentation.disclaimer,
+  });
+}
+
+function formCustomerText(type, data) {
+  const presentation = formPresentation(type);
+  const details = [];
+  const vehicle = formVehicleTitle(data);
+  if (vehicle) details.push(`Vozidlo: ${vehicle}`);
+  if (data.date) details.push(`Dátum: ${formatDateOnly(data.date)}`);
+  if (data.slot) details.push(`Časť dňa: ${data.slot}`);
+  if (data.time) details.push(`Čas: ${data.time}`);
+  if (type === 'finance' && data.calcSummary) details.push(`Orientačná kalkulácia:\n${data.calcSummary}`);
+
+  return [
+    `Dobrý deň, ${data.name},`,
+    '',
+    `ďakujeme, prijali sme vašu požiadavku (${presentation.label}).`,
+    ...details,
+    '',
+    presentation.nextStep,
+    '',
+    'PP AUTO s.r.o.',
+  ].join('\n');
 }
 
 async function handlePublicForm(req, res) {
@@ -683,16 +1022,9 @@ async function handlePublicForm(req, res) {
   if (type === 'testdrive' && (!data.brand && !data.carTitle)) return res.status(400).json({ error: 'Vyberte vozidlo.' });
 
   const kind = type;
-  const label = type === 'contact' ? 'kontaktný formulár' : type === 'finance' ? 'financovanie' : 'testovaciu jazdu';
+  const label = formPresentation(type).label;
   const adminText = formMailText(type, data, req.body?.page);
-  const customerText = [
-    `Dobrý deň ${data.name},`,
-    '',
-    `ďakujeme, prijali sme vašu požiadavku (${label}).`,
-    'Ozveme sa vám čo najskôr.',
-    '',
-    'PP AUTO s.r.o.',
-  ].join('\n');
+  const customerText = formCustomerText(type, data);
 
   let adminSent = false;
   let customerSent = false;
@@ -701,6 +1033,7 @@ async function handlePublicForm(req, res) {
       kind,
       subject: `PP AUTO – ${label} – ${data.name}`,
       text: adminText,
+      htmlBody: formAdminHtml(type, data, req.body?.page),
       replyTo: data.email,
     });
     adminSent = adminResult?.sent === true;
@@ -711,6 +1044,7 @@ async function handlePublicForm(req, res) {
         to: data.email,
         subject: `PP AUTO – potvrdenie: ${label}`,
         text: customerText,
+        htmlBody: formCustomerHtml(type, data),
       });
       customerSent = customerResult?.sent === true;
     } catch (error) {
