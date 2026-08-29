@@ -66,8 +66,18 @@
     // Klon zachová vzhľad/atribúty, ale odstráni starý event listener.
     const link = current.cloneNode(true);
     link.dataset.mainTestdriveRedirect = '1';
-    link.setAttribute('href', '/ponuka#testdrive');
-    link.setAttribute('aria-label', 'Prejsť na formulár testovacej jazdy');
+
+    const params = new URLSearchParams();
+    const brand = getBasicValue('Značka');
+    const model = getBasicValue('Model');
+    if (brand) params.set('td_brand', brand);
+    if (model) params.set('td_model', model);
+
+    const query = params.toString();
+    link.setAttribute('href', `/ponuka${query ? `?${query}` : ''}#testdrive`);
+    link.setAttribute('aria-label', model
+      ? `Objednať testovaciu jazdu pre ${brand} ${model}`.trim()
+      : 'Prejsť na formulár testovacej jazdy');
     current.replaceWith(link);
   }
 
