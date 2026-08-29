@@ -1,9 +1,5 @@
 .car-order-main-cta{
-  background:linear-gradient(135deg,#fff,#dbeafe);
-  color:#0b1220 !important;
-  border-color:rgba(255,255,255,.78) !important;
-  box-shadow:0 12px 30px rgba(59,130,246,.18);
-  font-weight:900;
+  font-weight:600;
 }
 .car-order-card{
   overflow:hidden;
