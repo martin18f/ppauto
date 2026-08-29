@@ -226,6 +226,66 @@
     });
   }
 
+  function requestedVehiclePreset() {
+    const params = new URLSearchParams(location.search);
+    const brand = String(params.get('td_brand') || '').toLowerCase().trim();
+    const model = String(params.get('td_model') || '').trim();
+    if (!['subaru', 'kgm', 'jeep', 'chery'].includes(brand) || !model) return null;
+    return { brand, model };
+  }
+
+  function applyRequestedVehiclePreset() {
+    const preset = requestedVehiclePreset();
+    if (!preset) return;
+
+    let attempts = 0;
+    const maxAttempts = 80;
+
+    const tryApply = () => {
+      attempts += 1;
+      const brandButton = document.querySelector(`#tdBrandRow [data-td-brand="${preset.brand}"]`);
+      const modelSelect = document.getElementById('tdModel');
+      const otherWrap = document.getElementById('tdOtherWrap');
+      const otherInput = document.getElementById('tdModelOther');
+
+      if (!brandButton || !modelSelect) {
+        if (attempts < maxAttempts) setTimeout(tryApply, 75);
+        return;
+      }
+
+      if (!brandButton.classList.contains('is-active')) brandButton.click();
+
+      if (modelSelect.disabled || modelSelect.options.length <= 1) {
+        if (attempts < maxAttempts) setTimeout(tryApply, 75);
+        return;
+      }
+
+      const exactOption = Array.from(modelSelect.options).find(option =>
+        option.value && option.value !== '__other__' &&
+        option.value.localeCompare(preset.model, 'sk', { sensitivity: 'accent' }) === 0
+      );
+
+      if (exactOption) {
+        modelSelect.value = exactOption.value;
+        modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        return;
+      }
+
+      const otherOption = Array.from(modelSelect.options).find(option => option.value === '__other__');
+      if (otherOption && otherWrap && otherInput) {
+        modelSelect.value = '__other__';
+        modelSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        otherInput.value = preset.model;
+        otherInput.dispatchEvent(new Event('input', { bubbles: true }));
+        return;
+      }
+
+      if (attempts < maxAttempts) setTimeout(tryApply, 75);
+    };
+
+    tryApply();
+  }
+
   function loadScriptOnce(src, marker) {
     return new Promise((resolve, reject) => {
       const existing = document.querySelector(`script[${marker}]`);
@@ -267,4 +327,5 @@
   createFloatingCta(section);
   scrollToRequestedSection(section);
   ensureTestDriveLogic();
+  applyRequestedVehiclePreset();
 })();
