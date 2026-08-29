@@ -55,6 +55,22 @@
     if (section) section.remove();
   }
 
+  function configureTestDriveRedirect() {
+    // Detail vozidla už nemá vlastný formulár testovacej jazdy.
+    mount.querySelector('#testdrive')?.remove();
+
+    const current = mount.querySelector('#openTestDrive');
+    if (!current || current.dataset.mainTestdriveRedirect === '1') return;
+
+    // auto.js historicky pripájal listener, ktorý scrolloval na detailový formulár.
+    // Klon zachová vzhľad/atribúty, ale odstráni starý event listener.
+    const link = current.cloneNode(true);
+    link.dataset.mainTestdriveRedirect = '1';
+    link.setAttribute('href', '/ponuka#testdrive');
+    link.setAttribute('aria-label', 'Prejsť na formulár testovacej jazdy');
+    current.replaceWith(link);
+  }
+
   function getBasicValue(label) {
     const basic = sectionByTitle('Základné údaje');
     if (!basic) return '';
@@ -126,6 +142,8 @@
   async function enhance() {
     scheduled = false;
 
+    configureTestDriveRedirect();
+
     const technical = sectionByTitle('Technické údaje');
     if (!technical) return;
 
@@ -138,6 +156,7 @@
     // Vlastné DOM zmeny nesmú znovu spúšťať observer.
     observer?.disconnect();
     try {
+      configureTestDriveRedirect();
       removeLegacyEquipmentSection();
       renderStrip(matchingDocuments(all, brand, model), sectionByTitle('Technické údaje'));
     } finally {
