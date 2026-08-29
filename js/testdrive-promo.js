@@ -214,6 +214,18 @@
     }
   }
 
+  function scrollToRequestedSection(section) {
+    if (location.hash !== '#testdrive') return;
+
+    // Sekcia vzniká až za behu JS, preto natívny hash pri prvom načítaní
+    // nemusí mať cieľ. Po vložení ju doscrollujeme explicitne.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  }
+
   function loadScriptOnce(src, marker) {
     return new Promise((resolve, reject) => {
       const existing = document.querySelector(`script[${marker}]`);
@@ -240,7 +252,7 @@
 
   async function ensureTestDriveLogic() {
     try {
-if (!document.querySelector('script[data-pp-testdrive-logic]')) {
+      if (!document.querySelector('script[data-pp-testdrive-logic]')) {
         await loadScriptOnce('/js/testdrive.js', 'data-pp-testdrive-logic');
       }
     } catch (error) {
@@ -253,5 +265,6 @@ if (!document.querySelector('script[data-pp-testdrive-logic]')) {
   ensureStyles();
   const section = createSection();
   createFloatingCta(section);
+  scrollToRequestedSection(section);
   ensureTestDriveLogic();
 })();
