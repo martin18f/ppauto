@@ -1,17 +1,5 @@
 .vercel
-
-# Local environment/secrets - NEVER commit
-.env
-.env.local
-.env.production.local
-.env.development.local
-.env.preview.local
-.env.*.local
 .env*
-
-# Safe documentation template is allowed in Git
-!.env.example
-
 node_modules/
 guide.txt
 cennik/
