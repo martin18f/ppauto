@@ -22,6 +22,10 @@
     return brand === 'all' ? '/ponuka' : '/' + encodeURIComponent(brand);
   }
 
+  function orderFormHref() {
+    return withLang(cleanBrandHref('all')) + '#objednat-auto';
+  }
+
   function forcedChooser() {
     return new URLSearchParams(location.search).get('choose') === '1';
   }
@@ -147,6 +151,17 @@
       if (brand) go(brand);
     });
   });
+
+  // Online objednávka potrebuje rovnakú krátku brand session ako vstup do ponuky.
+  // Používame režim „all“, aby objednávkový formulár nebol filtrovaný na jednu značku.
+  const onlineOrderCta = document.querySelector('.online-order-launch__cta');
+  if (onlineOrderCta) {
+    onlineOrderCta.setAttribute('href', orderFormHref());
+    onlineOrderCta.addEventListener('click', event => {
+      if (event.ctrlKey || event.metaKey || event.shiftKey || event.button === 1) return;
+      if (!writeBrandSession('all')) event.preventDefault();
+    });
+  }
 
   document.getElementById('skipOnce')?.addEventListener('click', () => go('all'));
 
