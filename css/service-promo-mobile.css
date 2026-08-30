@@ -1,0 +1,80 @@
+/* PP AUTO – mobilný servisný promo slider.
+   Izolovaný override: nemení desktop ani iné slidery na stránke. */
+
+@media (max-width: 720px) {
+  #servis .service-promo.promo-slider {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    min-height: 0 !important;
+    padding: 10px 46px;
+    overflow: hidden;
+  }
+
+  #servis .service-promo .promo-track {
+    display: flex;
+    align-items: stretch;
+    gap: 12px !important;
+    width: 100%;
+    min-height: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  #servis .service-promo .promo-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  #servis .service-promo .promo-img {
+    box-sizing: border-box;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1;
+    margin: 0 !important;
+    object-fit: contain !important;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    background: #0b0e13;
+  }
+
+  #servis .service-promo .promo-btn {
+    position: absolute;
+    top: 50%;
+    z-index: 6;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    margin: 0;
+    transform: translateY(-50%);
+  }
+
+  #servis .service-promo .promo-btn.prev {
+    left: 5px;
+  }
+
+  #servis .service-promo .promo-btn.next {
+    right: 5px;
+  }
+}
+
+@media (max-width: 420px) {
+  #servis .service-promo.promo-slider {
+    padding-inline: 38px;
+  }
+
+  #servis .service-promo .promo-btn {
+    width: 32px;
+    height: 32px;
+  }
+}
