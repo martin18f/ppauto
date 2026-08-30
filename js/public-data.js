@@ -116,6 +116,26 @@
     try { sessionStorage.removeItem(CACHE_KEY); } catch (e) {}
   }
 
+  function loadServicePromoMobileFix() {
+    if (!document.querySelector('#servis [data-promo]')) return;
+
+    if (!document.querySelector('link[data-service-promo-mobile-style]')) {
+      const style = document.createElement('link');
+      style.rel = 'stylesheet';
+      style.href = '/css/service-promo-mobile.css';
+      style.dataset.servicePromoMobileStyle = '1';
+      document.head.appendChild(style);
+    }
+
+    if (!document.querySelector('script[data-service-promo-mobile-script]')) {
+      const script = document.createElement('script');
+      script.src = '/js/service-promo-mobile.js';
+      script.defer = true;
+      script.dataset.servicePromoMobileScript = '1';
+      document.head.appendChild(script);
+    }
+  }
+
   window.ppPublicData = {
     getBootstrap,
     getCars,
@@ -123,6 +143,8 @@
     getPromos,
     clear,
   };
+
+  loadServicePromoMobileFix();
 
   // Začni čítať dáta hneď po parsovaní DOM. Ponuka, aktuality a objednávka
   // sa potom napoja na tú istú Promise namiesto troch samostatných requestov.
