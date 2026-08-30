@@ -1028,25 +1028,25 @@
           </div>
 
           <div class="promo-slider service-promo" data-promo>
-            <button class="promo-btn prev" aria-label="Predchádzajúci banner" type="button">
+            <button class="promo-btn prev" aria-label="Predchádzajúci banner" aria-controls="servicePromoTrack" type="button">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="15 18 9 12 15 6"></polyline>
               </svg>
             </button>
 
-            <div class="promo-track">
+            <div class="promo-track" id="servicePromoTrack" role="region" aria-roledescription="carousel" aria-label="Servisné akcie" tabindex="0">
 
-              <img class="promo-img" data-brand="jeep" src="img/akcie/Jeep/jeepakcia.webp" alt="Jeep – servisná akcia 1">
-              <img class="promo-img" data-brand="jeep" src="img/akcie/Jeep/jeepakcia1.avif" alt="Jeep – servisná akcia 2">
-              <img class="promo-img" data-brand="jeep" src="img/akcie/Jeep/jeepbateria.avif" alt="Jeep – servisná akcia 3">
-              <img class="promo-img" data-brand="jeep" src="img/akcie/Jeep/jeepvymenaoleja.avif" alt="Jeep – servisná akcia 4">
-              <img class="promo-img" data-brand="subaru" src="img/akcie/Subaru/subarusafe8.avif" alt="Subaru – servisná akcia 5">
+              <img class="promo-img" data-brand="jeep" src="img/akcie/Jeep/jeepakcia.webp" alt="Jeep – servisná akcia 1" role="button" tabindex="0">
+              <img class="promo-img" data-brand="jeep" src="img/akcie/Jeep/jeepakcia1.avif" alt="Jeep – servisná akcia 2" role="button" tabindex="0">
+              <img class="promo-img" data-brand="jeep" src="img/akcie/Jeep/jeepbateria.avif" alt="Jeep – servisná akcia 3" role="button" tabindex="0">
+              <img class="promo-img" data-brand="jeep" src="img/akcie/Jeep/jeepvymenaoleja.avif" alt="Jeep – servisná akcia 4" role="button" tabindex="0">
+              <img class="promo-img" data-brand="subaru" src="img/akcie/Subaru/subarusafe8.avif" alt="Subaru – servisná akcia 5" role="button" tabindex="0">
 
 
             </div>
 
-            <button class="promo-btn next" aria-label="Nasledujúci banner" type="button">
+            <button class="promo-btn next" aria-label="Nasledujúci banner" aria-controls="servicePromoTrack" type="button">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="9 18 15 12 9 6"></polyline>
@@ -1055,10 +1055,10 @@
           </div>
 
           <!-- Lightbox -->
-          <div class="promo-lightbox" id="promo-lightbox" data-lightbox>
-  <span class="close" data-close>&times;</span>
-  <img class="promo-lightbox-content" id="promo-lightbox-img" data-lightbox-img alt="Zväčšený banner">
-</div>
+          <div class="promo-lightbox" id="promo-lightbox" data-lightbox role="dialog" aria-modal="true" aria-label="Náhľad servisnej akcie" aria-hidden="true">
+            <button class="close" data-close type="button" aria-label="Zavrieť">&times;</button>
+            <img class="promo-lightbox-content" id="promo-lightbox-img" data-lightbox-img alt="Zväčšený banner">
+          </div>
         </div>
 
         
@@ -1100,24 +1100,80 @@
   </div>
 </section>
 
-    <!-- TESTIMONIALS -->
-    <section>
+    <!-- GOOGLE REVIEWS -->
+    <section class="google-reviews-section" aria-labelledby="googleReviewsTitle">
       <div class="container">
-        <div class="section-head">
-          <h3>Čo hovoria zákazníci</h3>
-        </div>
-        <div class="testi">
-          <div class="quote">
-            <p>„Profesionálny prístup, rýchle dodanie a perfektný servis. Odporúčam.“</p>
-            <div class="by">— Zákazník z Popradu</div>
+        <div class="google-reviews">
+          <div class="google-reviews__head">
+            <div class="google-reviews__copy">
+              <p class="google-reviews__eyebrow">
+                <span class="google-reviews__g" aria-hidden="true">G</span>
+                Google recenzie
+              </p>
+              <h3 id="googleReviewsTitle">Skúsenosti, ktoré si môžete overiť</h3>
+              <p>Spätná väzba našich zákazníkov z verejného profilu PP AUTO na Google.</p>
+            </div>
+
+            <div class="google-reviews__score" aria-label="Hodnotenie 4,6 z 5 na Google">
+              <strong>4,6</strong>
+              <div>
+                <div class="google-reviews__stars" aria-hidden="true">★★★★★</div>
+                <span>z 5 na Google</span>
+              </div>
+              <small>Hodnotenie overené 30. 8. 2026</small>
+            </div>
           </div>
-          <div class="quote">
-            <p>„Test jazda vybavená na počkanie, vysvetlené financovanie bez skrytých poplatkov.“</p>
-            <div class="by">— P. J., Kežmarok</div>
+
+          <div class="google-reviews__grid" aria-label="Výber z verejných Google recenzií">
+            <article class="google-review-card">
+              <div class="google-review-card__meta">
+                <span class="google-review-card__avatar" aria-hidden="true">JB</span>
+                <div>
+                  <cite>Jaroslav Baláž</cite>
+                  <span>Google recenzia</span>
+                </div>
+                <span class="google-review-card__source" aria-hidden="true">G</span>
+              </div>
+              <div class="google-review-card__stars" aria-label="5 z 5 hviezdičiek">★★★★★</div>
+              <blockquote>„Profesionálny prístup, ochota, výborná komunikácia a odbornosť. Odporúčam.“</blockquote>
+            </article>
+
+            <article class="google-review-card">
+              <div class="google-review-card__meta">
+                <span class="google-review-card__avatar" aria-hidden="true">AM</span>
+                <div>
+                  <cite>Anton Mačutek</cite>
+                  <span>Google recenzia</span>
+                </div>
+                <span class="google-review-card__source" aria-hidden="true">G</span>
+              </div>
+              <div class="google-review-card__stars" aria-label="5 z 5 hviezdičiek">★★★★★</div>
+              <blockquote>„Spokojný, s rýchlosťou aj cenou...“</blockquote>
+            </article>
+
+            <article class="google-review-card">
+              <div class="google-review-card__meta">
+                <span class="google-review-card__avatar" aria-hidden="true">PK</span>
+                <div>
+                  <cite>Palino Kubiš</cite>
+                  <span>Google recenzia</span>
+                </div>
+                <span class="google-review-card__source" aria-hidden="true">G</span>
+              </div>
+              <div class="google-review-card__stars" aria-label="5 z 5 hviezdičiek">★★★★★</div>
+              <blockquote>„Odborný a veľmi ústretový prístup predajcu.“</blockquote>
+            </article>
           </div>
-          <div class="quote">
-            <p>„Subaru kvôli AWD – v zime neoceniteľné. PP AUTO sa o všetko postaralo.“</p>
-            <div class="by">— M. K., Svit</div>
+
+          <div class="google-reviews__footer">
+            <p>Všetky recenzie, ich aktuálny počet a celé znenie nájdete priamo na Google.</p>
+            <a class="google-reviews__cta" href="https://www.google.com/maps?cid=16971245853955154214" target="_blank" rel="noopener noreferrer">
+              Pozrieť všetky recenzie na Google
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"></path>
+                <path d="m13 6 6 6-6 6"></path>
+              </svg>
+            </a>
           </div>
         </div>
       </div>
@@ -1493,56 +1549,6 @@ updateStatus();
 
 
 <script>
-  const track = document.querySelector('.promo-track');
-  const prevBtn = document.querySelector('.promo-btn.prev');
-  const nextBtn = document.querySelector('.promo-btn.next');
-  const slides = document.querySelectorAll('.promo-track img');
-
-  let index = 0;
-  const slideWidth = slides[0].offsetWidth + 12; // šírka + margin
-
-  function updateSlider() {
-    track.style.transform = `translateX(${-index * slideWidth}px)`;
-  }
-
-  nextBtn.addEventListener('click', () => {
-    if (index < slides.length - 1) {
-      index++;
-      updateSlider();
-    }
-  });
-
-  prevBtn.addEventListener('click', () => {
-    if (index > 0) {
-      index--;
-      updateSlider();
-    }
-  });
-
-  // Lightbox
-  const promoLightbox = document.getElementById("promo-lightbox");
-  const promoLightboxImg = document.getElementById("promo-lightbox-img");
-  const promoClose = document.querySelector(".promo-lightbox .close");
-
-  slides.forEach(img => {
-    img.addEventListener("click", () => {
-      promoLightbox.style.display = "flex";
-      promoLightboxImg.src = img.src;
-    });
-  });
-
-  promoClose.addEventListener("click", () => {
-    promoLightbox.style.display = "none";
-  });
-
-  promoLightbox.addEventListener("click", (e) => {
-    if (e.target === promoLightbox) {
-      promoLightbox.style.display = "none";
-    }
-  });
-</script>
-
-<script>
 document.addEventListener("DOMContentLoaded", () => {
   const filterRow = document.querySelector("#ponuka .filter-row");
   const buttons = Array.from(document.querySelectorAll("#ponuka .filter-row .tag[data-filter]"));
@@ -1598,9 +1604,13 @@ document.addEventListener("DOMContentLoaded", () => {
       img.classList.toggle("promo-hidden", !show);
     });
 
-    // reset slider transform (aby ti nezostalo posunuté na skrytý obrázok)
+    // Po zmene značky začni znovu na prvej viditeľnej servisnej akcii.
     const track = servis.querySelector(".promo-track");
-    if (track) track.style.transform = "translateX(0px)";
+    if (track) {
+      track.style.removeProperty("transform");
+      track.scrollLeft = 0;
+      track.dispatchEvent(new Event("pp:promo-filter"));
+    }
   }
 
   function setActiveButton(f){

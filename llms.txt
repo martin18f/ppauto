@@ -13,6 +13,7 @@ Languages: Slovak, English
 
 - Home and brand selection: https://ppauto.sk/
 - Vehicle offer: https://ppauto.sk/ponuka
+- Online vehicle order request: https://ppauto.sk/ponuka#objednat-auto
 - Subaru in Poprad: https://ppauto.sk/subaru
 - KGM in Poprad: https://ppauto.sk/kgm
 - Jeep in Poprad: https://ppauto.sk/jeep
@@ -24,6 +25,7 @@ Languages: Slovak, English
 
 - Authorized sale of Subaru, KGM, Jeep and Chery vehicles.
 - Stock vehicles, new vehicles and test drives.
+- Non-binding online order requests for stock vehicles or a custom vehicle configuration.
 - Authorized service, diagnostics, maintenance, seasonal inspections and spare parts.
 - Vehicle financing and insurance support.
 
