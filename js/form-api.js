@@ -191,6 +191,23 @@
     resetFormState(form);
   }
 
+  async function mirrorToCrm(payload) {
+    try {
+      const response = await fetch(apiUrl('/api/auth-check?mode=system-public'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true,
+      });
+      if (!response.ok) {
+        const result = await response.json().catch(() => ({}));
+        console.warn('[PP AUTO CRM] Lead sa nevytvoril:', clean(result?.error) || response.status);
+      }
+    } catch (error) {
+      console.warn('[PP AUTO CRM] Best-effort zápis zlyhal:', error?.message || error);
+    }
+  }
+
   async function submit(form) {
     const payload = payloadFor(form);
     if (!payload.type) return;
@@ -211,6 +228,9 @@
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(clean(result?.error) || 'Odoslanie sa nepodarilo.');
+
+      // CRM je zámerne až druhý krok. Jeho chyba nesmie zmeniť úspešný výsledok formulára.
+      void mirrorToCrm(payload);
 
       const suffix = confirmationSuffix(result);
       const message = form.id.includes('TestDrive') || form.id === 'testDriveForm'
