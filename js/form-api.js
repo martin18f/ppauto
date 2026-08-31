@@ -193,7 +193,7 @@
 
   async function mirrorToCrm(payload) {
     try {
-      const response = await fetch(apiUrl('/api/auth-check?mode=system-public'), {
+      const response = await fetch(apiUrl('/api/promos?mode=system-public'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
