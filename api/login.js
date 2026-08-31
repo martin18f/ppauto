@@ -6,6 +6,18 @@ import {
   safeSecretEqual,
 } from '../lib/admin-session.js';
 
+function parseLoginBody(body) {
+  if (!body) return {};
+  if (Buffer.isBuffer(body)) {
+    try { return JSON.parse(body.toString('utf8')); } catch { return {}; }
+  }
+  if (typeof body === 'string') {
+    try { return JSON.parse(body); } catch { return {}; }
+  }
+  if (typeof body === 'object' && !Array.isArray(body)) return body;
+  return {};
+}
+
 export default function handler(req, res) {
   res.setHeader('Cache-Control', 'private, no-store, max-age=0, must-revalidate');
 
@@ -20,7 +32,8 @@ export default function handler(req, res) {
   }
 
   const adminKey = String(process.env.ADMIN_KEY || '').trim();
-  const supplied = String(req.body?.key || '');
+  const body = parseLoginBody(req.body);
+  const supplied = String(body.key || '').trim();
 
   if (!adminKey) {
     console.error('ADMIN_KEY is not configured.');
