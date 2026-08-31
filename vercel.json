@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/system",
+      "destination": "/api/auth-check?mode=system"
+    },
+    {
       "source": "/",
       "destination": "/vyber-znacky.html"
     },
