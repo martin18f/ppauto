@@ -530,3 +530,22 @@
 
   loadOrders();
 })();
+
+// PP AUTO System is intentionally loaded after all legacy admin modules.
+(function loadPpAutoSystem() {
+  if (!document.querySelector('link[data-ppauto-system-style]')) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/css/ppauto-system.css';
+    link.dataset.ppautoSystemStyle = '1';
+    document.head.appendChild(link);
+  }
+
+  if (!document.querySelector('script[data-ppauto-system-script]')) {
+    const script = document.createElement('script');
+    script.src = '/js/ppauto-system.js';
+    script.async = false;
+    script.dataset.ppautoSystemScript = '1';
+    document.body.appendChild(script);
+  }
+})();
