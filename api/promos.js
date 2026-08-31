@@ -1,4 +1,5 @@
 import { hasAdminSession } from '../lib/admin-session.js';
+import { handlePpAutoSystem, handlePublicPpAutoLead } from '../lib/ppauto-system.js';
 // /api/promos
 
 function encodeGithubPath(path) {
@@ -24,6 +25,10 @@ function getIsAdmin(req) {
 }
 
 export default async function handler(req, res) {
+  const mode = String(req.query?.mode || '').toLowerCase();
+  if (mode === 'system') return handlePpAutoSystem(req, res);
+  if (mode === 'system-public') return handlePublicPpAutoLead(req, res);
+
   const isAdmin = getIsAdmin(req);
 
   try {
@@ -109,7 +114,6 @@ export default async function handler(req, res) {
         try {
           next = mutator([...promos]);
         } catch (e) {
-          // ak mutator vyhodí error so statusom (napr. 400/404), propaguj
           throw e;
         }
 
@@ -123,8 +127,6 @@ export default async function handler(req, res) {
       }
     }
 
-
-    // GET (public) / GET include_hidden=1 (admin only)
     if (req.method === "GET") {
       const includeHidden = String(req.query?.include_hidden || "") === "1";
       if (includeHidden && !isAdmin) return res.status(401).json({ error: "Unauthorized" });
@@ -182,11 +184,7 @@ export default async function handler(req, res) {
           }
 
           const prev = arr[index] || {};
-
-          // brand je buď nezmenený (prev.brand), alebo musí byť validný
-          const nextBrand =
-            incoming.brand === undefined ? normalizePromoBrand(prev.brand) : normalizePromoBrand(incoming.brand);
-
+          const nextBrand = incoming.brand === undefined ? normalizePromoBrand(prev.brand) : normalizePromoBrand(incoming.brand);
 
           if (!nextBrand) {
             const err = new Error("Invalid brand (subaru/kgm/jeep/chery)");
