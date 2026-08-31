@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/system",
-      "destination": "/api/auth-check?mode=system"
+      "destination": "/api/promos?mode=system"
     },
     {
       "source": "/",
