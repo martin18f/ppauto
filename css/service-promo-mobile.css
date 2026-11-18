@@ -20,9 +20,8 @@
     overflow-x: auto !important;
     overflow-y: hidden !important;
     scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
+    scroll-padding-inline: 4px;
     overscroll-behavior-x: contain;
-    touch-action: pan-x;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     transform: none !important;
@@ -42,7 +41,7 @@
     aspect-ratio: 1 / 1;
     margin: 0 !important;
     object-fit: contain !important;
-    scroll-snap-align: center;
+    scroll-snap-align: start;
     scroll-snap-stop: always;
     background: #0b0e13;
   }

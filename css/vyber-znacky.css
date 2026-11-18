@@ -603,6 +603,8 @@ a{color:inherit}
 
 /* Card */
 .card{
+  display:flex;
+  flex-direction:column;
   position:relative; border:1px solid var(--line); border-radius:var(--radius);
   background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)), var(--panel);
   overflow:hidden; box-shadow:var(--shadow);
@@ -712,21 +714,30 @@ a{color:inherit}
 
 
 .body{
-  padding:18px 14px 64px; /* dole priestor pre tlačidlo */
+  flex:1;
+  padding:18px 14px 14px;
   display:flex;
   flex-direction:column;
   gap:10px;
 }
-.body .btn{
-  position: absolute;
-  left: 14px;
-  right: 14px;
-  bottom: 10px;
-  z-index: 3;
 
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.card-actions{
+  display:grid;
+  gap:8px;
+  margin-top:auto;
+  padding-top:6px;
+}
+
+.card-actions .btn{
+  position:relative;
+  z-index:3;
+  min-height:44px;
+  text-align:center;
+}
+
+.card-actions .btn:focus-visible{
+  outline:2px solid #fff;
+  outline-offset:2px;
 }
 .brandline{ display:flex; align-items:center; gap:10px }
 .brandline h3{ margin:0; font-size:20px; letter-spacing:.3px }
@@ -750,7 +761,6 @@ a{color:inherit}
 
 .foot{ display:flex; justify-content:center; margin:25px 0 6px }
 .btn.ghost{ background:transparent; color:#cbd5e1; margin-bottom: 30px; }
-.btn.official{background:transparent; color: #cbd5e1;}
 
 .seo-panel{
   margin: 24px 0 0;

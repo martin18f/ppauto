@@ -124,6 +124,7 @@
 
   const BRAND_SESSION_KEY = 'ppauto.brandSession';
   const LEGACY_BRAND_KEY = 'ppauto.brand';
+  const BRAND_SESSION_TTL_MS = 2 * 60 * 1000;
 
   function chooserHref(langQuery) {
     const params = new URLSearchParams((langQuery || '').replace(/^\?/, ''));
@@ -218,30 +219,35 @@
     const lang = (params.get('lang') || '').toLowerCase().trim();
     const langQuery = lang === 'en' ? '?lang=en' : '';
     const session = readBrandSession();
+    const explicitBrand = isAllowed(requestedBrand) && requestedBrand !== 'all';
 
-    // Bez platného dvojminútového výberu sa verejná ponuka nesmie zobraziť.
-    if (!session) {
+    if (!session && !explicitBrand) {
       redirectToChooser(langQuery);
       return;
     }
 
-    // Session je jediný zdroj pravdy. Pri ručnom otvorení inej brand URL
-    // vráť návštevníka na jeho stále platnú voľbu bez predĺženia TTL.
-    if (!isAllowed(requestedBrand) || requestedBrand !== session.brand) {
-      location.replace(hrefForBrand(session.brand, langQuery, location.hash));
+    const brand = explicitBrand ? requestedBrand : session.brand;
+    if (requestedBrand !== brand) {
+      location.replace(hrefForBrand(brand, langQuery, location.hash));
       return;
     }
 
-    if (session.brand === 'all') document.documentElement.removeAttribute('data-brand');
-    else document.documentElement.setAttribute('data-brand', session.brand);
+    if (brand === 'all') document.documentElement.removeAttribute('data-brand');
+    else document.documentElement.setAttribute('data-brand', brand);
 
-    // Legacy theme key ostáva iba v sessionStorage kvôli detailu vozidla.
+    // Priamy odkaz na značku začína výber aj v novej karte.
     try {
-      if (session.brand === 'all') sessionStorage.removeItem(LEGACY_BRAND_KEY);
-      else sessionStorage.setItem(LEGACY_BRAND_KEY, session.brand);
+      if (explicitBrand && session?.brand !== brand) {
+        sessionStorage.setItem(BRAND_SESSION_KEY, JSON.stringify({
+          brand,
+          expiresAt: Date.now() + BRAND_SESSION_TTL_MS,
+        }));
+      }
+      if (brand === 'all') sessionStorage.removeItem(LEGACY_BRAND_KEY);
+      else sessionStorage.setItem(LEGACY_BRAND_KEY, brand);
     } catch (e) {}
 
-    applyPageMeta(session.brand);
+    applyPageMeta(brand);
   } catch (e) {
     redirectToChooser('');
   }
@@ -254,6 +260,7 @@
 
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/orders.css">
+<link rel="stylesheet" href="css/service-promo-mobile.css">
 <script src="js/contact-links.js" defer></script>
 <script src="js/i18n.js" defer></script>
 
@@ -263,7 +270,7 @@
   
   <div class="global-cursorfx" aria-hidden="true"></div>
 
-  <header>
+  <header class="site-header">
     <div class="container nav">
       <div class="brand">
         <a href="#" class="logo-link">
@@ -317,8 +324,13 @@
   ☰
 </button>
 </div>
-</div>
     </div>
+    <nav class="container brand-nav" aria-label="Značky vozidiel">
+      <a href="/subaru?filter=all#ponuka" data-brand-link="subaru"><img src="/img/subarulogo.png" alt="Subaru"></a>
+      <a href="/kgm?filter=all#ponuka" data-brand-link="kgm"><img src="/img/kgmlogo.svg" alt="KGM"></a>
+      <a href="/jeep?filter=all#ponuka" data-brand-link="jeep"><img src="/img/jeeplogo.webp" alt="Jeep"></a>
+      <a href="/chery?filter=all#ponuka" data-brand-link="chery"><img src="/img/cherylogo.png" alt="Chery"></a>
+    </nav>
   </header>
 
   <main>
@@ -428,7 +440,7 @@
     
 
       <h3>Aktuálna ponuka áut</h3>
-      <div class="filter-row" role="tablist" aria-label="Filtrovanie ponuky">
+      <div class="filter-row" role="group" aria-label="Filtrovanie ponuky">
         <button class="tag active" data-filter="all">Všetko</button>
         <button class="tag" data-filter="subaru">Subaru</button>
         <button class="tag" data-filter="kgm">KGM</button>
@@ -444,6 +456,7 @@
 
     <!-- sem sa automaticky vložia autá -->
     <div class="grid" id="inventory"></div>
+    <p id="inventoryLoadError" class="inventory-load-error" role="status" hidden>Ponuku vozidiel sa nepodarilo načítať.</p>
   </div>
 </section>
 
@@ -1028,7 +1041,7 @@
           </div>
 
           <div class="promo-slider service-promo" data-promo>
-            <button class="promo-btn prev" aria-label="Predchádzajúci banner" aria-controls="servicePromoTrack" type="button">
+            <button class="promo-btn prev" aria-label="Predchádzajúci banner" aria-controls="servicePromoTrack" type="button" hidden>
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="15 18 9 12 15 6"></polyline>
@@ -1046,7 +1059,7 @@
 
             </div>
 
-            <button class="promo-btn next" aria-label="Nasledujúci banner" aria-controls="servicePromoTrack" type="button">
+            <button class="promo-btn next" aria-label="Nasledujúci banner" aria-controls="servicePromoTrack" type="button" hidden>
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="9 18 15 12 9 6"></polyline>
@@ -1478,7 +1491,7 @@
     const nav = document.querySelector('header .nav');
     if (!nav) return;
 
-    const link = e.target.closest('.nav-links a');
+    const link = e.target.closest('.nav-links a, .brand-nav a');
     if (link) {
       setMobileMenu(false);
     }
@@ -1548,101 +1561,11 @@ updateStatus();
 
 
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const filterRow = document.querySelector("#ponuka .filter-row");
-  const buttons = Array.from(document.querySelectorAll("#ponuka .filter-row .tag[data-filter]"));
-  const cars = Array.from(document.querySelectorAll("#inventory .car"));
-
-  const servis = document.querySelector("#servis");
-  const promoImgs = servis ? Array.from(servis.querySelectorAll(".promo-img")) : [];
-
-  function normalizeBrand(v){
-    v = (v || "").toLowerCase().trim();
-    if (v === "subaru" || v === "kgm" || v === "jeep" || v === "chery" || v === "all") return v;
-    return v; // novinky/skladom necháme tak
-  }
-
-  function carHasBrand(card, brand){
-    const make = (card.dataset.make || "").toLowerCase().trim();
-    const tags = (card.dataset.tags || "").toLowerCase().split(/\s+/).filter(Boolean);
-
-    // BRAND: radšej cez tags (je to stabilnejšie), potom make
-    if (brand === "subaru" || brand === "kgm" || brand === "jeep" || brand === "chery") {
-      return tags.includes(brand) || make === brand;
-    }
-    return false;
-  }
-
-  function applyCarsFilter(f){
-    cars.forEach(card => {
-      const tags = (card.dataset.tags || "").toLowerCase().split(/\s+/).filter(Boolean);
-      const make = (card.dataset.make || "").toLowerCase().trim();
-
-      const show =
-        (f === "all") ||
-        (f === make) ||
-        tags.includes(f) ||
-        (f === "subaru" && carHasBrand(card, "subaru")) ||
-        (f === "kgm" && carHasBrand(card, "kgm")) ||
-        (f === "jeep" && carHasBrand(card, "jeep")) ||
-        (f === "chery" && carHasBrand(card, "chery"));
-
-      card.classList.toggle("is-hidden", !show);
-    });
-  }
-
-  function applyPromoFilter(f){
-    if (!promoImgs.length) return;
-
-    // len brand filtre ovplyvňujú promo (subaru/kgm/jeep/chery/all)
-    if (!(f === "all" || f === "subaru" || f === "kgm" || f === "jeep" || f === "chery")) return;
-
-    promoImgs.forEach(img => {
-      const b = (img.getAttribute("data-brand") || "all").toLowerCase().trim();
-      const show = (f === "all") || (b === "all") || (b === f);
-      img.classList.toggle("promo-hidden", !show);
-    });
-
-    // Po zmene značky začni znovu na prvej viditeľnej servisnej akcii.
-    const track = servis.querySelector(".promo-track");
-    if (track) {
-      track.style.removeProperty("transform");
-      track.scrollLeft = 0;
-      track.dispatchEvent(new Event("pp:promo-filter"));
-    }
-  }
-
-  function setActiveButton(f){
-    buttons.forEach(b => b.classList.toggle("active", b.dataset.filter === f));
-  }
-
-  function applyFilter(raw){
-    const f = normalizeBrand(raw);
-    setActiveButton(raw);          // nechávame presne to, čo je v data-filter
-    applyCarsFilter(f);
-    applyPromoFilter(f);
-  }
-
-  if (filterRow){
-    filterRow.addEventListener("click", (e) => {
-      const btn = e.target.closest(".tag[data-filter]");
-      if (!btn) return;
-      applyFilter(btn.dataset.filter);
-    });
-  }
-
-  // init = aktuálne aktívne tlačidlo, inak all
-  const active = buttons.find(b => b.classList.contains("active"))?.dataset.filter || "all";
-  applyFilter(active);
-});
-</script>
-
-
 <script src="js/vehicle-data.js" defer></script>
 <script src="js/public-data.js" defer></script>
 <script src="/js/form-api.js" defer></script>
 <script src="js/script.js" defer></script>
+<script src="js/service-promo.js" defer></script>
 <script src="js/orders.js" defer></script>
 
 <script src="js/testdrive.js"></script>

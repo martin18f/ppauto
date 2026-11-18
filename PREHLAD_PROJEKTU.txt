@@ -1,0 +1,162 @@
+PP AUTO POPRAD – PREHĽAD PROJEKTU
+================================
+
+Aktualizované 18. 11. 2026
+
+1. Účel a technológie
+--------------------
+
+ppauto.sk je web autosalónu a servisu PP AUTO v Poprade pre Subaru, KGM,
+Jeep a Chery. Návštevník si vyberie značku, prejde ponuku a detail vozidla
+alebo pošle nezáväznú požiadavku na konkrétne auto či vlastnú konfiguráciu.
+Web obsahuje aj servis, financovanie, testovacie jazdy, kontakty a informácie
+o predajni. Administrácia umožňuje tímu spravovať obsah a objednávky.
+
+Stránky tvoria statické HTML, CSS a čistý JavaScript. Časť logiky je priamo
+v HTML. JavaScript v prehliadači dopĺňa dynamické údaje z Node.js funkcií
+na Verceli. Funkcie používajú GitHub Contents API na čítanie a zápis
+obsahu. Závislosti sú v package.json a package-lock.json. Nodemailer
+slúži na SMTP a Playwright používajú pomocné importné skripty.
+
+2. Smerovanie
+-------------
+
+vercel.json prepája verejné adresy so súbormi. Prehliadač si pri prepise
+ponecháva verejnú adresu.
+
+  / a /vyber-znacky.html    vyber-znacky.html, vstup a výber značky
+  /ponuka                   index.html, ponuka všetkých značiek po výbere
+  /subaru, /kgm, /jeep,
+  /chery                    index.html, ponuka konkrétnej značky
+  /auta/<id>                auto.html, detail konkrétneho vozidla
+  /login.html               prihlasovacia stránka
+  /admin.html               správa obsahu a objednávok
+
+Ponuka značky sa dá otvoriť priamo jej adresou. Výber sa pre ďalšiu
+navigáciu ukladá do sessionStorage na dve minúty. „Zmeniť značku“ otvára
+výber s parametrom choose=1. Pri lokálnom náhľade sa používajú aj adresy
+index.html?brand=chery a auto.html?id=<id>. Anglickú verziu prepína
+parameter lang=en a jazyk si prehliadač pamätá. Preklady textov, atribútov
+a interných odkazov spravuje js/i18n.js.
+
+3. Hierarchia súborov
+---------------------
+
+  ppauto/
+    vyber-znacky.html          vstup, karty značiek, začiatok objednávky
+    index.html                 ponuka, objednávka, financovanie, servis,
+                               tím, galéria, kontakt a mapa
+    auto.html                  rozloženie detailu vozidla
+    login.html, admin.html     prihlásenie a administrácia
+    gdpr.html, cookies.html,
+    podmienky-pouzivania.html  právne stránky
+    css/                       spoločné a stránkové štýly
+    js/                        logika rozhrania a pomocné skripty
+    api/                       serverové funkcie na Verceli
+    lib/                       administrátorská relácia a poštové šablóny
+    data/                      lokálny auta.json a objednavky-test.json
+    img/                       logá, fotky, bannery a podklady
+      akcie/                   bannery akcií podľa značky
+      fotky_aut/               galérie vozidiel vrátane pôvodných fotiek
+      preview_modely/          obrázky pre pás modelov a výber modelu
+      promofotky/              predajňa a marketingové obrázky
+      zamestnanci/             fotky tímu
+      zaruka/                  podklady k záruke
+    scripts/                   migračný skript prihlásenia a e-mailov
+    snippets/                  samostatné HTML ukážky vkladaných prvkov
+    vercel.json                prepisy verejných adries
+    package*.json              závislosti projektu
+    robots.txt, sitemap.xml,
+    llms.txt                   verejné informácie pre indexovanie
+    PREHLAD_PROJEKTU.txt        tento prehľad
+
+Hlavné štýly a navigácia sú v css/style.css a css/mobile-nav.css. Výber
+značky má vlastné css/vyber-znacky.css. Súbory auto*.css, orders.css,
+admin*.css, legal.css a cookie-consent.css pokrývajú príslušné časti webu.
+js/contact-links.js dopĺňa kontaktné odkazy a na príslušných stránkach
+načítava mobilnú navigáciu, pätu, testovacie jazdy a PDF dokumenty.
+js/cookie-consent.js spravuje voľby súhlasu na ponuke a právnych stránkach
+vrátane Google Maps. Niektoré iné stránky vkladajú Google tag priamo.
+
+4. Dáta a prepojenia
+-------------------
+
+Ponuka a detail vozidla
+  js/public-data.js zdieľa medzi modulmi volanie GET /api/orders?mode=bootstrap
+  a uchováva odpoveď v sessionStorage 60 sekúnd. Odpoveď obsahuje viditeľné
+  vozidlá, aktuality a možnosti konfigurácie objednávky. Pri zlyhaní má
+  katalóg záložné GET /api/cars a aktuality GET /api/promos.
+  js/script.js vykresľuje karty a filtruje podľa značky, modelu a značiek
+  v poli tagy, napríklad skladom, novinky či predvadzacie. Verejný katalóg
+  vynecháva záznamy so skryte=true. js/vehicle-data.js zjednocuje staršie
+  údaje o palive a obrázkoch. js/auto.js načíta detail podľa ID a
+  js/auto-documents.js doplní dostupné PDF podľa značky a modelu.
+
+Administrácia a úložisko
+  login.html volá /api/login. Podpísanú HttpOnly cookie používa
+  lib/admin-session.js a panel overuje prihlásenie cez /api/auth-check.
+  Správa áut a aktualít je najmä v admin.html. Špecializované moduly
+  js/admin-*.js spravujú parametre, výbavu, farby, dokumenty a objednávky.
+  /api/cars upravuje katalóg vozidiel, /api/options parametre a modely,
+  /api/vehicle-options doplnkovú výbavu a farby, /api/promos aktuality
+  a /api/documents register PDF. /api/upload-image a /api/upload-pdf
+  ukladajú súbory cez GitHub API. /api/document-file sprístupňuje PDF
+  podľa ID z registra.
+  Cieľové úložisko, vetvu a cesty určujú premenné prostredia na serveri.
+  Typické názvy sú auta.json, parametre.json, vehicle-options.json,
+  akcie.json a dokumenty.json. Lokálne data/auta.json je verzovaná kópia.
+  Stav živej ponuky sa overuje cez verejné API.
+
+Objednávky a ostatné formuláre
+  js/orders.js a js/auto-order.js posielajú objednávky do POST /api/orders.
+  Funkcia overí údaje a vozidlo, pridelí číslo a uloží objednávku v šifrovanom
+  JSON v samostatne nastaviteľnom GitHub úložisku. Server potom skúsi poslať
+  notifikácie. Admin môže meniť stav, spravovať poznámky a archivovať.
+  Kontakt, rýchly dopyt na financovanie a testovacia jazda idú cez
+  js/form-api.js do /api/orders?mode=form. SMTP rieši lib/mailer.js
+  a obsah správ je v lib/email-templates.js.
+
+Akcie a servisné balíky
+  Horný slider „Aktuálna ponuka“ číta marketingové aktuality z /api/promos,
+  kde admin môže vybrať aj Chery. Servisný slider má vlastné bannery
+  zapísané priamo v index.html v #servicePromoTrack. Značka sa zadáva
+  atribútom data-brand a obrázok sa načítava z img/akcie/. V galérii sú
+  použité bannery Jeep a Subaru. Posúvanie šípkami a klávesnicou ovláda
+  js/service-promo.js. Mobilné rozloženie s posúvaním prstom upravuje
+  css/service-promo-mobile.css.
+
+5. Lokálne overenie a údržba prehľadu
+-----------------------------------
+
+Projekt nemá samostatný build ani npm skript na spustenie. npm test je
+zástupný príkaz. Na náhľad HTML a CSS stačí statický HTTP server.
+Pre funkčné API a čisté adresy treba Vercel alebo lokálny náhľad, ktorý
+zohľadní prepisy a dodá testovacie odpovede API. js/botjeep.js
+a js/botsubaru.js sú samostatné Playwright importy z Eurotipu, ktoré
+môžu zapisovať cez administráciu. Migračný skript v scripts/ upravuje
+zdrojové súbory pre konkrétnu historickú migráciu.
+
+Pri ďalšej zmene aktualizuj príslušnú časť prehľadu, dátum a záznam nižšie.
+Pri závislosti od živých dát uveď dátum overenia. Prístupové údaje
+a osobné údaje patria do určených úložísk a nastavení prostredia.
+
+6. Záznam zmien a otvorených bodov
+--------------------------------
+
+18. 11. 2026
+  - Každá karta na výbere značky ponúka dva odkazy. „Naše skladové vozidlá“
+    otvára ponuku danej značky na #ponuka s aktívnym filtrom Všetko
+    (filter=all). Zahrnie aj vozidlá bez tagu skladom.
+    Kliknutie na logo Chery na výbere značky otvorí ten istý filter.
+    „Prejsť na oficiálnu stránku“ vedie na slovenský web značky.
+  - Kategórie Skladom, Predvádzacie a Novinky zobrazujú iba vozidlá
+    s príslušným tagom. Pri nulovom výsledku zostane zoznam prázdny.
+  - Horná lišta ponuky a detailu obsahuje odkazy s existujúcimi logami
+    Subaru, KGM, Jeep a Chery aj na mobile. Kliknutie na logo otvorí
+    ponuku danej značky s filtrom Všetko.
+  - Pri kontrole verejnej ponuky boli evidované štyri Chery bez tagu
+    skladom. Doplnenie tohto označenia patrí vozidlám s potvrdenou
+    dostupnosťou a robí sa v administrácii vozidiel.
+  - Servisná akcia Chery čaká na potvrdený banner a podmienky. Miestny
+    obrázok Chery s kartou CCS a marketingová aktualita o prvej nádrži
+    neposkytujú potvrdené podklady k servisnému balíku.

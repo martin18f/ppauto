@@ -613,6 +613,85 @@ section {
   scroll-margin-top: 80px; /* výšku si doladíš podľa headera */
 }
 
+.site-header + main section[id] {
+  scroll-margin-top: 162px;
+}
+
+.site-header .brand-nav {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 112px));
+  justify-content: center;
+  gap: clamp(5px, 1.2vw, 12px);
+  padding: 0 8px 8px;
+}
+
+.site-header .nav.open + .brand-nav {
+  position: relative;
+  z-index: 100002;
+}
+
+.brand-nav a {
+  display: grid;
+  place-items: center;
+  min-height: 48px;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.brand-nav img {
+  display: block;
+  width: 100%;
+  height: 30px;
+  object-fit: contain;
+}
+
+.brand-nav a:hover img {
+  filter: brightness(1.15);
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .brand-nav img {
+    transition: scale .18s ease;
+  }
+
+  .brand-nav a:hover img {
+    scale: 1.08;
+  }
+}
+
+.brand-nav [data-brand-link="kgm"] img {
+  transform: scale(1.65);
+}
+
+.brand-nav a:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.inventory-load-error {
+  margin: 0 0 .75rem;
+  color: var(--muted);
+}
+
+#ponuka .tag[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 680px) {
+  .site-header + main section[id] {
+    scroll-margin-top: 132px;
+  }
+}
+
+@media (max-width: 440px) {
+  .brand-nav a {
+    padding-inline: 9px;
+  }
+
+  .brand-nav [data-brand-link="kgm"] img {
+    transform: scale(1.4);
+  }
+}
 
 
 
@@ -2167,12 +2246,23 @@ html[data-brand] #jazda #tdBrandRow{ display: none !important; }
 #servis .service-promo .promo-track{
   min-height: 240px;           /* o kúsok menej než slider */
   align-items: center;
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+#servis .service-promo .promo-btn[hidden] {
+  display: none;
 }
 
 /* obrázky v servise – jednotná výška */
 #servis .service-promo.promo-slider img{
   height: 240px;               /* musí ladiť s track */
   width: auto;
+  max-width: 100%;
+  margin: 0;
   object-fit: cover;
 }
 
@@ -3512,7 +3602,7 @@ body.promo2-lock{ overflow: hidden; }
     position: fixed;
     left: 12px;
     right: 12px;
-    top: calc(64px + env(safe-area-inset-top, 0px));
+    top: calc(157px + env(safe-area-inset-top, 0px));
     z-index: 100001;
     flex-direction: column;
     gap: 6px;
@@ -3521,7 +3611,7 @@ body.promo2-lock{ overflow: hidden; }
     border: 1px solid var(--line);
     border-radius: 14px;
     box-shadow: var(--shadow);
-    max-height: calc(100vh - 92px);
+    max-height: calc(100dvh - 169px - env(safe-area-inset-bottom, 0px));
     overflow: auto;
     -webkit-overflow-scrolling: touch;
   }

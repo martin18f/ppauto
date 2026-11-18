@@ -17,9 +17,15 @@
     return window.ppI18n ? window.ppI18n.withLang(href) : href;
   }
 
-  function cleanBrandHref(brand) {
-    if (isLocalRouteHost()) return 'index.html?brand=' + encodeURIComponent(brand);
-    return brand === 'all' ? '/ponuka' : '/' + encodeURIComponent(brand);
+  function cleanBrandHref(brand, { allVehicles = brand === 'chery' } = {}) {
+    const local = isLocalRouteHost();
+    const params = new URLSearchParams();
+    if (local) params.set('brand', brand);
+    if (allVehicles) params.set('filter', 'all');
+    const pathname = local ? 'index.html' : brand === 'all' ? '/ponuka' : '/' + encodeURIComponent(brand);
+    const query = params.size ? '?' + params.toString() : '';
+    const anchor = allVehicles ? '#ponuka' : '';
+    return pathname + query + anchor;
   }
 
   function orderFormHref() {
@@ -114,23 +120,14 @@
   function go(brand) {
     const normalized = String(brand || '').toLowerCase().trim();
     if (!ALLOWED_BRANDS.has(normalized)) return;
-    if (!writeBrandSession(normalized)) return;
+    if (!writeBrandSession(normalized) && normalized === 'all') return;
     location.href = withLang(cleanBrandHref(normalized));
   }
 
   cards.forEach(card => {
     const brand = String(card.dataset.brand || '').toLowerCase().trim();
-    const mainLink = card.querySelector('.card-main-link');
-
-    if (brand && mainLink) {
-      mainLink.setAttribute('href', withLang(cleanBrandHref(brand)));
-      mainLink.addEventListener('click', event => {
-        // Pri otvorení v novom tabe nemôžeme preniesť sessionStorage; nech nový tab
-        // začne ako nový návštevník cez chooser.
-        if (event.ctrlKey || event.metaKey || event.shiftKey || event.button === 1) return;
-        if (!writeBrandSession(brand)) event.preventDefault();
-      });
-    }
+    card.querySelector('.card-main-link')?.setAttribute('href', withLang(cleanBrandHref(brand)));
+    card.querySelector('.stock-link')?.setAttribute('href', withLang(cleanBrandHref(brand, { allVehicles: true })));
 
     card.addEventListener('click', event => {
       if (event.target.closest('a, button')) return;
@@ -138,6 +135,7 @@
     });
 
     card.addEventListener('keydown', event => {
+      if (event.target.closest('a, button')) return;
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
       if (brand) go(brand);

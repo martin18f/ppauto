@@ -79,7 +79,7 @@
 </head>
 
 <body>
-  <header>
+  <header class="site-header">
     <div class="container nav">
       <div class="brand">
         <a href="/" class="logo-link">
@@ -113,6 +113,12 @@
   >☰</button>
 </div>
     </div>
+    <nav class="container brand-nav" aria-label="Značky vozidiel">
+      <a href="/subaru?filter=all#ponuka" data-brand-link="subaru"><img src="/img/subarulogo.png" alt="Subaru"></a>
+      <a href="/kgm?filter=all#ponuka" data-brand-link="kgm"><img src="/img/kgmlogo.svg" alt="KGM"></a>
+      <a href="/jeep?filter=all#ponuka" data-brand-link="jeep"><img src="/img/jeeplogo.webp" alt="Jeep"></a>
+      <a href="/chery?filter=all#ponuka" data-brand-link="chery"><img src="/img/cherylogo.png" alt="Chery"></a>
+    </nav>
   </header>
 
   <main>
@@ -219,7 +225,7 @@
     const nav = document.querySelector('header .nav');
     if (!nav) return;
 
-    const link = e.target.closest('.nav-links a');
+    const link = e.target.closest('.nav-links a, .brand-nav a');
     if (link) {
       setMobileMenu(false);
     }

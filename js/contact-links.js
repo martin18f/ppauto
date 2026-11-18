@@ -79,6 +79,9 @@
   function startBrandSessionGuard() {
     if (!isBrandProtectedPublicPage()) return true;
 
+    // Explicitná URL značky už určila kontext v index.html.
+    if (document.getElementById('inventory') && document.documentElement.dataset.brand) return true;
+
     document.documentElement.style.visibility = 'hidden';
     const initial = readBrandSession();
     if (!isFreshBrandSession(initial)) {
@@ -342,6 +345,11 @@
 
   ensureMobileNavStyles();
   syncVehicleDetailNavWithMain();
+  document.querySelectorAll('.brand-nav a[data-brand-link]').forEach(link => {
+    const brand = link.dataset.brandLink;
+    if (brand === document.documentElement.dataset.brand) link.setAttribute('aria-current', 'page');
+    if (isLocalRouteHost()) link.href = '/index.html?brand=' + encodeURIComponent(brand) + '&filter=all#ponuka';
+  });
   hydrateMailLinks(document);
   ensureMartinFooter();
 

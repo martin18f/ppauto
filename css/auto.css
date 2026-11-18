@@ -20,7 +20,7 @@
   --car-orange: var(--accent-3);
   --car-orange-rgb: 245,158,11;
 
-  --sticky-top: 112px;
+  --sticky-top: 162px;
   --gallery-h: clamp(320px, 42vw, 560px);
 }
 
@@ -39,7 +39,7 @@ html[data-brand="chery"] { --car-accent: var(--accent-4); --car-accent-rgb: 225,
 
 @media (max-width: 680px){
   :root{
-    --sticky-top: 96px;
+    --sticky-top: 132px;
     --gallery-h: clamp(220px, 70vw, 420px);
   }
 }

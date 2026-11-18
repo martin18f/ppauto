@@ -248,7 +248,7 @@ function getBrandFromPathnameRaw() {
 
 /**
  * Brand kontext berieme z čistej URL alebo zo starého ?brand=... fallbacku.
- * Nič neukladáme do localStorage/sessionStorage.
+ * Zoznam a jeho filtre sa riadia adresou, výber pre navigáciu spravuje index.html.
  * - ?brand=subaru|kgm|jeep|chery → BRAND_CTX
  * - ?brand=all → null
  */
@@ -265,7 +265,7 @@ function cleanBrandParamFromURL() {
   if (!url.searchParams.has('brand')) return;
   if (isLocalRouteHost()) return;
 
-  const brand = (url.searchParams.get('brand') || '').toLowerCase().trim();
+  const brand = getBrandFromURLRaw();
   const pathname = CLEAN_BRAND_PATHS[brand] || url.pathname;
 
   url.searchParams.delete('brand');
@@ -300,26 +300,8 @@ function rememberInventoryReturnRoute(carId) {
  * (brand taby schováme, lebo už si v brand režime)
  */
 function pruneTabsForBrand() {
-  const buttons = document.querySelectorAll('.filter-row .tag');
-  if (!buttons.length) return;
-
-  if (!BRAND_CTX) {
-    // bez brand kontextu nechaj všetko
-    buttons.forEach(btn => (btn.style.display = ''));
-    return;
-  }
-
-  const allowed = new Set(['all', 'novinky', 'skladom', 'predvadzacie']);
-  buttons.forEach(btn => {
-    const v = (btn.getAttribute('data-filter') || '').toLowerCase().trim();
-    btn.style.display = allowed.has(v) ? '' : 'none';
-  });
-
-  // nastav "Všetko" ako aktívne
-  const allBtn = document.querySelector('.filter-row .tag[data-filter="all"]');
-  if (allBtn) {
-    buttons.forEach(b => b.classList.remove('active'));
-    allBtn.classList.add('active');
+  for (const button of document.querySelectorAll('#ponuka .filter-row [data-filter]')) {
+    button.hidden = !!BRAND_CTX && BRAND_FILTERS.has(button.dataset.filter);
   }
 }
 
@@ -328,24 +310,19 @@ function pruneTabsForBrand() {
 
 
 function applyPromoBrandFilter(brandView) {
-  const imgs = document.querySelectorAll('#servis .promo-img');
-  if (!imgs.length) return;
-
+  const track = document.getElementById('servicePromoTrack');
+  if (!track) return;
   const bv = (brandView || '').toLowerCase().trim();
 
-  imgs.forEach(img => {
+  let changed = false;
+  track.querySelectorAll('.promo-img').forEach(img => {
     const b = (img.getAttribute('data-brand') || 'all').toLowerCase().trim();
-
-    // bez brandu = zobraziť všetko
     const show = !bv || bv === 'all' || b === 'all' || b === bv;
-
+    changed ||= img.classList.contains('promo-hidden') === show;
     img.classList.toggle('promo-hidden', !show);
   });
 
-  // reset slideru, aby nezostal posunutý na skrytý banner
-  const track = document.querySelector('#servis .promo-track');
-  if (track) track.style.transform = 'translateX(0px)';
-  
+  if (changed) track.dispatchEvent(new Event('pp:promo-filter'));
 }
 
 
@@ -365,6 +342,11 @@ function applyFilters(filter) {
   ACTIVE_FILTER = f;
 
   const isBrandFilter = BRAND_FILTERS.has(f);
+  for (const button of document.querySelectorAll('#ponuka .filter-row [data-filter]')) {
+    const active = button.dataset.filter === f;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
+  }
 
   // 🔹 DÔLEŽITÉ:
   // brandView určuje LEN globálny brand (z vyber-znacky)
@@ -393,10 +375,7 @@ function applyFilters(filter) {
       modelOK = model === ACTIVE_MODEL || model.startsWith(ACTIVE_MODEL + '-');
     }
 
-    card.classList.toggle(
-      'is-hidden',
-      !(brandOK && filterOK && catOK && modelOK)
-    );
+    card.classList.toggle('is-hidden', !(brandOK && filterOK && catOK && modelOK));
   });
 
   // 🔹 modelový pás sa zobrazuje LEN pri globálnom brand režime
@@ -538,10 +517,11 @@ function resolveCarId(auto, baseCounts, usedIds) {
  * Vytvorí DOM element <article> pre jedno auto
  */
 function vykresliKartu(auto) {
+  const tags = Array.isArray(auto.tagy) ? auto.tagy.map(t => String(t).toLowerCase().trim()).filter(Boolean) : [];
   const article = document.createElement('article');
   article.className = 'car car-pro';
   article.dataset.make = (auto.znacka || '').toLowerCase().trim();
-  article.dataset.tags = (auto.tagy || []).join(' ').toLowerCase().trim();
+  article.dataset.tags = tags.join(' ');
   article.dataset.model = slugify(auto.model || '');
 
   // --- helpers ---
@@ -634,10 +614,6 @@ function vykresliKartu(auto) {
   const altText = `${rokText ? rokText + ' ' : ''}${titleText}`.trim();
 
   // --- META riadok (rok + zľava + statusy) ---
-  const tags = Array.isArray(auto.tagy)
-    ? auto.tagy.map((t) => String(t).toLowerCase().trim()).filter(Boolean)
-    : [];
-
   const metaItems = [];
 
   if (rokText) {
@@ -780,17 +756,18 @@ function vykresliKartu(auto) {
 
 
 function initFiltery() {
-  const buttons = document.querySelectorAll('.filter-row .tag');
-  if (!buttons.length) return;
+  document.querySelectorAll('#ponuka .filter-row [data-filter]').forEach(button => {
+    button.addEventListener('click', () => applyFilters(button.dataset.filter));
+  });
 
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      buttons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+  document.querySelector('.brand-nav')?.addEventListener('click', event => {
+    const link = event.target.closest('a[data-brand-link]');
+    if (!link || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    if (link.pathname !== location.pathname || link.search !== location.search) return;
 
-      const filter = (btn.getAttribute('data-filter') || 'all').toLowerCase().trim();
-      applyFilters(filter);
-    });
+    // Pri rovnakom odkaze prehliadač stránku nenačíta znova.
+    ACTIVE_MODEL = null;
+    applyFilters('all');
   });
 }
 
@@ -835,13 +812,12 @@ async function nacitajAuta() {
     });
 
 
-    initFiltery();
-    pruneTabsForBrand();
-    applyFilters('all');
+    applyFilters(ACTIVE_FILTER);
 
     console.log('✅ Načítané autá:', auta.length, '| BRAND_CTX =', BRAND_CTX || 'none');
   } catch (error) {
     console.error('❌ Chyba pri načítaní zoznamu áut:', error);
+    document.getElementById('inventoryLoadError')?.removeAttribute('hidden');
   }
   
 }
@@ -853,14 +829,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (BRAND_CTX) document.documentElement.setAttribute('data-brand', BRAND_CTX);
   else document.documentElement.removeAttribute('data-brand');
 
-  // ✅ DOPLNIŤ – nech sa servisné akcie hneď vyfiltrujú podľa globálneho brandu
-  applyPromoBrandFilter(BRAND_CTX);
-
-  applyBrandSections();
   cleanBrandParamFromURL();
 
+  initFiltery();
   initModelsStrip();
-  syncModelsStrip('all');
+  pruneTabsForBrand();
+  const requestedFilter = new URLSearchParams(location.search).get('filter');
+  const defaultFilter = BRAND_CTX === 'chery' ? 'skladom' : 'all';
+  applyFilters(requestedFilter === 'all' || requestedFilter === 'skladom' ? requestedFilter : defaultFilter);
   nacitajAuta();
 });
 
@@ -958,28 +934,17 @@ function initModelsStrip() {
 }
 
 // =========================
-// SERVICE: Promo slider + Lightbox + FAQ
+// SERVICE: Lightbox + FAQ
 // =========================
 (function () {
-  // PROMO SLIDER + LIGHTBOX
+  // LIGHTBOX
   const promoRoot = document.querySelector('#servis [data-promo]');
   if (promoRoot) {
     const track = promoRoot.querySelector('.promo-track');
-    const prev = promoRoot.querySelector('.promo-btn.prev');
-    const next = promoRoot.querySelector('.promo-btn.next');
 
     const lightbox = document.querySelector('#servis [data-lightbox]');
     const lightboxImg = document.querySelector('#servis [data-lightbox-img]');
     const lightboxClose = document.querySelector('#servis [data-close]');
-
-    const scrollByCard = (dir) => {
-      const firstImg = track?.querySelector('img');
-      const cardW = firstImg ? (firstImg.getBoundingClientRect().width + 12) : 320;
-      track.scrollBy({ left: dir * cardW, behavior: 'smooth' });
-    };
-
-    if (prev) prev.addEventListener('click', () => scrollByCard(-1));
-    if (next) next.addEventListener('click', () => scrollByCard(1));
 
     // click image -> lightbox
     track?.addEventListener('click', (e) => {
